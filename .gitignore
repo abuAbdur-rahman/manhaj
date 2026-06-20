@@ -37,7 +37,7 @@ yarn-error.log*
 #Project setup
 supabase
 !lib/supabase
-.opencode/docs/manhaj-setup-v1.2.md
+.opencode/docs/manhaj-setup-*.md
 .opencode/coderabbit
 
 # vercel
