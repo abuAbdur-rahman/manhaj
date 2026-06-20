@@ -32,6 +32,13 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+#Project setup
+supabase
+!lib/supabase
+.opencode/docs/manhaj-setup-v1.2.md
+.opencode/coderabbit
 
 # vercel
 .vercel
