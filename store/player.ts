@@ -29,7 +29,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   isLoading: false,
   sleepTimerRemaining: null,
   setEpisode: (episode) =>
-    set({ currentEpisode: episode, currentTime: 0, isPlaying: true }),
+    set({
+      currentEpisode: episode,
+      currentTime: 0,
+      duration: episode.duration_seconds ?? 0,
+      isPlaying: true,
+    }),
   setPlaying: (playing) => set({ isPlaying: playing }),
   setCurrentTime: (time) => set({ currentTime: time }),
   setDuration: (duration) => set({ duration }),
@@ -51,6 +56,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       isPlaying: false,
       currentTime: 0,
       duration: 0,
+      speed: 1,
       isLoading: false,
       sleepTimerRemaining: null,
     }),

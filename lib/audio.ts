@@ -10,11 +10,15 @@ export function formatDuration(seconds: number): string {
 }
 
 export function parseDurationString(input: string): number | null {
-  const parts = input.split(":").map(Number);
-  if (parts.some(Number.isNaN)) return null;
-  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  if (parts.length === 2) return parts[0] * 60 + parts[1];
-  if (parts.length === 1) return parts[0];
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const parts = trimmed.split(":");
+  if (parts.some((p) => p === "")) return null;
+  const nums = parts.map(Number);
+  if (nums.some((n) => !Number.isFinite(n) || n < 0)) return null;
+  if (nums.length === 3) return nums[0] * 3600 + nums[1] * 60 + nums[2];
+  if (nums.length === 2) return nums[0] * 60 + nums[1];
+  if (nums.length === 1) return nums[0];
   return null;
 }
 

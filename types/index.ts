@@ -1,4 +1,4 @@
-export type Language = "yoruba" | "english" | "hausa" | "arabic";
+export type Language = "yoruba" | "english" | "arabic";
 
 export type Speed = 0.75 | 1 | 1.25 | 1.5 | 2;
 

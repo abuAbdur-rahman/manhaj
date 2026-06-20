@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const recentPlaceholders = [
@@ -24,11 +25,15 @@ export default function Home() {
     <>
       <header className="sticky top-0 z-50 border-b border-sand-200 bg-sand-50/95 backdrop-blur supports-[backdrop-filter]:bg-sand-50/80">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <Link
-            href="/"
-            className="text-xl font-semibold tracking-tight text-forest-600"
-          >
-            Manhaj
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo.png"
+              alt="Manhaj"
+              width={135}
+              height={74}
+              className="h-8 w-auto"
+              priority
+            />
           </Link>
           <nav className="flex items-center gap-6 text-sm font-medium text-forest-700">
             <Link
@@ -50,9 +55,14 @@ export default function Home() {
       <main>
         <section className="border-b border-sand-200 bg-sand-100">
           <div className="mx-auto max-w-6xl px-4 py-20 text-center sm:py-28">
-            <h1 className="text-4xl font-bold tracking-tight text-forest-700 sm:text-5xl">
-              Manhaj
-            </h1>
+            <Image
+              src="/logo.png"
+              alt="Manhaj"
+              width={406}
+              height={221}
+              className="mx-auto h-20 w-auto sm:h-28"
+              priority
+            />
             <p className="mt-3 text-lg text-forest-500 sm:text-xl">
               Ilm, organized.
             </p>
