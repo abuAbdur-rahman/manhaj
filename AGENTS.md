@@ -30,6 +30,7 @@
 - **Tailwind v4**: `@import "tailwindcss"` in CSS; theme tokens in `@theme` directives
 - **Tests**: none configured yet
 - **Single-package repo** despite `pnpm-workspace.yaml` (ignores `sharp` + `unrs-resolver` built deps only)
+- **Existing components**: never recreate a component that already exists. Always check `components/ui/`, `components/layout/`, `components/`, and `lib/` before creating anything new. Prefer reusing over rewriting.
 
 ## Architecture
 

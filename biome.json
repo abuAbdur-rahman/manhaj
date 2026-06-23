@@ -27,6 +27,21 @@
       "react": "recommended"
     }
   },
+  "overrides": [
+    {
+      "includes": [
+        "components/ui/skeleton.tsx",
+        "components/ui/waveform-seal.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
+    }
+  ],
   "assist": {
     "actions": {
       "source": {
