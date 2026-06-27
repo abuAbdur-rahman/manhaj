@@ -10,7 +10,7 @@ Stage all working-tree changes, review with code-reviewer, then commit.
 - Exclude from commit:
   - `.env`, `.env.local`, `*.pem`, `*.key` (secrets)
   - `node_modules/`, build output (`.next/`, `dist/`, `out/`)
-  - `.opencode/tasks/` and `.opencode/docs/*.md` — UNLESS this is a documentation update (then include them)
+  - `.opencode/tasks/` and `.opencode/docs/*.md`
 - Run a code review first using the code-reviewer subagent. If any Critical issue found, stop and report them. Otherwise proceed.
 - Commit message format: `type(scope): short description`
   - Type: `feat` / `fix` / `refactor` / `chore` / `docs`
