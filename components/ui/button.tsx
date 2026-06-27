@@ -12,7 +12,7 @@ const buttonVariants = cva(
         secondary:
           "bg-sand-100 text-forest-900 hover:bg-sand-200 active:bg-sand-300",
         ghost: "text-forest-700 hover:bg-sand-100 active:bg-sand-200",
-        gold: "bg-gold-500 text-white hover:bg-gold-400 active:bg-gold-500",
+        clay: "bg-clay-500 text-white hover:bg-clay-600 active:bg-clay-500",
         outline:
           "border border-sand-200 text-forest-700 hover:bg-sand-100 active:bg-sand-200",
         destructive: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",

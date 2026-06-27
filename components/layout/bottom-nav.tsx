@@ -52,7 +52,7 @@ export function BottomNav({ className }: { className?: string }) {
               "flex flex-col items-center justify-center gap-0.5 px-3 py-1 min-h-11 min-w-11 rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
               isActive
                 ? "text-forest-600"
-                : "text-sand-300 hover:text-forest-700",
+                : "text-forest-700/60 hover:text-forest-700",
             )}
           >
             <Icon className="h-[22px] w-[22px]" aria-hidden="true" />

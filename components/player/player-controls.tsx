@@ -105,7 +105,7 @@ export function PlayerControls({
           className={cn(
             "flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
             sleepTimerRemaining !== null
-              ? "text-gold-500 bg-gold-500/10"
+              ? "text-clay-500 bg-clay-500/10"
               : "text-sand-300 hover:text-forest-700 hover:bg-forest-50",
           )}
           aria-label={
