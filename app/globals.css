@@ -13,8 +13,9 @@
   --color-sand-200: #eae6d9;
   --color-sand-300: #d9d3c0;
 
-  --color-gold-400: #c9a84c;
-  --color-gold-500: #b8962e;
+  --color-clay-400: #c2754a;
+  --color-clay-500: #a85c35;
+  --color-clay-600: #8c4a29;
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-arabic: "Noto Naskh Arabic", serif;
