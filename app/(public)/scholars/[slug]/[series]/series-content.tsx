@@ -2,6 +2,7 @@
 
 import { Download, Play } from "lucide-react";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { EpisodeRow } from "@/components/episodes/episode-row";
 import { Button } from "@/components/ui/button";
 import { downloadEpisode } from "@/lib/download";
@@ -23,6 +24,7 @@ export function SeriesContent({ episodes }: SeriesContentProps) {
       await downloadEpisode(episode);
     } catch (err) {
       console.error("Download failed:", err);
+      toast.error(`Couldn't download "${episode.title}". Check your connection and storage space.`);
     } finally {
       setDownloadingIds((prev) => {
         const next = new Set(prev);
@@ -40,6 +42,7 @@ export function SeriesContent({ episodes }: SeriesContentProps) {
         await downloadEpisode(episode);
       } catch (err) {
         console.error("Download failed:", err);
+        toast.error(`Couldn't download "${episode.title}". Check your connection and storage space.`);
       }
       setDownloadingIds((prev) => {
         const next = new Set(prev);
