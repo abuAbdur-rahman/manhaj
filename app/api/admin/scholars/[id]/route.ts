@@ -5,8 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const UpdateScholarSchema = z.object({
   name: z.string().min(1).optional(),
-  bio: z.string().optional(),
-  photo_url: z.string().optional(),
+  bio: z.string().nullable().optional(),
+  photo_url: z.string().nullable().optional(),
   languages: z.array(z.enum(["yoruba", "english", "arabic"])).optional(),
   social_links: z
     .object({
@@ -35,7 +35,15 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: { code: "INVALID_JSON", message: "Malformed JSON" } },
+      { status: 400 },
+    );
+  }
   const result = UpdateScholarSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(
@@ -57,7 +65,7 @@ export async function PATCH(
     .update(result.data)
     .eq("id", id)
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (updateError) {
     console.error("Error updating scholar:", updateError);
@@ -97,10 +105,12 @@ export async function DELETE(
   const { id } = await params;
   const supabase = await createClient();
 
-  const { error: deleteError } = await supabase
+  const { data: deleted, error: deleteError } = await supabase
     .from("scholars")
     .update({ is_active: false })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
 
   if (deleteError) {
     console.error("Error deactivating scholar:", deleteError);
@@ -112,6 +122,13 @@ export async function DELETE(
         },
       },
       { status: 500 },
+    );
+  }
+
+  if (!deleted) {
+    return NextResponse.json(
+      { error: { code: "NOT_FOUND", message: "Scholar not found" } },
+      { status: 404 },
     );
   }
 

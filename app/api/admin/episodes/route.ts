@@ -32,7 +32,15 @@ export async function POST(request: NextRequest) {
   if (authResult instanceof Response) return authResult;
   const admin = authResult;
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: { code: "INVALID_JSON", message: "Malformed JSON" } },
+      { status: 400 },
+    );
+  }
   const result = CreateEpisodeSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(

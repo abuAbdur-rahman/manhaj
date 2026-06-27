@@ -5,8 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const CreateScholarSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  bio: z.string().optional(),
-  photo_url: z.string().optional(),
+  bio: z.string().nullable().optional(),
+  photo_url: z.string().nullable().optional(),
   languages: z.array(z.enum(["yoruba", "english", "arabic"])).default([]),
   social_links: z
     .object({
@@ -39,7 +39,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: { code: "INVALID_JSON", message: "Malformed JSON" } },
+      { status: 400 },
+    );
+  }
   const result = CreateScholarSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(

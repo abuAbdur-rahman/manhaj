@@ -11,6 +11,7 @@ interface ScholarOption {
 interface SeriesOption {
   id: string;
   title: string;
+  scholar_id: string;
   scholar: { name: string } | null;
 }
 
@@ -31,7 +32,7 @@ export default async function AdminEpisodesPage() {
         .order("created_at", { ascending: false }),
       supabase
         .from("series")
-        .select("id, title, scholar:scholar_id(name)")
+        .select("id, title, scholar_id, scholar:scholar_id(name)")
         .eq("scholar_id", admin.scholarId)
         .eq("is_active", true)
         .order("title"),
@@ -55,7 +56,7 @@ export default async function AdminEpisodesPage() {
         .order("name"),
       supabase
         .from("series")
-        .select("id, title, scholar:scholar_id(name)")
+        .select("id, title, scholar_id, scholar:scholar_id(name)")
         .eq("is_active", true)
         .order("title"),
     ]);
@@ -66,11 +67,7 @@ export default async function AdminEpisodesPage() {
 
     episodes = epResult.data ?? [];
     scholars = scholarsResult.data ?? [];
-    series = (seriesResult.data ?? []) as unknown as {
-      id: string;
-      title: string;
-      scholar: { name: string } | null;
-    }[];
+    series = (seriesResult.data ?? []) as unknown as SeriesOption[];
   }
 
   return (

@@ -140,12 +140,13 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
         setAudioUrl(result.url);
 
         const arrayBuffer = await file.arrayBuffer();
-        if (audioContextRef.current) {
-          audioContextRef.current.close();
+        const tempCtx = new AudioContext();
+        try {
+          const audioBuffer = await tempCtx.decodeAudioData(arrayBuffer);
+          setDurationSeconds(Math.round(audioBuffer.duration));
+        } finally {
+          tempCtx.close();
         }
-        audioContextRef.current = new AudioContext();
-        const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
-        setDurationSeconds(Math.round(audioBuffer.duration));
 
         setUploadState("uploaded");
       } catch (err) {

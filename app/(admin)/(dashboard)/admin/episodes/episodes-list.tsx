@@ -33,6 +33,7 @@ interface ScholarOption {
 interface SeriesOption {
   id: string;
   title: string;
+  scholar_id: string;
   scholar: { name: string } | null;
 }
 
@@ -53,9 +54,9 @@ export function EpisodesList({
 }: EpisodesListProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [scholarFilter, setScholarFilter] = useState("");
-  const [seriesFilter, setSeriesFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [scholarFilter, setScholarFilter] = useState("all");
+  const [seriesFilter, setSeriesFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState(initialEpisodes);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
@@ -65,9 +66,9 @@ export function EpisodesList({
   } | null>(null);
 
   const filteredSeries = useMemo(() => {
-    if (!scholarFilter) return series;
-    return series.filter((s) => s.scholar?.name === scholars.find((sc) => sc.id === scholarFilter)?.name);
-  }, [series, scholarFilter, scholars]);
+    if (!scholarFilter || scholarFilter === "all") return series;
+    return series.filter((s) => s.scholar_id === scholarFilter);
+  }, [series, scholarFilter]);
 
   const filtered = useMemo(() => {
     let result = items;
@@ -82,15 +83,15 @@ export function EpisodesList({
       );
     }
 
-    if (scholarFilter) {
+    if (scholarFilter && scholarFilter !== "all") {
       result = result.filter((e) => e.scholar_id === scholarFilter);
     }
 
-    if (seriesFilter) {
+    if (seriesFilter && seriesFilter !== "all") {
       result = result.filter((e) => e.series_id === seriesFilter);
     }
 
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== "all") {
       result = result.filter((e) =>
         statusFilter === "published" ? e.is_published : !e.is_published,
       );
@@ -202,7 +203,7 @@ export function EpisodesList({
                 <SelectValue placeholder="All status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All status</SelectItem>
+                <SelectItem value="all">All status</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
               </SelectContent>
@@ -214,7 +215,7 @@ export function EpisodesList({
                   <SelectValue placeholder="All scholars" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All scholars</SelectItem>
+                  <SelectItem value="all">All scholars</SelectItem>
                   {scholars.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}
@@ -229,7 +230,7 @@ export function EpisodesList({
                 <SelectValue placeholder="All series" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All series</SelectItem>
+                <SelectItem value="all">All series</SelectItem>
                 {filteredSeries.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.title}
@@ -331,17 +332,17 @@ export function EpisodesList({
             <div className="mt-4">
               <EmptyState
                 title={
-                  search || scholarFilter || seriesFilter || statusFilter
+                  search || scholarFilter !== "all" || seriesFilter !== "all" || statusFilter !== "all"
                     ? "No matching episodes"
                     : "No episodes yet"
                 }
                 description={
-                  search || scholarFilter || seriesFilter || statusFilter
+                  search || scholarFilter !== "all" || seriesFilter !== "all" || statusFilter !== "all"
                     ? "Try adjusting your search or filters."
                     : "Create your first episode to get started."
                 }
                 action={
-                  !search && !scholarFilter && !seriesFilter && !statusFilter
+                  !search && scholarFilter === "all" && seriesFilter === "all" && statusFilter === "all"
                     ? (
                       <Link
                         href="/admin/episodes/new"

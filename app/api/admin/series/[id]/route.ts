@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const UpdateSeriesSchema = z.object({
   title: z.string().min(1).optional(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   cover_url: z.string().optional(),
   is_featured: z.boolean().optional(),
   is_active: z.boolean().optional(),
@@ -51,7 +51,15 @@ export async function PATCH(
     );
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: { code: "INVALID_JSON", message: "Malformed JSON" } },
+      { status: 400 },
+    );
+  }
   const result = UpdateSeriesSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(
@@ -87,7 +95,7 @@ export async function PATCH(
 
   const { data: updated, error: updateError } = await supabase
     .from("series")
-    .update(result.data)
+    .update(updates)
     .eq("id", id)
     .select("*, scholar:scholar_id(*)")
     .single();

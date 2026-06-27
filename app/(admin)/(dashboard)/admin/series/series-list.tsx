@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import {
@@ -65,9 +65,13 @@ export function SeriesList({
 }: SeriesListProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [scholarFilter, setScholarFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [scholarFilter, setScholarFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState(initialSeries);
+
+  useEffect(() => {
+    setItems(initialSeries);
+  }, [initialSeries]);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -90,11 +94,11 @@ export function SeriesList({
       result = result.filter((s) => s.title.toLowerCase().includes(q));
     }
 
-    if (scholarFilter) {
+    if (scholarFilter && scholarFilter !== "all") {
       result = result.filter((s) => s.scholar_id === scholarFilter);
     }
 
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== "all") {
       result = result.filter((s) =>
         statusFilter === "active" ? s.is_active : !s.is_active,
       );
@@ -115,7 +119,9 @@ export function SeriesList({
           const err = await res.json().catch(() => ({}));
           throw new Error(err.error?.message ?? "Failed to delete");
         }
-        setItems((prev) => prev.filter((s) => s.id !== id));
+        setItems((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, is_active: false } : s)),
+        );
         router.refresh();
       } catch (err) {
         setActionError(err instanceof Error ? err.message : "Something went wrong");
@@ -261,7 +267,7 @@ export function SeriesList({
                 <SelectValue placeholder="All status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All status</SelectItem>
+                <SelectItem value="all">All status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
@@ -273,7 +279,7 @@ export function SeriesList({
                   <SelectValue placeholder="All scholars" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All scholars</SelectItem>
+                  <SelectItem value="all">All scholars</SelectItem>
                   {scholars.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}
@@ -372,17 +378,17 @@ export function SeriesList({
             <div className="mt-4">
               <EmptyState
                 title={
-                  search || scholarFilter || statusFilter
+                  search || scholarFilter !== "all" || statusFilter !== "all"
                     ? "No matching series"
                     : "No series yet"
                 }
                 description={
-                  search || scholarFilter || statusFilter
+                  search || scholarFilter !== "all" || statusFilter !== "all"
                     ? "Try adjusting your search or filters."
                     : "Create your first series to get started."
                 }
                 action={
-                  !search && !scholarFilter && !statusFilter
+                  !search && scholarFilter === "all" && statusFilter === "all"
                     ? (
                       <Button variant="primary" onClick={openCreateDialog}>
                         Create series

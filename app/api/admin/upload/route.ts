@@ -58,8 +58,18 @@ export async function POST(request: NextRequest) {
   }
 
   const rawExt = (file.name.split(".").pop() ?? "").toLowerCase();
-  const ext = ALLOWED_EXTENSIONS.has(rawExt) ? rawExt : "mp3";
-  const key = `lectures/${crypto.randomUUID()}.${ext}`;
+  if (!rawExt || !ALLOWED_EXTENSIONS.has(rawExt)) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: `Unsupported file extension "${rawExt}". Allowed: ${[...ALLOWED_EXTENSIONS].join(", ")}`,
+        },
+      },
+      { status: 400 },
+    );
+  }
+  const key = `lectures/${crypto.randomUUID()}.${rawExt}`;
   const buffer = Buffer.from(await file.arrayBuffer());
   const url = await uploadAudio(buffer, key, file.type);
 

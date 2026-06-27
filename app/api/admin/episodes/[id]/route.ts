@@ -7,7 +7,10 @@ const UpdateEpisodeSchema = z.object({
   title: z.string().min(1).optional(),
   series_id: z.string().min(1).optional(),
   language: z.enum(["yoruba", "english", "arabic"]).optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.enum([
+    "aqeedah", "fiqh", "tafseer", "hadith", "seerah",
+    "manhaj", "adab", "family", "ibadah", "dawah", "ruqyah", "arabic",
+  ])).optional(),
   description: z.string().optional(),
   is_published: z.boolean().optional(),
 });
@@ -51,7 +54,15 @@ export async function PATCH(
     );
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: { code: "INVALID_JSON", message: "Malformed JSON" } },
+      { status: 400 },
+    );
+  }
   const result = UpdateEpisodeSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(

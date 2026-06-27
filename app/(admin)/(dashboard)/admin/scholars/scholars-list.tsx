@@ -42,7 +42,7 @@ interface ScholarsListProps {
 export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState(initialScholars);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
@@ -76,7 +76,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
       );
     }
 
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== "all") {
       result = result.filter((s) =>
         statusFilter === "active" ? s.is_active : !s.is_active,
       );
@@ -97,7 +97,9 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.error?.message ?? "Failed to delete");
         }
-        setItems((prev) => prev.filter((s) => s.id !== id));
+        setItems((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, is_active: false } : s)),
+        );
         router.refresh();
       } catch (err) {
         setActionError(
@@ -209,6 +211,11 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
         return;
       }
 
+      if (photoUploading) {
+        setFormError("Please wait for the photo upload to finish");
+        return;
+      }
+
       setFormPending(true);
       try {
         const payload: Record<string, unknown> = {
@@ -314,7 +321,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                 <SelectValue placeholder="All status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All status</SelectItem>
+                <SelectItem value="all">All status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
@@ -566,7 +573,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
               >
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" disabled={formPending}>
+              <Button variant="primary" type="submit" disabled={formPending || photoUploading}>
                 {formPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
