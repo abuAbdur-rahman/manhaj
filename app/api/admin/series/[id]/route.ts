@@ -9,6 +9,7 @@ const UpdateSeriesSchema = z.object({
   cover_url: z.string().optional(),
   is_featured: z.boolean().optional(),
   is_active: z.boolean().optional(),
+  scholar_id: z.string().uuid().optional(),
 });
 
 export async function PATCH(
@@ -63,6 +64,25 @@ export async function PATCH(
       },
       { status: 422 },
     );
+  }
+
+  const updates = { ...result.data };
+
+  if (updates.scholar_id && admin.role === "super_admin") {
+    const { data: scholarExists } = await supabase
+      .from("scholars")
+      .select("id")
+      .eq("id", updates.scholar_id)
+      .eq("is_active", true)
+      .single();
+    if (!scholarExists) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Scholar not found" } },
+        { status: 404 },
+      );
+    }
+  } else {
+    delete updates.scholar_id;
   }
 
   const { data: updated, error: updateError } = await supabase

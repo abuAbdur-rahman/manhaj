@@ -64,6 +64,7 @@ function formatFileSize(bytes: number): string {
 export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const [title, setTitle] = useState("");
   const [seriesId, setSeriesId] = useState("");
@@ -139,8 +140,11 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
         setAudioUrl(result.url);
 
         const arrayBuffer = await file.arrayBuffer();
-        const audioContext = new AudioContext();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+        }
+        audioContextRef.current = new AudioContext();
+        const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
         setDurationSeconds(Math.round(audioBuffer.duration));
 
         setUploadState("uploaded");

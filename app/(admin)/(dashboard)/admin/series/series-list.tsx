@@ -11,7 +11,6 @@ import {
 } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/components/ui/cn";
 import {
   Dialog,
   DialogContent,
@@ -70,6 +69,7 @@ export function SeriesList({
   const [statusFilter, setStatusFilter] = useState("");
   const [items, setItems] = useState(initialSeries);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formMode, setFormMode] = useState<FormMode>("create");
@@ -105,16 +105,20 @@ export function SeriesList({
 
   const handleDelete = useCallback(
     async (id: string) => {
+      setActionError("");
       setPendingId(id);
       try {
         const res = await fetch(`/api/admin/series/${id}`, {
           method: "DELETE",
         });
-        if (!res.ok) throw new Error("Failed to delete");
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error?.message ?? "Failed to delete");
+        }
         setItems((prev) => prev.filter((s) => s.id !== id));
         router.refresh();
-      } catch {
-        // silent
+      } catch (err) {
+        setActionError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
         setPendingId(null);
         setConfirmDelete(null);
@@ -232,6 +236,15 @@ export function SeriesList({
 
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
+          {actionError && (
+            <div
+              role="alert"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              {actionError}
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sand-300" />

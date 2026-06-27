@@ -7,7 +7,10 @@ const CreateEpisodeSchema = z.object({
   title: z.string().min(1, "Title is required"),
   series_id: z.string().min(1, "Series is required"),
   language: z.enum(["yoruba", "english", "arabic"]),
-  tags: z.array(z.string()).default([]),
+  tags: z.array(z.enum([
+    "aqeedah", "fiqh", "tafseer", "hadith", "seerah",
+    "manhaj", "adab", "family", "ibadah", "dawah", "ruqyah", "arabic",
+  ])).default([]),
   audio_url: z.string().min(1, "Audio URL is required"),
   duration_seconds: z.number().int().positive().optional(),
   recorded_date: z.string().optional(),

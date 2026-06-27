@@ -8,6 +8,7 @@ const CreateSeriesSchema = z.object({
   description: z.string().optional(),
   cover_url: z.string().optional(),
   is_featured: z.boolean().default(false),
+  scholar_id: z.string().uuid().optional(),
 });
 
 function slugify(text: string): string {
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { title, description, cover_url, is_featured } = result.data;
+  const { title, description, cover_url, is_featured, scholar_id: bodyScholarId } = result.data;
   const supabase = await createClient();
 
   if (admin.role === "scholar_admin" && !admin.scholarId) {
@@ -52,9 +53,7 @@ export async function POST(request: NextRequest) {
   }
 
   const scholar_id =
-    admin.role === "super_admin"
-      ? (body.scholar_id ?? null)
-      : admin.scholarId;
+    admin.role === "super_admin" ? (bodyScholarId ?? null) : admin.scholarId;
 
   if (!scholar_id) {
     return NextResponse.json(
@@ -62,6 +61,22 @@ export async function POST(request: NextRequest) {
         error: { code: "VALIDATION_ERROR", message: "scholar_id is required" },
       },
       { status: 422 },
+    );
+  }
+
+  const { data: scholarExists } = await supabase
+    .from("scholars")
+    .select("id")
+    .eq("id", scholar_id)
+    .eq("is_active", true)
+    .single();
+
+  if (!scholarExists) {
+    return NextResponse.json(
+      {
+        error: { code: "NOT_FOUND", message: "Scholar not found" },
+      },
+      { status: 404 },
     );
   }
 

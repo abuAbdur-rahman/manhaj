@@ -24,6 +24,11 @@ interface SeriesWithCount {
 
 export default async function AdminSeriesPage() {
   const admin = await requireAdmin();
+
+  if (admin.role === "scholar_admin" && !admin.scholarId) {
+    throw new Error("Scholar admin is missing scholar scope");
+  }
+
   const supabase = await createClient();
 
   let scholars: ScholarOption[];

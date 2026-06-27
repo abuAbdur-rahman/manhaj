@@ -66,6 +66,33 @@ export async function PATCH(
     );
   }
 
+  if (result.data.series_id) {
+    const { data: targetSeries } = await supabase
+      .from("series")
+      .select("scholar_id")
+      .eq("id", result.data.series_id)
+      .single();
+
+    if (!targetSeries) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Target series not found" } },
+        { status: 404 },
+      );
+    }
+
+    if (targetSeries.scholar_id !== existing.scholar_id) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Series must belong to the same scholar as the episode",
+          },
+        },
+        { status: 422 },
+      );
+    }
+  }
+
   const { data: updated, error: updateError } = await supabase
     .from("episodes")
     .update(result.data)
