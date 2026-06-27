@@ -220,14 +220,14 @@ export async function getEpisodeBySlug(slug: string): Promise<Episode | null> {
     .select("*, scholar:scholar_id(*), series:series_id(*)")
     .eq("slug", slug)
     .eq("is_published", true)
-    .single();
+    .maybeSingle();
 
-  if (error || !data) {
-    console.error("Failed to fetch episode:", error?.message);
-    return null;
+  if (error) {
+    console.error("Failed to fetch episode:", error.message);
+    throw error;
   }
 
-  return data as Episode;
+  return data as Episode | null;
 }
 
 export async function getSeriesEpisodes(

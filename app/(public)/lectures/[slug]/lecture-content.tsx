@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Download, ExternalLink, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EpisodeCard } from "@/components/episodes/episode-card";
@@ -97,6 +98,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
       await downloadEpisode(episode);
     } catch (err) {
       console.error("Download failed:", err);
+      toast.error(`Couldn't download "${episode.title}". Check your connection and storage space.`);
     } finally {
       setIsDownloading(false);
     }
@@ -104,14 +106,21 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
 
   const handleShare = useCallback(async () => {
     const url = window.location.href;
-    if (navigator.share) {
-      await navigator.share({
-        title: episode.title,
-        text: `Listen to "${episode.title}" by ${episode.scholar?.name} on Manhaj`,
-        url,
-      });
-    } else {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: episode.title,
+          text: `Listen to "${episode.title}" by ${episode.scholar?.name} on Manhaj`,
+          url,
+        });
+        return;
+      }
       await navigator.clipboard.writeText(url);
+    } catch (error) {
+      if ((error as DOMException).name !== "AbortError") {
+        console.error("Share failed:", error);
+        toast.error("Couldn't share this lecture. Check your sharing permissions.");
+      }
     }
   }, [episode]);
 
@@ -121,6 +130,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     window.open(
       `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
       "_blank",
+      "noopener,noreferrer",
     );
   }, [episode]);
 
@@ -128,6 +138,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     if (!isCurrentEpisode || !audioRef.current) return;
 
     const audio = audioRef.current;
+    audio.playbackRate = speed;
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoadedMetadata = () => {
@@ -157,7 +168,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
       audio.removeEventListener("waiting", onWaiting);
       audio.removeEventListener("canplay", onCanPlay);
     };
-  }, [isCurrentEpisode, isPlaying, setCurrentTime, setDuration, setLoading, setPlaying]);
+  }, [isCurrentEpisode, isPlaying, speed, setCurrentTime, setDuration, setLoading, setPlaying]);
 
   useEffect(() => {
     if (isCurrentEpisode && sleepTimerRemaining !== null) {

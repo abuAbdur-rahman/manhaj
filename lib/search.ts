@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Episode, Language } from "@/types";
 
 const MAX_QUERY_LENGTH = 100;
-const DISALLOWED_CHARS = /[^a-zA-Z0-9\s'-]/g;
+const DISALLOWED_CHARS = /[^\p{L}\p{N}\s'-]/gu;
 
 function sanitizeQuery(raw: string): string {
   return raw.trim().slice(0, MAX_QUERY_LENGTH).replace(DISALLOWED_CHARS, "");

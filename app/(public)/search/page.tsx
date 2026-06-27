@@ -31,12 +31,13 @@ export default function SearchPage() {
   const lastTokenRef = useRef(0);
 
   const runSearch = useCallback(async (q: string, langs: Language[]) => {
+    const token = ++lastTokenRef.current;
+
     if (!q.trim()) {
       setResults([]);
       setStatus("idle");
       return;
     }
-    const token = ++lastTokenRef.current;
     setStatus("loading");
     try {
       const episodes = await searchEpisodes(q, langs);

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Download } from "lucide-react";
+import { toast } from "sonner";
 import { DownloadRow } from "@/components/episodes/download-row";
 import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
@@ -39,19 +40,17 @@ export function DownloadsContent() {
     loadDownloads();
   }, [loadDownloads]);
 
-  const handleRemove = useCallback(
-    async (download: DownloadedEpisode) => {
-      try {
-        await removeDownload(download.episode.id);
-        setDownloads((prev) =>
-          prev.filter((d) => d.episode.id !== download.episode.id),
-        );
-      } catch (err) {
-        console.error("Failed to remove download:", err);
-      }
-    },
-    [],
-  );
+  const handleRemove = useCallback(async (download: DownloadedEpisode) => {
+    try {
+      await removeDownload(download.episode.id);
+      setDownloads((prev) =>
+        prev.filter((d) => d.episode.id !== download.episode.id),
+      );
+    } catch (err) {
+      console.error("Failed to remove download:", err);
+      toast.error("Couldn't remove this download. Try again.");
+    }
+  }, []);
 
   const totalBytes = downloads.reduce(
     (sum, d) => sum + (d.fileSizeBytes ?? 0),
@@ -82,6 +81,7 @@ export function DownloadsContent() {
             <div className="space-y-1">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div
+                  // biome-ignore lint/suspicious/noArrayIndexKey: <no explanation>
                   key={i}
                   className="flex items-center gap-3 rounded-lg px-3 py-2.5"
                 >
