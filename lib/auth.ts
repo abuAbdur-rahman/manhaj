@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -51,5 +52,34 @@ export async function requireAdmin(
   const admin = await getCurrentAdmin();
   if (!admin) redirect("/admin/login");
   if (requiredRole && admin.role !== requiredRole) redirect("/admin");
+  return admin;
+}
+
+export async function requireAdminApi(
+  requiredRole?: AdminRole,
+): Promise<CurrentAdmin | Response> {
+  const admin = await getCurrentAdmin();
+  if (!admin) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "UNAUTHORIZED",
+          message: "Invalid or expired session",
+        },
+      },
+      { status: 401 },
+    );
+  }
+  if (requiredRole && admin.role !== requiredRole) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "FORBIDDEN",
+          message: "Insufficient permissions",
+        },
+      },
+      { status: 403 },
+    );
+  }
   return admin;
 }

@@ -1,6 +1,16 @@
 import Image from "next/image";
 import { cn } from "@/components/ui/cn";
 
+function getInitials(name?: string): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
+
 interface AvatarProps {
   src?: string | null;
   alt?: string;
@@ -41,7 +51,7 @@ export function Avatar({
         role="img"
         aria-label={alt || fallback || "Avatar"}
       >
-        {fallback?.charAt(0).toUpperCase() ?? "?"}
+        {getInitials(fallback) ?? "?"}
       </div>
     );
   }
