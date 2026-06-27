@@ -37,7 +37,6 @@ yarn-error.log*
 #Project setup
 supabase
 !lib/supabase
-.opencode/coderabbit
 
 # vercel
 .vercel
