@@ -82,6 +82,12 @@ Tag = "aqeedah" | "fiqh" | "tafseer" | "hadith" | "seerah" | "manhaj" | "adab" |
 3. Creates episode entry in Supabase (title, series, tags, duration) — scoped to their assigned scholar
 4. Content goes live (admin must call upload API endpoint)
 
+## CI/CD
+- Never commit secrets or credentials
+- Never commit sensitive data
+- Never commit build artifacts
+- Never commit .opencode/tasks or .opencode/docs/*.md except for documentation updates
+
 ## PWA
 
 - Serwist for service worker with runtime caching for audio (mp3/wav/ogg) and images
