@@ -21,19 +21,21 @@ import {
 export default async function AdminDashboardPage() {
   const admin = await getCurrentAdmin();
 
+  const scopedScholarId =
+    admin?.role === "scholar_admin" ? (admin.scholarId ?? undefined) : undefined;
+
+  if (admin?.role === "scholar_admin" && !scopedScholarId) {
+    throw new Error("Scholar admin is missing scholar scope");
+  }
+
   const [episodes, stats] = await Promise.all([
-    getEpisodesForAdmin(
-      admin?.role === "scholar_admin"
-        ? (admin.scholarId ?? undefined)
-        : undefined,
-      10,
-    ),
+    getEpisodesForAdmin(scopedScholarId, 10),
     admin?.role === "super_admin" ? getDashboardStats() : null,
   ]);
 
   const scholar =
-    admin?.role === "scholar_admin" && admin.scholarId
-      ? await getScholarById(admin.scholarId)
+    admin?.role === "scholar_admin" && scopedScholarId
+      ? await getScholarById(scopedScholarId)
       : null;
 
   return (
