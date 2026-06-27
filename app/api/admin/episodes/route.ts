@@ -7,7 +7,10 @@ const CreateEpisodeSchema = z.object({
   title: z.string().min(1, "Title is required"),
   series_id: z.string().min(1, "Series is required"),
   language: z.enum(["yoruba", "english", "arabic"]),
-  tags: z.array(z.string()).default([]),
+  tags: z.array(z.enum([
+    "aqeedah", "fiqh", "tafseer", "hadith", "seerah",
+    "manhaj", "adab", "family", "ibadah", "dawah", "ruqyah", "arabic",
+  ])).default([]),
   audio_url: z.string().min(1, "Audio URL is required"),
   duration_seconds: z.number().int().positive().optional(),
   recorded_date: z.string().optional(),
@@ -29,7 +32,15 @@ export async function POST(request: NextRequest) {
   if (authResult instanceof Response) return authResult;
   const admin = authResult;
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: { code: "INVALID_JSON", message: "Malformed JSON" } },
+      { status: 400 },
+    );
+  }
   const result = CreateEpisodeSchema.safeParse(body);
   if (!result.success) {
     return NextResponse.json(
