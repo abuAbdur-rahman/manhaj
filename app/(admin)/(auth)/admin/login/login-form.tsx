@@ -21,20 +21,23 @@ export function LoginForm() {
     setError(null);
     setIsLoading(true);
 
-    const { error: signInError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    try {
+      const { error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-    if (signInError) {
-      setError("Invalid email or password.");
+      if (signInError) {
+        setError("Invalid email or password.");
+        return;
+      }
+
+      router.push("/admin");
+      router.refresh();
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    router.push("/admin");
-    router.refresh();
   }
 
   return (

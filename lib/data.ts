@@ -240,10 +240,12 @@ export async function getScholarById(id: string): Promise<Scholar | null> {
     .eq("is_active", true)
     .single();
 
-  if (error || !data) {
-    console.error("Failed to fetch scholar by id:", error?.message);
-    return null;
+  if (error) {
+    console.error("Failed to fetch scholar by id:", error.message);
+    throw error;
   }
+
+  if (!data) return null;
 
   return {
     ...data,
@@ -276,7 +278,7 @@ export async function getEpisodesForAdmin(
 
   if (error) {
     console.error("Failed to fetch admin episodes:", error.message);
-    return [];
+    throw error;
   }
 
   return data as Episode[];
@@ -288,7 +290,7 @@ export async function getDashboardStats(): Promise<{
 }> {
   const supabase = await createClient();
 
-  const [{ count: scholarCount }, { count: episodeCount }] = await Promise.all([
+  const [scholarResult, episodeResult] = await Promise.all([
     supabase
       .from("scholars")
       .select("*", { count: "exact", head: true })
@@ -296,9 +298,19 @@ export async function getDashboardStats(): Promise<{
     supabase.from("episodes").select("*", { count: "exact", head: true }),
   ]);
 
+  if (scholarResult.error) {
+    console.error("Failed to fetch scholar count:", scholarResult.error.message);
+    throw scholarResult.error;
+  }
+
+  if (episodeResult.error) {
+    console.error("Failed to fetch episode count:", episodeResult.error.message);
+    throw episodeResult.error;
+  }
+
   return {
-    scholarCount: scholarCount ?? 0,
-    episodeCount: episodeCount ?? 0,
+    scholarCount: scholarResult.count ?? 0,
+    episodeCount: episodeResult.count ?? 0,
   };
 }
 
