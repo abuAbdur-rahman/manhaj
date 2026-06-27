@@ -211,3 +211,43 @@ export async function getSeriesWithEpisodes(
 
   return { series, episodes: episodes as Episode[] };
 }
+
+export async function getEpisodeBySlug(slug: string): Promise<Episode | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("episodes")
+    .select("*, scholar:scholar_id(*), series:series_id(*)")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to fetch episode:", error.message);
+    throw error;
+  }
+
+  return data as Episode | null;
+}
+
+export async function getSeriesEpisodes(
+  seriesId: string,
+  limit = 10,
+): Promise<Episode[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("episodes")
+    .select("*, scholar:scholar_id(*), series:series_id(*)")
+    .eq("series_id", seriesId)
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Failed to fetch series episodes:", error.message);
+    return [];
+  }
+
+  return data as Episode[];
+}
