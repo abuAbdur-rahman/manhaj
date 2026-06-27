@@ -230,6 +230,78 @@ export async function getEpisodeBySlug(slug: string): Promise<Episode | null> {
   return data as Episode | null;
 }
 
+export async function getScholarById(id: string): Promise<Scholar | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("scholars")
+    .select("*, episode_count:episodes(count), series_count:series(count)")
+    .eq("id", id)
+    .eq("is_active", true)
+    .single();
+
+  if (error || !data) {
+    console.error("Failed to fetch scholar by id:", error?.message);
+    return null;
+  }
+
+  return {
+    ...data,
+    episode_count: data.episode_count
+      ? ((data.episode_count as { count: number }[])[0]?.count ?? 0)
+      : 0,
+    series_count: data.series_count
+      ? ((data.series_count as { count: number }[])[0]?.count ?? 0)
+      : 0,
+  } as unknown as Scholar;
+}
+
+export async function getEpisodesForAdmin(
+  scholarId?: string,
+  limit = 10,
+): Promise<Episode[]> {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("episodes")
+    .select("*, scholar:scholar_id(*), series:series_id(*)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (scholarId) {
+    query = query.eq("scholar_id", scholarId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Failed to fetch admin episodes:", error.message);
+    return [];
+  }
+
+  return data as Episode[];
+}
+
+export async function getDashboardStats(): Promise<{
+  scholarCount: number;
+  episodeCount: number;
+}> {
+  const supabase = await createClient();
+
+  const [{ count: scholarCount }, { count: episodeCount }] = await Promise.all([
+    supabase
+      .from("scholars")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true),
+    supabase.from("episodes").select("*", { count: "exact", head: true }),
+  ]);
+
+  return {
+    scholarCount: scholarCount ?? 0,
+    episodeCount: episodeCount ?? 0,
+  };
+}
+
 export async function getSeriesEpisodes(
   seriesId: string,
   limit = 10,
