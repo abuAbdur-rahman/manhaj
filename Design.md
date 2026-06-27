@@ -20,7 +20,7 @@ Design must hold up against three constraints from the BRD:
 
 ### 2.1 Color
 
-Building on the tokens already defined in `app/globals.css`. The palette is restrained on purpose: green carries trust and is reserved for action, gold is used as a rare accent (never a background), sand carries almost the entire surface area.
+Building on the tokens already defined in `app/globals.css`. The palette is restrained on purpose: green carries trust and is reserved for action, clay is used as a rare accent (never a background), sand carries almost the entire surface area.
 
 | Token | Hex | Role |
 |---|---|---|
@@ -34,10 +34,11 @@ Building on the tokens already defined in `app/globals.css`. The palette is rest
 | `sand-100` | `#f5f3ec` | Card surface |
 | `sand-200` | `#eae6d9` | Borders, dividers |
 | `sand-300` | `#d9d3c0` | Disabled/inactive |
-| `gold-500` | `#b8962e` | Signature accent — featured badge, sleep-timer ring, donate button only |
-| `gold-400` | `#c9a84c` | Gold hover state |
+| `clay-500` | `#a85c35` | Signature accent — featured badge, sleep-timer ring, donate button only |
+| `clay-400` | `#c2754a` | Clay hover state |
+| `clay-600` | `#8c4a29` | Clay pressed state |
 
-**Rule:** gold appears in at most one element per screen. If everything is gold, nothing is.
+**Rule:** clay appears in at most one element per screen. If everything is clay, nothing is.
 
 ### 2.2 Typography
 
@@ -371,7 +372,7 @@ Offline-specific state: if a user opens a lecture page with no connection and th
 
 ## 6. Accessibility & Performance
 
-- Color contrast: forest-900 on sand-50 = 15.8:1 (AAA). forest-500 on sand-50 = 6.1:1 (AA for normal text). Never place body text in gold.
+- Color contrast: forest-900 on sand-50 = 15.8:1 (AAA). forest-500 on sand-50 = 6.1:1 (AA for normal text). Never place body text in clay.
 - All icon-only controls (download, share, play in lists) carry `aria-label`s describing the action + subject ("Download: Episode title"), not just "Download."
 - Visible focus rings (forest-500, 2px) on every interactive element — admins will often be on desktop/keyboard.
 - `prefers-reduced-motion` disables the waveform pulse and any transition beyond opacity fades.
@@ -386,7 +387,7 @@ Offline-specific state: if a user opens a lecture page with no connection and th
 - No skeuomorphic "cassette tape" or "prayer beads" UI gimmicks — respect the content, don't theme it.
 - No engagement mechanics: no streak counters, no badges, no "X people listening now."
 - No dense admin dashboard charts in MVP — admins need an upload flow, not analytics.
-- No dark mode in this pass (BRD defers it to v1.5) — token system above is structured so a dark variant (swap sand/forest luminance, keep gold as-is) can be added later without a redesign.
+- No dark mode in this pass (BRD defers it to v1.5) — token system above is structured so a dark variant (swap sand/forest luminance, keep clay as-is) can be added later without a redesign.
 
 ---
 
