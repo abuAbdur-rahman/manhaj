@@ -99,5 +99,4 @@ export interface DownloadedEpisode {
   audioBlob?: Blob;
   downloadedAt: string;
   fileSizeBytes: number;
-  audioBlob?: Blob;
 }
