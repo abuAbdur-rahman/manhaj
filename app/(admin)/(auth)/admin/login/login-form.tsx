@@ -1,8 +1,8 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,19 +22,26 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      const { error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
       if (signInError) {
-        setError("Invalid email or password.");
+        if (signInError.code === "email_not_confirmed") {
+          setError("Email not confirmed. Check your inbox.");
+        } else if (signInError.status === 429) {
+          setError("Too many attempts. Try again later.");
+        } else {
+          setError("Invalid email or password.");
+        }
         return;
       }
 
       router.push("/admin");
       router.refresh();
+    } catch {
+      setError("Connection error. Check your internet and try again.");
     } finally {
       setIsLoading(false);
     }

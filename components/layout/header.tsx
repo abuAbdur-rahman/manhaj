@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -33,7 +34,16 @@ function HeaderLeft({ type, label, href, segments }: HeaderLeftProps) {
 
   if (type === "logo") {
     return (
-      <Link href="/" className="flex items-center gap-2">
+      <Link href="/" className="flex items-center gap-2 shrink-0">
+        <div className="relative h-7 w-7 shrink-0">
+          <Image
+            src="/logo.png"
+            alt="Manhaj"
+            fill
+            className="object-contain"
+            loading="eager"
+          />
+        </div>
         <span className="text-lg font-semibold text-forest-700">Manhaj</span>
       </Link>
     );
@@ -100,7 +110,7 @@ export function Header({ className, children }: HeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 flex h-14 items-center justify-between border-b border-sand-200 bg-sand-50 px-4 gap-4",
+        "sticky top-0 z-40 flex items-center justify-between border-b border-sand-200 bg-sand-50 px-4 gap-4 h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)]",
         className,
       )}
     >

@@ -33,6 +33,7 @@ export function EpisodeRow({
         type="button"
         onClick={() => setEpisode(episode)}
         className="flex flex-1 items-center gap-3 min-w-0 cursor-pointer"
+        aria-label={`Play: ${episode.title}`}
       >
         {index !== undefined && (
           <span className="w-6 text-right font-mono text-sm text-sand-300 shrink-0">

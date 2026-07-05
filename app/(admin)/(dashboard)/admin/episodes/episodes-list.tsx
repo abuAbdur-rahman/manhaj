@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 import {
   Header,
   HeaderCenter,
@@ -100,34 +100,33 @@ export function EpisodesList({
     return result;
   }, [items, search, scholarFilter, seriesFilter, statusFilter]);
 
-  const handleTogglePublish = useCallback(
-    async (episode: Episode) => {
-      setActionError("");
-      setPendingId(episode.id);
-      try {
-        const res = await fetch(`/api/admin/episodes/${episode.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ is_published: !episode.is_published }),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.error?.message ?? "Failed to update");
-        }
-        setItems((prev) =>
-          prev.map((e) =>
-            e.id === episode.id ? { ...e, is_published: !e.is_published } : e,
-          ),
-        );
-      } catch (err) {
-        setActionError(err instanceof Error ? err.message : "Something went wrong");
-      } finally {
-        setPendingId(null);
-        setConfirmAction(null);
+  const handleTogglePublish = useCallback(async (episode: Episode) => {
+    setActionError("");
+    setPendingId(episode.id);
+    try {
+      const res = await fetch(`/api/admin/episodes/${episode.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_published: !episode.is_published }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message ?? "Failed to update");
       }
-    },
-    [],
-  );
+      setItems((prev) =>
+        prev.map((e) =>
+          e.id === episode.id ? { ...e, is_published: !e.is_published } : e,
+        ),
+      );
+    } catch (err) {
+      setActionError(
+        err instanceof Error ? err.message : "Something went wrong",
+      );
+    } finally {
+      setPendingId(null);
+      setConfirmAction(null);
+    }
+  }, []);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -144,7 +143,9 @@ export function EpisodesList({
         setItems((prev) => prev.filter((e) => e.id !== id));
         router.refresh();
       } catch (err) {
-        setActionError(err instanceof Error ? err.message : "Something went wrong");
+        setActionError(
+          err instanceof Error ? err.message : "Something went wrong",
+        );
       } finally {
         setPendingId(null);
         setConfirmAction(null);
@@ -153,12 +154,9 @@ export function EpisodesList({
     [router],
   );
 
-  const promptConfirm = useCallback(
-    (id: string, action: ConfirmAction) => {
-      setConfirmAction({ id, action });
-    },
-    [],
-  );
+  const promptConfirm = useCallback((id: string, action: ConfirmAction) => {
+    setConfirmAction({ id, action });
+  }, []);
 
   return (
     <>
@@ -168,7 +166,10 @@ export function EpisodesList({
         <HeaderRight>
           <Link
             href="/admin/episodes/new"
-            className={cn(buttonVariants({ variant: "primary", size: "sm" }), "gap-1.5")}
+            className={cn(
+              buttonVariants({ variant: "primary", size: "sm" }),
+              "gap-1.5",
+            )}
           >
             <Plus className="h-4 w-4" />
             New
@@ -293,7 +294,11 @@ export function EpisodesList({
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : confirmAction?.id === episode.id &&
                       confirmAction.action === "toggle" ? (
-                      episode.is_published ? "Unpublish?" : "Publish?"
+                      episode.is_published ? (
+                        "Unpublish?"
+                      ) : (
+                        "Publish?"
+                      )
                     ) : episode.is_published ? (
                       "Unpublish"
                     ) : (
@@ -332,26 +337,33 @@ export function EpisodesList({
             <div className="mt-4">
               <EmptyState
                 title={
-                  search || scholarFilter !== "all" || seriesFilter !== "all" || statusFilter !== "all"
+                  search ||
+                  scholarFilter !== "all" ||
+                  seriesFilter !== "all" ||
+                  statusFilter !== "all"
                     ? "No matching episodes"
                     : "No episodes yet"
                 }
                 description={
-                  search || scholarFilter !== "all" || seriesFilter !== "all" || statusFilter !== "all"
+                  search ||
+                  scholarFilter !== "all" ||
+                  seriesFilter !== "all" ||
+                  statusFilter !== "all"
                     ? "Try adjusting your search or filters."
                     : "Create your first episode to get started."
                 }
                 action={
-                  !search && scholarFilter === "all" && seriesFilter === "all" && statusFilter === "all"
-                    ? (
-                      <Link
-                        href="/admin/episodes/new"
-                        className={buttonVariants({ variant: "primary" })}
-                      >
-                        Create episode
-                      </Link>
-                    )
-                    : undefined
+                  !search &&
+                  scholarFilter === "all" &&
+                  seriesFilter === "all" &&
+                  statusFilter === "all" ? (
+                    <Link
+                      href="/admin/episodes/new"
+                      className={buttonVariants({ variant: "primary" })}
+                    >
+                      Create episode
+                    </Link>
+                  ) : undefined
                 }
               />
             </div>

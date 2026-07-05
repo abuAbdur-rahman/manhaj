@@ -1,14 +1,9 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, Upload, X } from "lucide-react";
-import type { Language, Tag } from "@/types";
-import {
-  Header,
-  HeaderCenter,
-  HeaderLeft,
-} from "@/components/layout/header";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -20,6 +15,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Language, Tag } from "@/types";
+
+const ALLOWED_AUDIO_EXTENSIONS = [
+  "mp3",
+  "wav",
+  "ogg",
+  "aac",
+  "m4a",
+  "wma",
+  "mpeg",
+  "opus",
+  "oga",
+];
+const ACCEPT_STRING = ALLOWED_AUDIO_EXTENSIONS.map((e) => `.${e}`).join(",");
 
 const ALL_TAGS: Tag[] = [
   "aqeedah",
@@ -47,12 +56,20 @@ type UploadState = "idle" | "uploading" | "uploaded" | "error";
 interface AdminSeries {
   id: string;
   title: string;
+  scholar_id: string;
   scholar?: { name: string } | null;
+}
+
+interface AdminScholar {
+  id: string;
+  name: string;
 }
 
 interface NewEpisodeFormProps {
   series: AdminSeries[];
+  scholars: AdminScholar[];
   adminRole: "super_admin" | "scholar_admin";
+  adminScholarId: string | null;
 }
 
 function formatFileSize(bytes: number): string {
@@ -61,12 +78,21 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
+export function NewEpisodeForm({
+  series: allSeries,
+  scholars,
+  adminRole,
+  adminScholarId,
+}: NewEpisodeFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
 
   const [title, setTitle] = useState("");
+  const [scholarId, setScholarId] = useState(
+    adminRole === "scholar_admin" ? (adminScholarId ?? "") : "",
+  );
   const [seriesId, setSeriesId] = useState("");
   const [language, setLanguage] = useState<Language>("yoruba");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
@@ -81,6 +107,11 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState("");
 
+  const filteredSeries = useMemo(() => {
+    if (!scholarId) return [];
+    return allSeries.filter((s) => s.scholar_id === scholarId);
+  }, [allSeries, scholarId]);
+
   const toggleTag = useCallback((tag: Tag) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
@@ -92,8 +123,17 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      if (!file.type.startsWith("audio/")) {
-        setErrors((prev) => ({ ...prev, audio: "File must be an audio file" }));
+      if (xhrRef.current) {
+        xhrRef.current.abort();
+        xhrRef.current = null;
+      }
+
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (!ext || !ALLOWED_AUDIO_EXTENSIONS.includes(ext)) {
+        setErrors((prev) => ({
+          ...prev,
+          audio: `Allowed types: ${ALLOWED_AUDIO_EXTENSIONS.join(", ")}`,
+        }));
         return;
       }
 
@@ -111,6 +151,7 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
       formData.append("audio", file);
 
       const xhr = new XMLHttpRequest();
+      xhrRef.current = xhr;
 
       xhr.upload.addEventListener("progress", (event) => {
         if (event.lengthComputable) {
@@ -132,7 +173,12 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
               reject(new Error(message));
             }
           });
-          xhr.addEventListener("error", () => reject(new Error("Network error")));
+          xhr.addEventListener("error", () =>
+            reject(new Error("Network error")),
+          );
+          xhr.addEventListener("abort", () =>
+            reject(new DOMException("Upload cancelled", "AbortError")),
+          );
           xhr.open("POST", "/api/admin/upload");
           xhr.send(formData);
         });
@@ -150,18 +196,24 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
 
         setUploadState("uploaded");
       } catch (err) {
+        if ((err as Error)?.name === "AbortError") return;
         setUploadState("error");
         setErrors((prev) => ({
           ...prev,
-          audio:
-            err instanceof Error ? err.message : "Failed to upload audio",
+          audio: err instanceof Error ? err.message : "Failed to upload audio",
         }));
+      } finally {
+        xhrRef.current = null;
       }
     },
     [],
   );
 
   const clearFile = useCallback(() => {
+    if (xhrRef.current) {
+      xhrRef.current.abort();
+      xhrRef.current = null;
+    }
     setAudioFile(null);
     setAudioUrl("");
     setDurationSeconds(null);
@@ -176,13 +228,13 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
     (publish: boolean): Record<string, string> => {
       const errs: Record<string, string> = {};
       if (!title.trim()) errs.title = "Title is required";
-      if (!seriesId) errs.seriesId = "Series is required";
+      if (!scholarId) errs.scholarId = "Scholar is required";
       if (publish && uploadState !== "uploaded") {
         errs.audio = "Audio file is required to publish";
       }
       return errs;
     },
-    [title, seriesId, uploadState],
+    [title, scholarId, uploadState],
   );
 
   const handleSubmit = useCallback(
@@ -195,20 +247,23 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
       setIsSubmitting(true);
 
       try {
+        const payload: Record<string, unknown> = {
+          title: title.trim(),
+          language,
+          tags: selectedTags,
+          audio_url: audioUrl,
+          duration_seconds: durationSeconds,
+          recorded_date: recordedDate || undefined,
+          description: description.trim() || undefined,
+          is_published: publish,
+          scholar_id: scholarId,
+        };
+        if (seriesId) payload.series_id = seriesId;
+
         const res = await fetch("/api/admin/episodes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: title.trim(),
-            series_id: seriesId,
-            language,
-            tags: selectedTags,
-            audio_url: audioUrl,
-            duration_seconds: durationSeconds,
-            recorded_date: recordedDate || undefined,
-            description: description.trim() || undefined,
-            is_published: publish,
-          }),
+          body: JSON.stringify(payload),
         });
 
         if (!res.ok) {
@@ -235,6 +290,7 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
       durationSeconds,
       recordedDate,
       description,
+      scholarId,
       router,
       validate,
     ],
@@ -245,14 +301,17 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
   return (
     <>
       <Header>
-        <HeaderLeft type="breadcrumb" segments={[
-          { label: "Episodes", href: "/admin/episodes" },
-          { label: "New", href: "/admin/episodes/new" },
-        ]} />
+        <HeaderLeft
+          type="breadcrumb"
+          segments={[
+            { label: "Episodes", href: "/admin/episodes" },
+            { label: "New", href: "/admin/episodes/new" },
+          ]}
+        />
         <HeaderCenter title="New Episode" />
       </Header>
 
-      <main className="flex-1 pb-20 lg:pb-0">
+      <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-6 md:px-6">
           {submitError && (
             <div
@@ -283,29 +342,66 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
               )}
             </fieldset>
 
+            {adminRole === "super_admin" && (
+              <fieldset>
+                <label
+                  htmlFor="scholar"
+                  className="mb-1.5 block text-sm font-medium text-forest-700"
+                >
+                  Scholar <span className="text-clay-500">*</span>
+                </label>
+                <Select value={scholarId} onValueChange={setScholarId}>
+                  <SelectTrigger
+                    id="scholar"
+                    className={errors.scholarId ? "border-red-300" : ""}
+                  >
+                    <SelectValue placeholder="Select a scholar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scholars.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.scholarId && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {errors.scholarId}
+                  </p>
+                )}
+              </fieldset>
+            )}
+
             <fieldset>
               <label
                 htmlFor="series"
                 className="mb-1.5 block text-sm font-medium text-forest-700"
               >
-                Series <span className="text-clay-500">*</span>
+                Series <span className="text-xs text-sand-300">(optional)</span>
               </label>
-              <Select value={seriesId} onValueChange={setSeriesId}>
+              <Select
+                value={seriesId}
+                onValueChange={setSeriesId}
+                disabled={!scholarId}
+              >
                 <SelectTrigger
                   id="series"
                   className={errors.seriesId ? "border-red-300" : ""}
                 >
-                  <SelectValue placeholder="Select a series" />
+                  <SelectValue
+                    placeholder={
+                      scholarId ? "Select a series" : "Select a scholar first"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {series.map((s) => (
+                  {filteredSeries.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.title}
-                      {s.scholar?.name && adminRole === "super_admin"
-                        ? ` — ${s.scholar.name}`
-                        : ""}
                     </SelectItem>
                   ))}
+                  <SelectItem value="">No series (standalone)</SelectItem>
                 </SelectContent>
               </Select>
               {errors.seriesId && (
@@ -338,9 +434,9 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
             </fieldset>
 
             <fieldset>
-              <label className="mb-1.5 block text-sm font-medium text-forest-700">
+              <legend className="mb-1.5 block text-sm font-medium text-forest-700">
                 Tags
-              </label>
+              </legend>
               <div className="flex flex-wrap gap-1.5">
                 {ALL_TAGS.map((tag) => (
                   <Chip
@@ -376,7 +472,7 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="audio/*"
+                    accept={ACCEPT_STRING}
                     onChange={handleFileSelect}
                     className="hidden"
                     aria-label="Select audio file"
@@ -487,14 +583,14 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
                 disabled={isPending}
                 onClick={() => handleSubmit(false)}
               >
-                {isSubmitting && !audioUrl
-                  ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  )
-                  : "Save draft"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save draft"
+                )}
               </Button>
               <Button
                 type="button"
@@ -502,19 +598,19 @@ export function NewEpisodeForm({ series, adminRole }: NewEpisodeFormProps) {
                 disabled={isPending}
                 onClick={() => handleSubmit(true)}
               >
-                {isSubmitting && audioUrl
-                  ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Publishing...
-                    </>
-                  )
-                  : "Publish"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Publishing...
+                  </>
+                ) : (
+                  "Publish"
+                )}
               </Button>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </>
   );
 }

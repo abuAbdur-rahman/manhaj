@@ -13,7 +13,7 @@ export async function getRecentEpisodes(limit = 10): Promise<Episode[]> {
 
   if (error) {
     console.error("Failed to fetch recent episodes:", error.message);
-    return [];
+    throw error;
   }
 
   return data as Episode[];
@@ -31,7 +31,7 @@ export async function getFeaturedSeries(): Promise<Series[]> {
 
   if (error) {
     console.error("Failed to fetch featured series:", error.message);
-    return [];
+    throw error;
   }
 
   return data.map((item: Record<string, unknown>) => ({
@@ -54,7 +54,7 @@ export async function getScholars(limit = 3): Promise<Scholar[]> {
 
   if (error) {
     console.error("Failed to fetch scholars:", error.message);
-    return [];
+    throw error;
   }
 
   return data.map((item: Record<string, unknown>) => ({
@@ -76,7 +76,7 @@ export async function getAllScholars(): Promise<Scholar[]> {
 
   if (error) {
     console.error("Failed to fetch scholars:", error.message);
-    return [];
+    throw error;
   }
 
   return data.map((item: Record<string, unknown>) => ({
@@ -98,12 +98,14 @@ export async function getScholarBySlug(slug: string): Promise<Scholar | null> {
     .select("*, episode_count:episodes(count), series_count:series(count)")
     .eq("slug", slug)
     .eq("is_active", true)
-    .single();
+    .maybeSingle();
 
-  if (error || !data) {
-    console.error("Failed to fetch scholar:", error?.message);
-    return null;
+  if (error) {
+    console.error("Failed to fetch scholar:", error.message);
+    throw error;
   }
+
+  if (!data) return null;
 
   return {
     ...data,
@@ -116,7 +118,10 @@ export async function getScholarBySlug(slug: string): Promise<Scholar | null> {
   } as unknown as Scholar;
 }
 
-export async function getScholarSeries(scholarId: string): Promise<Series[]> {
+export async function getScholarSeries(
+  scholarId: string,
+  limit = 50,
+): Promise<Series[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -124,11 +129,12 @@ export async function getScholarSeries(scholarId: string): Promise<Series[]> {
     .select("*, scholar:scholar_id(*), episode_count:episodes(count)")
     .eq("scholar_id", scholarId)
     .eq("is_active", true)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (error) {
     console.error("Failed to fetch scholar series:", error.message);
-    return [];
+    throw error;
   }
 
   return data.map((item: Record<string, unknown>) => ({
@@ -141,6 +147,7 @@ export async function getScholarSeries(scholarId: string): Promise<Series[]> {
 
 export async function getScholarEpisodes(
   scholarId: string,
+  limit = 50,
 ): Promise<Episode[]> {
   const supabase = await createClient();
 
@@ -149,11 +156,12 @@ export async function getScholarEpisodes(
     .select("*, scholar:scholar_id(*), series:series_id(*)")
     .eq("scholar_id", scholarId)
     .eq("is_published", true)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
   if (error) {
     console.error("Failed to fetch scholar episodes:", error.message);
-    return [];
+    throw error;
   }
 
   return data as Episode[];
@@ -167,15 +175,17 @@ export async function getSeriesWithEpisodes(
 
   const { data: scholar, error: scholarError } = await supabase
     .from("scholars")
-    .select("id")
+    .select("id, name, slug")
     .eq("slug", scholarSlug)
     .eq("is_active", true)
-    .single();
+    .maybeSingle();
 
-  if (scholarError || !scholar) {
-    console.error("Failed to fetch scholar for series:", scholarError?.message);
-    return null;
+  if (scholarError) {
+    console.error("Failed to fetch scholar for series:", scholarError.message);
+    throw scholarError;
   }
+
+  if (!scholar) return null;
 
   const { data: seriesData, error: seriesError } = await supabase
     .from("series")
@@ -183,12 +193,14 @@ export async function getSeriesWithEpisodes(
     .eq("scholar_id", scholar.id)
     .eq("slug", seriesSlug)
     .eq("is_active", true)
-    .single();
+    .maybeSingle();
 
-  if (seriesError || !seriesData) {
-    console.error("Failed to fetch series:", seriesError?.message);
-    return null;
+  if (seriesError) {
+    console.error("Failed to fetch series:", seriesError.message);
+    throw seriesError;
   }
+
+  if (!seriesData) return null;
 
   const series = {
     ...seriesData,
@@ -206,7 +218,7 @@ export async function getSeriesWithEpisodes(
 
   if (episodesError) {
     console.error("Failed to fetch episodes:", episodesError.message);
-    return { series, episodes: [] };
+    throw episodesError;
   }
 
   return { series, episodes: episodes as Episode[] };
@@ -299,12 +311,18 @@ export async function getDashboardStats(): Promise<{
   ]);
 
   if (scholarResult.error) {
-    console.error("Failed to fetch scholar count:", scholarResult.error.message);
+    console.error(
+      "Failed to fetch scholar count:",
+      scholarResult.error.message,
+    );
     throw scholarResult.error;
   }
 
   if (episodeResult.error) {
-    console.error("Failed to fetch episode count:", episodeResult.error.message);
+    console.error(
+      "Failed to fetch episode count:",
+      episodeResult.error.message,
+    );
     throw episodeResult.error;
   }
 
@@ -330,7 +348,7 @@ export async function getSeriesEpisodes(
 
   if (error) {
     console.error("Failed to fetch series episodes:", error.message);
-    return [];
+    throw error;
   }
 
   return data as Episode[];

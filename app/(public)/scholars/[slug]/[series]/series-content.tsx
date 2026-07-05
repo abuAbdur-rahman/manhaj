@@ -24,7 +24,9 @@ export function SeriesContent({ episodes }: SeriesContentProps) {
       await downloadEpisode(episode);
     } catch (err) {
       console.error("Download failed:", err);
-      toast.error(`Couldn't download "${episode.title}". Check your connection and storage space.`);
+      toast.error(
+        `Couldn't download "${episode.title}". Check your connection and storage space.`,
+      );
     } finally {
       setDownloadingIds((prev) => {
         const next = new Set(prev);
@@ -42,7 +44,9 @@ export function SeriesContent({ episodes }: SeriesContentProps) {
         await downloadEpisode(episode);
       } catch (err) {
         console.error("Download failed:", err);
-        toast.error(`Couldn't download "${episode.title}". Check your connection and storage space.`);
+        toast.error(
+          `Couldn't download "${episode.title}". Check your connection and storage space.`,
+        );
       }
       setDownloadingIds((prev) => {
         const next = new Set(prev);

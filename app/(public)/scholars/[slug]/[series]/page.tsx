@@ -20,7 +20,7 @@ export default async function SeriesPage({ params }: SeriesPageProps) {
   const episodeCount = episodes.length;
 
   return (
-    <div className="min-h-screen pb-28">
+    <div className="min-h-screen">
       <Header>
         <HeaderLeft type="back" label="Back to series" />
         <HeaderCenter

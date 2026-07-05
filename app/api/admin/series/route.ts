@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -48,7 +48,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { title, description, cover_url, is_featured, scholar_id: bodyScholarId } = result.data;
+  const {
+    title,
+    description,
+    cover_url,
+    is_featured,
+    scholar_id: bodyScholarId,
+  } = result.data;
   const supabase = await createClient();
 
   if (admin.role === "scholar_admin" && !admin.scholarId) {

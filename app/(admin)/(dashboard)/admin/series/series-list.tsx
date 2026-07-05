@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Header,
   HeaderCenter,
@@ -14,9 +14,9 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 interface ScholarOption {
   id: string;
   name: string;
@@ -124,7 +125,9 @@ export function SeriesList({
         );
         router.refresh();
       } catch (err) {
-        setActionError(err instanceof Error ? err.message : "Something went wrong");
+        setActionError(
+          err instanceof Error ? err.message : "Something went wrong",
+        );
       } finally {
         setPendingId(null);
         setConfirmDelete(null);
@@ -138,25 +141,24 @@ export function SeriesList({
     setEditingId(null);
     setFormTitle("");
     setFormDescription("");
-    setFormScholarId(adminRole === "scholar_admin" ? (adminScholarId ?? "") : "");
+    setFormScholarId(
+      adminRole === "scholar_admin" ? (adminScholarId ?? "") : "",
+    );
     setFormFeatured(false);
     setFormError("");
     setDialogOpen(true);
   }, [adminRole, adminScholarId]);
 
-  const openEditDialog = useCallback(
-    (series: SeriesRow) => {
-      setFormMode("edit");
-      setEditingId(series.id);
-      setFormTitle(series.title);
-      setFormDescription(series.description ?? "");
-      setFormScholarId(series.scholar_id);
-      setFormFeatured(series.is_featured);
-      setFormError("");
-      setDialogOpen(true);
-    },
-    [],
-  );
+  const openEditDialog = useCallback((series: SeriesRow) => {
+    setFormMode("edit");
+    setEditingId(series.id);
+    setFormTitle(series.title);
+    setFormDescription(series.description ?? "");
+    setFormScholarId(series.scholar_id);
+    setFormFeatured(series.is_featured);
+    setFormError("");
+    setDialogOpen(true);
+  }, []);
 
   const handleFormSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -168,7 +170,11 @@ export function SeriesList({
         return;
       }
 
-      if (formMode === "create" && adminRole === "super_admin" && !formScholarId) {
+      if (
+        formMode === "create" &&
+        adminRole === "super_admin" &&
+        !formScholarId
+      ) {
         setFormError("Scholar is required");
         return;
       }
@@ -214,12 +220,23 @@ export function SeriesList({
         router.refresh();
         setDialogOpen(false);
       } catch (err) {
-        setFormError(err instanceof Error ? err.message : "Something went wrong");
+        setFormError(
+          err instanceof Error ? err.message : "Something went wrong",
+        );
       } finally {
         setFormPending(false);
       }
     },
-    [formMode, editingId, formTitle, formDescription, formFeatured, formScholarId, adminRole, router],
+    [
+      formMode,
+      editingId,
+      formTitle,
+      formDescription,
+      formFeatured,
+      formScholarId,
+      adminRole,
+      router,
+    ],
   );
 
   return (
@@ -388,13 +405,13 @@ export function SeriesList({
                     : "Create your first series to get started."
                 }
                 action={
-                  !search && scholarFilter === "all" && statusFilter === "all"
-                    ? (
-                      <Button variant="primary" onClick={openCreateDialog}>
-                        Create series
-                      </Button>
-                    )
-                    : undefined
+                  !search &&
+                  scholarFilter === "all" &&
+                  statusFilter === "all" ? (
+                    <Button variant="primary" onClick={openCreateDialog}>
+                      Create series
+                    </Button>
+                  ) : undefined
                 }
               />
             </div>
@@ -450,10 +467,7 @@ export function SeriesList({
                 <label className="text-sm font-medium text-forest-900">
                   Scholar
                 </label>
-                <Select
-                  value={formScholarId}
-                  onValueChange={setFormScholarId}
-                >
+                <Select value={formScholarId} onValueChange={setFormScholarId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select scholar" />
                   </SelectTrigger>
@@ -486,11 +500,7 @@ export function SeriesList({
               >
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={formPending}
-              >
+              <Button variant="primary" type="submit" disabled={formPending}>
                 {formPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />

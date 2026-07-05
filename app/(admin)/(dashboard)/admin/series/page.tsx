@@ -50,7 +50,9 @@ export default async function AdminSeriesPage() {
     if (seriesResult.error) throw seriesResult.error;
     series = (seriesResult.data ?? []).map((s) => ({
       ...s,
-      episode_count: (s as unknown as { episode_count: { count: number }[] }).episode_count?.[0]?.count ?? 0,
+      episode_count:
+        (s as unknown as { episode_count: { count: number }[] })
+          .episode_count?.[0]?.count ?? 0,
     })) as SeriesWithCount[];
     scholars = [];
   } else {
@@ -75,7 +77,9 @@ export default async function AdminSeriesPage() {
 
     series = (seriesResult.data ?? []).map((s) => ({
       ...s,
-      episode_count: (s as unknown as { episode_count: { count: number }[] }).episode_count?.[0]?.count ?? 0,
+      episode_count:
+        (s as unknown as { episode_count: { count: number }[] })
+          .episode_count?.[0]?.count ?? 0,
     })) as SeriesWithCount[];
     scholars = scholarsResult.data ?? [];
   }

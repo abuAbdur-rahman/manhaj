@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
+import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,7 +14,7 @@ export interface CurrentAdmin {
   scholarId: string | null;
 }
 
-export async function getCurrentAdmin(): Promise<CurrentAdmin | null> {
+export const getCurrentAdmin = cache(async (): Promise<CurrentAdmin | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -44,7 +45,7 @@ export async function getCurrentAdmin(): Promise<CurrentAdmin | null> {
     role: admin.role,
     scholarId: admin.scholar_id,
   };
-}
+});
 
 export async function requireAdmin(
   requiredRole?: AdminRole,

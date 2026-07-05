@@ -1,18 +1,36 @@
-import { NextRequest, NextResponse } from "next/server";
-import { uploadAudio } from "@/lib/r2";
+import { type NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
+import { uploadAudio } from "@/lib/r2";
 
 const MAX_FILE_SIZE = 500 * 1024 * 1024;
-const ALLOWED_EXTENSIONS = new Set(["mp3", "wav", "ogg", "aac", "m4a", "wma"]);
+const ALLOWED_EXTENSIONS = new Set([
+  "mp3",
+  "wav",
+  "ogg",
+  "aac",
+  "m4a",
+  "wma",
+  "mpeg",
+  "opus",
+  "oga",
+]);
 
 export async function POST(request: NextRequest) {
   const authResult = await requireAdminApi();
   if (authResult instanceof Response) return authResult;
 
-  const formData = await request.formData();
-  const file = formData.get("audio") as File | null;
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json(
+      { error: { code: "INVALID_FORM_DATA", message: "Malformed form data" } },
+      { status: 400 },
+    );
+  }
 
-  if (!file) {
+  const entry = formData.get("audio");
+  if (!(entry instanceof File)) {
     return NextResponse.json(
       {
         error: { code: "VALIDATION_ERROR", message: "No audio file provided" },
@@ -20,6 +38,7 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+  const file = entry;
 
   if (file.size > MAX_FILE_SIZE) {
     return NextResponse.json(
@@ -38,10 +57,10 @@ export async function POST(request: NextRequest) {
       {
         error: {
           code: "VALIDATION_ERROR",
-          message: "File must be an audio file",
+          message: "File exceeds 500 MB limit",
         },
       },
-      { status: 400 },
+      { status: 413 },
     );
   }
 
