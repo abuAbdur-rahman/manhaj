@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Naskh_Arabic } from "next/font/google";
 import { Toaster } from "sonner";
+import { SwRegister } from "@/components/layout/sw-register";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -56,9 +57,13 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${notoNaskhArabic.variable} h-full antialiased`}
     >
+      <head>
+        <meta name="theme-color" content="#1a6b3c" />
+      </head>
       <body className="flex min-h-full flex-col bg-sand-50 text-forest-900 font-sans">
         {children}
-        <Toaster position="bottom-center" theme="light" />
+        <Toaster position="top-center" theme="light" />
+        <SwRegister />
       </body>
     </html>
   );

@@ -6,26 +6,39 @@ import { useCallback, useEffect, useState } from "react";
 export function OfflineDetector() {
   const router = useRouter();
   const pathname = usePathname();
-  const [wasOffline, setWasOffline] = useState(false);
+  const [offline, setOffline] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setOffline(typeof navigator !== "undefined" && !navigator.onLine);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !offline) return;
+
+    if (
+      pathname.startsWith("/lectures/") &&
+      !pathname.includes("mode=offline")
+    ) {
+      router.replace(`${pathname}?mode=offline`);
+    } else if (pathname !== "/downloads") {
+      router.replace("/downloads");
+    }
+  }, [mounted, offline, pathname, router]);
 
   const handleOffline = useCallback(() => {
-    setWasOffline(true);
-    if (pathname !== "/downloads") {
+    setOffline(true);
+    if (pathname.startsWith("/lectures/")) {
+      router.replace(`${pathname}?mode=offline`);
+    } else if (pathname !== "/downloads") {
       router.replace("/downloads");
     }
   }, [pathname, router]);
 
   const handleOnline = useCallback(() => {
-    if (wasOffline) {
-      setWasOffline(false);
-    }
-  }, [wasOffline]);
-
-  useEffect(() => {
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      handleOffline();
-    }
-  }, [handleOffline]);
+    setOffline(false);
+  }, []);
 
   useEffect(() => {
     window.addEventListener("offline", handleOffline);
@@ -36,5 +49,14 @@ export function OfflineDetector() {
     };
   }, [handleOffline, handleOnline]);
 
-  return null;
+  if (!offline) return null;
+
+  return (
+    <div
+      className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-forest-900 text-sm px-4 py-2 text-center font-medium"
+      role="alert"
+    >
+      You&apos;re offline — showing downloaded content
+    </div>
+  );
 }

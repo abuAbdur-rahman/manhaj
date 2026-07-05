@@ -1,51 +1,57 @@
+"use client";
+
 import { Loader2, Pause, Play } from "lucide-react";
 import { cn } from "@/components/ui/cn";
 
+type PlayButtonSize = "sm" | "md" | "lg" | "xl";
+
 interface PlayButtonProps {
-  isPlaying: boolean;
+  isPlaying?: boolean;
   isLoading?: boolean;
-  size?: "sm" | "md" | "lg";
-  onClick: () => void;
+  size?: PlayButtonSize;
+  onClick?: () => void;
   className?: string;
 }
 
-const sizeClasses = {
-  sm: "h-10 w-10",
-  md: "h-14 w-14",
-  lg: "h-20 w-20",
-};
-
-const iconSizes = {
-  sm: "h-4 w-4",
-  md: "h-6 w-6",
-  lg: "h-8 w-8",
+const sizeConfig: Record<PlayButtonSize, { button: string; icon: number }> = {
+  sm: { button: "w-10 h-10", icon: 16 },
+  md: { button: "w-12 h-12", icon: 20 },
+  lg: { button: "w-16 h-16", icon: 28 },
+  xl: { button: "w-24 h-24", icon: 48 },
 };
 
 export function PlayButton({
-  isPlaying,
+  isPlaying = false,
   isLoading = false,
   size = "md",
   onClick,
   className,
 }: PlayButtonProps) {
+  const config = sizeConfig[size];
+
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={isLoading}
       className={cn(
-        "inline-flex items-center justify-center rounded-full bg-forest-500 text-white transition-all hover:bg-forest-600 active:scale-95 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
-        sizeClasses[size],
+        "flex items-center justify-center rounded-full transition-all duration-150",
+        "bg-forest-600 text-white hover:bg-forest-700 active:scale-95",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+        "disabled:opacity-70 disabled:cursor-not-allowed",
+        "shadow-lg hover:shadow-xl",
+        config.button,
         className,
       )}
       aria-label={isPlaying ? "Pause" : "Play"}
+      title={isPlaying ? "Pause" : "Play"}
     >
       {isLoading ? (
-        <Loader2 className={cn("animate-spin", iconSizes[size])} />
+        <Loader2 size={config.icon} className="animate-spin" />
       ) : isPlaying ? (
-        <Pause className={iconSizes[size]} />
+        <Pause size={config.icon} fill="currentColor" />
       ) : (
-        <Play className={iconSizes[size]} />
+        <Play size={config.icon} fill="currentColor" />
       )}
     </button>
   );

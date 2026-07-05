@@ -57,10 +57,10 @@ export async function POST(request: NextRequest) {
       {
         error: {
           code: "VALIDATION_ERROR",
-          message: "File exceeds 500 MB limit",
+          message: "Unsupported file type; audio file expected",
         },
       },
-      { status: 413 },
+      { status: 400 },
     );
   }
 
