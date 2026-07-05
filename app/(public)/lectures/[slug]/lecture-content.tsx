@@ -1,15 +1,16 @@
 "use client";
 
-import { Download, ExternalLink, Share2 } from "lucide-react";
+import { Clock, Download, Share2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
-import { EpisodeCard } from "@/components/episodes/episode-card";
+import { AudioCard } from "@/components/episodes/audio-card";
 import { PlayButton } from "@/components/player/play-button";
 import { PlayerControls } from "@/components/player/player-controls";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/components/ui/cn";
 import { formatDuration } from "@/lib/audio";
 import { downloadEpisode } from "@/lib/download";
+import { useDownloadedIds } from "@/lib/use-downloaded";
 import { usePlayerStore } from "@/store/player";
 import type { Episode, Speed } from "@/types";
 
@@ -21,6 +22,7 @@ interface LectureContentProps {
 const SLEEP_TIMER_OPTIONS = [15, 30, 60] as const;
 
 export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
+  const downloadedIds = useDownloadedIds();
   const [isDownloading, setIsDownloading] = useState(false);
   const [sleepTimerIndex, setSleepTimerIndex] = useState(-1);
 
@@ -32,7 +34,6 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     speed,
     isLoading,
     sleepTimerRemaining,
-    audioRef,
     setEpisode,
     setPlaying,
     setCurrentTime,
@@ -42,6 +43,8 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   } = usePlayerStore();
 
   const isCurrentEpisode = currentEpisode?.id === episode.id;
+  const isThisEpisodePlaying = isCurrentEpisode && isPlaying;
+  const isThisEpisodeLoading = isCurrentEpisode && isLoading;
 
   const handlePlay = useCallback(() => {
     if (!isCurrentEpisode) {
@@ -54,11 +57,8 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   const handleSeek = useCallback(
     (time: number) => {
       setCurrentTime(time);
-      if (audioRef) {
-        audioRef.currentTime = time;
-      }
     },
-    [setCurrentTime, audioRef],
+    [setCurrentTime],
   );
 
   const handleSkipBack = useCallback(() => {
@@ -87,45 +87,15 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   }, [sleepTimerIndex, setSleepTimer]);
 
   const handleDownload = useCallback(async () => {
-    if (isDownloading) return;
+    if (isDownloading || downloadedIds.has(episode.id)) return;
     setIsDownloading(true);
-    try {
-      await downloadEpisode(episode);
-    } catch (err) {
-      console.error("Download failed:", err);
-      toast.error(
-        `Couldn't download "${episode.title}". Check your connection and storage space.`,
-      );
-    } finally {
-      setIsDownloading(false);
-    }
-  }, [episode, isDownloading]);
-
-  const handleShare = useCallback(async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: episode.title,
-          text: `Listen to "${episode.title}" by ${episode.scholar?.name} on Manhaj`,
-          url,
-        });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-    } catch (error) {
-      if ((error as DOMException).name !== "AbortError") {
-        console.error("Share failed:", error);
-        toast.error(
-          "Couldn't share this lecture. Check your sharing permissions.",
-        );
-      }
-    }
-  }, [episode]);
+    await downloadEpisode(episode);
+    setIsDownloading(false);
+  }, [episode, isDownloading, downloadedIds]);
 
   const handleWhatsAppShare = useCallback(() => {
-    const url = window.location.href;
-    const text = `Listen to "${episode.title}" by ${episode.scholar?.name} on Manhaj`;
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    const text = `\u{1F4DA} Listen to "${episode.title}" by ${episode.scholar?.name} on Manhaj\n\nIlm, organized.`;
     window.open(
       `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
       "_blank",
@@ -133,15 +103,21 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     );
   }, [episode]);
 
+  const handleCopyLink = useCallback(async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch (error) {
+      console.error("Copy failed:", error);
+    }
+  }, []);
+
   useEffect(() => {
     if (isCurrentEpisode && sleepTimerRemaining !== null) {
       const interval = setInterval(tickSleepTimer, 1000);
       return () => clearInterval(interval);
     }
   }, [isCurrentEpisode, sleepTimerRemaining, tickSleepTimer]);
-
-  const isThisEpisodePlaying = isCurrentEpisode && isPlaying;
-  const isThisEpisodeLoading = isCurrentEpisode && isLoading;
 
   const recordedDate = episode.recorded_date
     ? new Date(episode.recorded_date).toLocaleDateString("en-US", {
@@ -152,120 +128,231 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     : null;
 
   return (
-    <article className="mx-auto max-w-6xl px-4 py-6">
-      <div className="flex flex-col items-center">
-        <PlayButton
-          isPlaying={isThisEpisodePlaying ?? false}
-          isLoading={isThisEpisodeLoading}
-          size="lg"
-          onClick={handlePlay}
-        />
-
-        <h1 className="mt-6 text-center text-2xl font-semibold text-forest-900">
-          {episode.title}
-        </h1>
-
-        <p className="mt-1 text-sm text-forest-700">
-          {episode.scholar?.name}
-          {episode.series && (
-            <>
-              <span className="mx-1.5 text-sand-300">·</span>
-              {episode.series.title}
-            </>
+    <article className="w-full">
+      {/* ============================================ */}
+      {/* HERO SECTION */}
+      {/* ============================================ */}
+      <section className="bg-gradient-to-b from-forest-50 to-transparent px-4 py-8 sm:py-12">
+        <div className="mx-auto max-w-3xl flex flex-col items-center text-center">
+          {episode.scholar?.photo_url && (
+            <div className="mb-6 w-20 h-20 rounded-full overflow-hidden border-4 border-forest-100 shadow-sm">
+              <Image
+                src={episode.scholar.photo_url}
+                alt={episode.scholar.name}
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+              />
+            </div>
           )}
-        </p>
 
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-          <Badge variant="default">{episode.language}</Badge>
-          {episode.tags.map((tag) => (
-            <Badge key={tag} variant="outline">
-              {tag}
-            </Badge>
-          ))}
-          <span className="font-mono text-xs text-sand-300">
-            {formatDuration(episode.duration_seconds ?? 0)}
-          </span>
-        </div>
-      </div>
+          <div className="mb-8">
+            <PlayButton
+              isPlaying={isThisEpisodePlaying ?? false}
+              isLoading={isThisEpisodeLoading}
+              size="xl"
+              onClick={handlePlay}
+            />
+          </div>
 
-      <PlayerControls
-        isPlaying={isThisEpisodePlaying ?? false}
-        isLoading={isThisEpisodeLoading ?? false}
-        currentTime={isCurrentEpisode ? currentTime : 0}
-        duration={isCurrentEpisode ? duration : (episode.duration_seconds ?? 0)}
-        speed={speed}
-        sleepTimerRemaining={sleepTimerRemaining}
-        onPlay={handlePlay}
-        onSeek={handleSeek}
-        onSkipBack={handleSkipBack}
-        onSkipForward={handleSkipForward}
-        onSpeedChange={handleSpeedChange}
-        onSleepTimer={handleSleepTimer}
-        className="mt-8"
-      />
+          <h1 className="text-3xl sm:text-4xl font-bold text-forest-900 leading-tight mb-3">
+            {episode.title}
+          </h1>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className="w-full sm:w-auto"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          {isDownloading ? "Downloading..." : "Download"}
-        </Button>
-        <Button
-          variant="secondary"
-          size="lg"
-          onClick={handleWhatsAppShare}
-          className="w-full sm:w-auto"
-        >
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Share via WhatsApp
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleShare}
-          aria-label="Share lecture link"
-        >
-          <Share2 className="h-5 w-5" />
-        </Button>
-      </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm text-forest-600 mb-6">
+            {episode.scholar && (
+              <>
+                <Link
+                  href={`/scholars/${episode.scholar.slug}`}
+                  className="font-semibold text-forest-700 hover:text-forest-800 transition-colors"
+                >
+                  {episode.scholar.name}
+                </Link>
+                {episode.series && <span className="text-sand-300">·</span>}
+              </>
+            )}
+            {episode.series && (
+              <Link
+                href={`/scholars/${episode.scholar?.slug}/${episode.series.slug}`}
+                className="font-semibold text-forest-700 hover:text-forest-800 transition-colors"
+              >
+                {episode.series.title}
+              </Link>
+            )}
+          </div>
 
-      {episode.description && (
-        <section className="mt-8 rounded-lg border border-sand-200 bg-sand-100 p-4">
-          <p className="text-sm leading-relaxed text-forest-700 whitespace-pre-line">
-            {episode.description}
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-forest-100 text-forest-700 text-xs font-semibold uppercase tracking-wide">
+              <Clock size={12} />
+              {formatDuration(episode.duration_seconds ?? 0)}
+            </span>
+
+            {episode.language && (
+              <span className="inline-block px-3 py-1 rounded-full bg-sand-200 text-forest-700 text-xs font-semibold capitalize">
+                {episode.language}
+              </span>
+            )}
+
+            {episode.tags.slice(0, 2).map((tag) => (
+              <span
+                key={tag}
+                className="inline-block px-3 py-1 rounded-full bg-forest-50 text-forest-700 text-xs font-medium capitalize"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
           {recordedDate && (
-            <p className="mt-3 text-xs text-sand-300">
-              Recorded: {recordedDate}
+            <p className="text-xs text-forest-500 font-medium">
+              Recorded {recordedDate}
             </p>
           )}
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* PLAYER CONTROLS */}
+      {/* ============================================ */}
+      <section className="px-4 py-6 border-b border-sand-200 bg-white">
+        <div className="mx-auto max-w-3xl">
+          <PlayerControls
+            isPlaying={isThisEpisodePlaying ?? false}
+            isLoading={isThisEpisodeLoading ?? false}
+            currentTime={isCurrentEpisode ? currentTime : 0}
+            duration={
+              isCurrentEpisode ? duration : (episode.duration_seconds ?? 0)
+            }
+            speed={speed}
+            sleepTimerRemaining={sleepTimerRemaining}
+            onPlay={handlePlay}
+            onSeek={handleSeek}
+            onSkipBack={handleSkipBack}
+            onSkipForward={handleSkipForward}
+            onSpeedChange={handleSpeedChange}
+            onSleepTimer={handleSleepTimer}
+          />
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* ACTION BUTTONS */}
+      {/* ============================================ */}
+      <section className="px-4 py-6 bg-sand-50">
+        <div className="mx-auto max-w-3xl flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={isDownloading || downloadedIds.has(episode.id)}
+            className={cn(
+              "flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-150",
+              downloadedIds.has(episode.id)
+                ? "bg-green-100 text-green-700"
+                : "bg-forest-600 text-white hover:bg-forest-700",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              "flex-1 sm:flex-none",
+            )}
+            title={
+              downloadedIds.has(episode.id)
+                ? "Already downloaded"
+                : "Download for offline listening"
+            }
+          >
+            <Download
+              size={18}
+              fill={downloadedIds.has(episode.id) ? "currentColor" : "none"}
+            />
+            {isDownloading
+              ? "Downloading..."
+              : downloadedIds.has(episode.id)
+                ? "Downloaded"
+                : "Download"}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleWhatsAppShare}
+            className={cn(
+              "flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-150",
+              "bg-[#25D366] text-white hover:bg-[#20BD5A]",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+              "flex-1 sm:flex-none",
+            )}
+            title="Share via WhatsApp"
+          >
+            <Image
+              src="/icons/whatsapp.svg"
+              alt="WhatsApp"
+              width={20}
+              height={20}
+              className="w-5 h-5"
+            />
+            Share on WhatsApp
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className={cn(
+              "flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-150",
+              "bg-sand-200 text-forest-700 hover:bg-sand-300",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+              "flex-1 sm:flex-none",
+            )}
+            title="Copy link to clipboard"
+          >
+            <Share2 size={18} />
+            Copy Link
+          </button>
+        </div>
+      </section>
+
+      {/* ============================================ */}
+      {/* DESCRIPTION */}
+      {/* ============================================ */}
+      {episode.description && (
+        <section className="px-4 py-8">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-lg font-semibold text-forest-900 mb-4">
+              About this lecture
+            </h2>
+            <div className="rounded-lg border border-sand-200 bg-sand-50 p-5">
+              <p className="text-sm leading-relaxed text-forest-700 whitespace-pre-line">
+                {episode.description}
+              </p>
+            </div>
+          </div>
         </section>
       )}
 
+      {/* ============================================ */}
+      {/* MORE FROM THIS SERIES */}
+      {/* ============================================ */}
       {moreEpisodes.length > 0 && (
-        <section className="mt-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-forest-900">
-              More from this series
-            </h2>
-            {episode.series && episode.scholar && (
-              <a
-                href={`/scholars/${episode.scholar.slug}/${episode.series.slug}`}
-                className="text-sm font-medium text-forest-500 hover:text-forest-600 transition-colors"
-              >
-                View all &rarr;
-              </a>
-            )}
-          </div>
-          <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-            {moreEpisodes.map((e) => (
-              <EpisodeCard key={e.id} episode={e} />
-            ))}
+        <section className="px-4 py-8 border-t border-sand-200">
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-forest-900">
+                More from this series
+              </h2>
+              {episode.series && episode.scholar && (
+                <Link
+                  href={`/scholars/${episode.scholar.slug}/${episode.series.slug}`}
+                  className="text-sm font-semibold text-forest-600 hover:text-forest-700 transition-colors"
+                >
+                  View all &rarr;
+                </Link>
+              )}
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3">
+              {moreEpisodes.map((e) => (
+                <div key={e.id} className="flex-shrink-0 md:flex-shrink">
+                  <AudioCard episode={e} variant="card" />
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}

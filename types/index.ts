@@ -96,8 +96,7 @@ export interface PlayerState {
 
 export interface DownloadedEpisode {
   episode: Episode;
-  downloadedAt: string;
-  cacheKey: string;
-  fileSizeBytes: number;
   audioBlob?: Blob;
+  downloadedAt: string;
+  fileSizeBytes: number;
 }

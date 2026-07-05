@@ -38,7 +38,12 @@ export function AudioProvider() {
     }
 
     const resolveSrc = async () => {
-      const downloads = await listDownloads();
+      let downloads: Awaited<ReturnType<typeof listDownloads>> = [];
+      try {
+        downloads = await listDownloads();
+      } catch {
+        // IDB unavailable — stream from network
+      }
       const local = downloads.find((d) => d.episode.id === currentEpisode.id);
 
       if (objectUrlRef.current) {

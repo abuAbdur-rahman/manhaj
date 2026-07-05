@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { EpisodeRow } from "@/components/episodes/episode-row";
+import { AudioCard } from "@/components/episodes/audio-card";
 import { SeriesCard } from "@/components/series/series-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Episode, Series } from "@/types";
@@ -43,7 +43,7 @@ export function ScholarTabs({ series, episodes }: ScholarTabsProps) {
         {episodes.length > 0 ? (
           <div className="divide-y divide-sand-200">
             {episodes.map((episode, i) => (
-              <EpisodeRow key={episode.id} episode={episode} index={i + 1} />
+              <AudioCard key={episode.id} episode={episode} number={i + 1} />
             ))}
           </div>
         ) : (

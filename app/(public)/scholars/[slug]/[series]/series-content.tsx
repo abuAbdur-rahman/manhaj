@@ -2,10 +2,9 @@
 
 import { Download, Play } from "lucide-react";
 import { useCallback, useState } from "react";
-import { toast } from "sonner";
-import { EpisodeRow } from "@/components/episodes/episode-row";
+import { AudioCard } from "@/components/episodes/audio-card";
 import { Button } from "@/components/ui/button";
-import { downloadEpisode } from "@/lib/download";
+import { downloadEpisodeSequence } from "@/lib/download";
 import { usePlayerStore } from "@/store/player";
 import type { Episode } from "@/types";
 
@@ -15,44 +14,13 @@ interface SeriesContentProps {
 
 export function SeriesContent({ episodes }: SeriesContentProps) {
   const setEpisode = usePlayerStore((s) => s.setEpisode);
-  const [downloadingIds, setDownloadingIds] = useState<Set<string>>(new Set());
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
-
-  const handleDownload = useCallback(async (episode: Episode) => {
-    setDownloadingIds((prev) => new Set(prev).add(episode.id));
-    try {
-      await downloadEpisode(episode);
-    } catch (err) {
-      console.error("Download failed:", err);
-      toast.error(
-        `Couldn't download "${episode.title}". Check your connection and storage space.`,
-      );
-    } finally {
-      setDownloadingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(episode.id);
-        return next;
-      });
-    }
-  }, []);
 
   const handleDownloadAll = useCallback(async () => {
     setIsDownloadingAll(true);
-    for (const episode of episodes) {
-      setDownloadingIds((prev) => new Set(prev).add(episode.id));
-      try {
-        await downloadEpisode(episode);
-      } catch (err) {
-        console.error("Download failed:", err);
-        toast.error(
-          `Couldn't download "${episode.title}". Check your connection and storage space.`,
-        );
-      }
-      setDownloadingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(episode.id);
-        return next;
-      });
+    const count = await downloadEpisodeSequence(episodes);
+    if (count > 0) {
+      console.log(`Downloaded ${count}/${episodes.length} episodes`);
     }
     setIsDownloadingAll(false);
   }, [episodes]);
@@ -91,14 +59,7 @@ export function SeriesContent({ episodes }: SeriesContentProps) {
 
       <div className="divide-y divide-sand-200">
         {episodes.map((episode, i) => (
-          <EpisodeRow
-            key={episode.id}
-            episode={episode}
-            index={i + 1}
-            onDownload={
-              downloadingIds.has(episode.id) ? undefined : handleDownload
-            }
-          />
+          <AudioCard key={episode.id} episode={episode} number={i + 1} />
         ))}
       </div>
     </div>

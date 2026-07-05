@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import Link from "next/link";
-import { EpisodeCard } from "@/components/episodes/episode-card";
+import { RecentEpisodes } from "./recent-episodes";
 import {
   Header,
   HeaderCenter,
@@ -50,16 +50,7 @@ export default async function HomePage() {
             </div>
 
             {recentEpisodes.length > 0 ? (
-              <div className="mt-4 flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scrollbar-none">
-                {recentEpisodes.map((episode) => (
-                  <div key={episode.id} className="snap-start">
-                    <EpisodeCard
-                      episode={episode}
-                      href={`/lectures/${episode.slug}`}
-                    />
-                  </div>
-                ))}
-              </div>
+              <RecentEpisodes episodes={recentEpisodes} />
             ) : (
               <p className="mt-4 text-sm text-sand-300">
                 No lectures yet. Check back soon.
