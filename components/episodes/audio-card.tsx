@@ -2,12 +2,13 @@
 
 import { Clock, Download, Loader2, Play, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { forwardRef, useCallback, useMemo, useState } from "react";
+import { forwardRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/components/ui/cn";
 import { formatDuration } from "@/lib/audio";
 import { downloadEpisode } from "@/lib/download";
 import { useDownloadedIds } from "@/lib/use-downloaded";
+import { useDownloadsStore } from "@/store/downloads";
 import type { Episode, Scholar } from "@/types";
 
 type AudioCardVariant = "row" | "card" | "download";
@@ -39,9 +40,10 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
   ) => {
     const router = useRouter();
     const downloadedIds = useDownloadedIds();
-    const [internalDownloading, setInternalDownloading] = useState(false);
+    const isDownloading = useDownloadsStore((s) =>
+      s.inProgress.some((d) => d.episodeId === episode.id),
+    );
     const isDownloaded = downloadedIds.has(episode.id);
-    const isDownloading = internalDownloading;
 
     const durationText = useMemo(
       () => formatDuration(episode.duration_seconds ?? 0),
@@ -52,9 +54,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
       async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (isDownloading || isDownloaded) return;
-        setInternalDownloading(true);
         await downloadEpisode(episode);
-        setInternalDownloading(false);
       },
       [episode, isDownloading, isDownloaded],
     );
