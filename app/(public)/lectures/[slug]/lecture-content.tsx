@@ -11,6 +11,7 @@ import { cn } from "@/components/ui/cn";
 import { formatDuration } from "@/lib/audio";
 import { downloadEpisode } from "@/lib/download";
 import { useDownloadedIds } from "@/lib/use-downloaded";
+import { useDownloadsStore } from "@/store/downloads";
 import { usePlayerStore } from "@/store/player";
 import type { Episode, Speed } from "@/types";
 
@@ -23,7 +24,9 @@ const SLEEP_TIMER_OPTIONS = [15, 30, 60] as const;
 
 export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   const downloadedIds = useDownloadedIds();
-  const [isDownloading, setIsDownloading] = useState(false);
+  const isDownloading = useDownloadsStore((s) =>
+    s.inProgress.some((d) => d.episodeId === episode.id),
+  );
   const [sleepTimerIndex, setSleepTimerIndex] = useState(-1);
 
   const {
@@ -89,14 +92,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
 
   const handleDownload = useCallback(async () => {
     if (isDownloading || downloadedIds.has(episode.id)) return;
-    setIsDownloading(true);
-    try {
-      await downloadEpisode(episode);
-    } catch (err) {
-      console.error("Download failed:", err);
-    } finally {
-      setIsDownloading(false);
-    }
+    await downloadEpisode(episode);
   }, [episode, isDownloading, downloadedIds]);
 
   const handleWhatsAppShare = useCallback(() => {
