@@ -34,7 +34,7 @@ export default async function HomePage() {
         </HeaderRight>
       </Header>
 
-      <main className="flex-1 pb-14">
+      <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 pb-8">
           <section className="py-8">
             <div className="flex items-center justify-between">
@@ -52,13 +52,12 @@ export default async function HomePage() {
             {recentEpisodes.length > 0 ? (
               <div className="mt-4 flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory scrollbar-none">
                 {recentEpisodes.map((episode) => (
-                  <Link
-                    key={episode.id}
-                    href={`/lectures/${episode.slug}`}
-                    className="snap-start"
-                  >
-                    <EpisodeCard episode={episode} />
-                  </Link>
+                  <div key={episode.id} className="snap-start">
+                    <EpisodeCard
+                      episode={episode}
+                      href={`/lectures/${episode.slug}`}
+                    />
+                  </div>
                 ))}
               </div>
             ) : (

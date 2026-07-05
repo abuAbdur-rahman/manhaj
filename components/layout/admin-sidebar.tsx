@@ -9,6 +9,7 @@ import {
   Shield,
   Users,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -84,8 +85,16 @@ export function AdminSidebar({
     >
       <div className="flex h-14 items-center justify-between border-b border-sand-200 px-3">
         {!isCollapsed && (
-          <Link href="/admin" className="text-sm font-semibold text-forest-700">
-            Manhaj Admin
+          <Link href="/admin" className="flex items-center gap-2 shrink-0">
+            <div className="relative h-6 w-6 shrink-0">
+              <Image
+                src="/logo.png"
+                alt="Manhaj"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <span className="text-sm font-semibold text-forest-700">Admin</span>
           </Link>
         )}
         <Button
@@ -122,6 +131,7 @@ export function AdminSidebar({
                   : "text-forest-700 hover:bg-sand-50",
                 isCollapsed && "justify-center px-2",
               )}
+              aria-current={isActive ? "page" : undefined}
               title={isCollapsed ? item.label : undefined}
             >
               <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />

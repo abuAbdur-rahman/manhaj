@@ -2,7 +2,7 @@ import { cn } from "@/components/ui/cn";
 
 interface WaveformSealProps {
   className?: string;
-  variant?: "inline" | "watermark" | "skeleton";
+  variant?: "inline" | "watermark" | "skeleton" | "muted";
   barCount?: number;
 }
 
@@ -23,8 +23,9 @@ export function WaveformSeal({
 
   const variantClasses = {
     inline: "text-forest-500",
-    watermark: "opacity-6 text-forest-50",
+    watermark: "opacity-[0.06] text-forest-50",
     skeleton: "text-forest-500/30 motion-safe:animate-pulse",
+    muted: "text-sand-300",
   };
 
   return (

@@ -13,7 +13,7 @@ export default async function ScholarsPage() {
         <HeaderCenter title="Scholars" />
       </Header>
 
-      <main className="flex-1 pb-14">
+      <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 pb-8">
           <h1 className="py-6 text-xl font-semibold text-forest-700">
             Our Scholars

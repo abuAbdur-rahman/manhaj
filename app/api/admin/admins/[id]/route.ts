@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -152,7 +152,10 @@ export async function DELETE(
     console.error("Error deactivating admin:", deleteError);
     return NextResponse.json(
       {
-        error: { code: "INTERNAL_ERROR", message: "Failed to deactivate admin" },
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to deactivate admin",
+        },
       },
       { status: 500 },
     );

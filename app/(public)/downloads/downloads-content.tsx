@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { Download } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DownloadRow } from "@/components/episodes/download-row";
 import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { listDownloads, removeDownload } from "@/lib/downloads-db";
+import { usePlayerStore } from "@/store/player";
 import type { DownloadedEpisode } from "@/types";
 
 function formatBytes(bytes: number): string {
@@ -19,9 +20,17 @@ function formatBytes(bytes: number): string {
 }
 
 export function DownloadsContent() {
+  const setEpisode = usePlayerStore((s) => s.setEpisode);
   const [downloads, setDownloads] = useState<DownloadedEpisode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handlePlay = useCallback(
+    (download: DownloadedEpisode) => {
+      setEpisode(download.episode);
+    },
+    [setEpisode],
+  );
 
   const loadDownloads = useCallback(async () => {
     setIsLoading(true);
@@ -64,7 +73,7 @@ export function DownloadsContent() {
         <HeaderCenter title="Downloads" />
       </Header>
 
-      <main className="flex-1 pb-14">
+      <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4">
           {downloads.length > 0 && (
             <div className="flex items-center justify-between py-4">
@@ -115,6 +124,7 @@ export function DownloadsContent() {
                 <DownloadRow
                   key={download.episode.id}
                   download={download}
+                  onPlay={handlePlay}
                   onRemove={handleRemove}
                 />
               ))}

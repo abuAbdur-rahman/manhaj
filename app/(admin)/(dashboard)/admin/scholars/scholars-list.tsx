@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Header,
   HeaderCenter,
@@ -14,9 +14,9 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -132,23 +132,20 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
     setDialogOpen(true);
   }, [resetForm]);
 
-  const openEditDialog = useCallback(
-    (scholar: Scholar) => {
-      setFormMode("edit");
-      setEditingId(scholar.id);
-      setFormName(scholar.name);
-      setFormBio(scholar.bio ?? "");
-      setFormLanguages(scholar.languages);
-      setFormPhotoUrl(scholar.photo_url ?? "");
-      setFormSocialWhatsapp(scholar.social_links?.whatsapp ?? "");
-      setFormSocialYoutube(scholar.social_links?.youtube ?? "");
-      setFormSocialTelegram(scholar.social_links?.telegram ?? "");
-      setFormSocialWebsite(scholar.social_links?.website ?? "");
-      setFormError("");
-      setDialogOpen(true);
-    },
-    [],
-  );
+  const openEditDialog = useCallback((scholar: Scholar) => {
+    setFormMode("edit");
+    setEditingId(scholar.id);
+    setFormName(scholar.name);
+    setFormBio(scholar.bio ?? "");
+    setFormLanguages(scholar.languages);
+    setFormPhotoUrl(scholar.photo_url ?? "");
+    setFormSocialWhatsapp(scholar.social_links?.whatsapp ?? "");
+    setFormSocialYoutube(scholar.social_links?.youtube ?? "");
+    setFormSocialTelegram(scholar.social_links?.telegram ?? "");
+    setFormSocialWebsite(scholar.social_links?.website ?? "");
+    setFormError("");
+    setDialogOpen(true);
+  }, []);
 
   const handlePhotoUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -270,8 +267,16 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
       }
     },
     [
-      formMode, editingId, formName, formBio, formLanguages, formPhotoUrl,
-      formSocialWhatsapp, formSocialYoutube, formSocialTelegram, formSocialWebsite,
+      formMode,
+      editingId,
+      formName,
+      formBio,
+      formLanguages,
+      formPhotoUrl,
+      formSocialWhatsapp,
+      formSocialYoutube,
+      formSocialTelegram,
+      formSocialWebsite,
       router,
     ],
   );
@@ -353,7 +358,11 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                     </p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-1">
                       {scholar.languages.map((lang) => (
-                        <Badge key={lang} variant="default" className="text-[10px]">
+                        <Badge
+                          key={lang}
+                          variant="default"
+                          className="text-[10px]"
+                        >
                           {lang}
                         </Badge>
                       ))}
@@ -417,13 +426,11 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                     : "Create your first scholar to get started."
                 }
                 action={
-                  !search && !statusFilter
-                    ? (
-                      <Button variant="primary" onClick={openCreateDialog}>
-                        Create scholar
-                      </Button>
-                    )
-                    : undefined
+                  !search && !statusFilter ? (
+                    <Button variant="primary" onClick={openCreateDialog}>
+                      Create scholar
+                    </Button>
+                  ) : undefined
                 }
               />
             </div>
@@ -464,9 +471,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
-                Bio
-              </label>
+              <label className="text-sm font-medium text-forest-900">Bio</label>
               <Input
                 value={formBio}
                 onChange={(e) => setFormBio(e.target.value)}
@@ -573,7 +578,11 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
               >
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" disabled={formPending || photoUploading}>
+              <Button
+                variant="primary"
+                type="submit"
+                disabled={formPending || photoUploading}
+              >
                 {formPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />

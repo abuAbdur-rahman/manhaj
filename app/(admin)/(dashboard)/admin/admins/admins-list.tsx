@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Header,
   HeaderCenter,
@@ -14,9 +14,9 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -80,8 +80,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
       const q = search.toLowerCase();
       result = result.filter(
         (a) =>
-          a.name.toLowerCase().includes(q) ||
-          a.email.toLowerCase().includes(q),
+          a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q),
       );
     }
 
@@ -292,9 +291,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                   </div>
 
                   <Badge
-                    variant={
-                      admin.role === "super_admin" ? "clay" : "default"
-                    }
+                    variant={admin.role === "super_admin" ? "clay" : "default"}
                     className="shrink-0 text-[10px]"
                   >
                     {admin.role === "super_admin" ? "Super" : "Scholar"}
@@ -352,13 +349,11 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                     : "Invite your first admin to get started."
                 }
                 action={
-                  !search && roleFilter === "all" && statusFilter === "all"
-                    ? (
-                      <Button variant="primary" onClick={openInviteDialog}>
-                        Invite admin
-                      </Button>
-                    )
-                    : undefined
+                  !search && roleFilter === "all" && statusFilter === "all" ? (
+                    <Button variant="primary" onClick={openInviteDialog}>
+                      Invite admin
+                    </Button>
+                  ) : undefined
                 }
               />
             </div>
@@ -385,7 +380,9 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
               <div className="space-y-3 rounded-lg border border-sand-200 bg-sand-100 p-4">
                 <div className="space-y-0.5">
                   <p className="text-xs font-medium text-sand-300">Email</p>
-                  <p className="text-sm text-forest-900">{inviteResult.email}</p>
+                  <p className="text-sm text-forest-900">
+                    {inviteResult.email}
+                  </p>
                 </div>
                 <div className="space-y-0.5">
                   <p className="text-xs font-medium text-sand-300">
@@ -464,9 +461,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="super_admin">
-                        Super admin
-                      </SelectItem>
+                      <SelectItem value="super_admin">Super admin</SelectItem>
                       <SelectItem value="scholar_admin">
                         Scholar admin
                       </SelectItem>

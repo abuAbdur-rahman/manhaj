@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @theme {
   --color-forest-50: #f0f7f4;
@@ -19,4 +20,16 @@
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-arabic: "Noto Naskh Arabic", serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --text-display: 24px;
+  --text-title: 18px;
+  --text-label: 13px;
+}
+
+@utility scrollbar-none {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
 }

@@ -1,16 +1,31 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 const CreateEpisodeSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  series_id: z.string().min(1, "Series is required"),
+  series_id: z.string().optional(),
+  scholar_id: z.string().uuid().optional(),
   language: z.enum(["yoruba", "english", "arabic"]),
-  tags: z.array(z.enum([
-    "aqeedah", "fiqh", "tafseer", "hadith", "seerah",
-    "manhaj", "adab", "family", "ibadah", "dawah", "ruqyah", "arabic",
-  ])).default([]),
+  tags: z
+    .array(
+      z.enum([
+        "aqeedah",
+        "fiqh",
+        "tafseer",
+        "hadith",
+        "seerah",
+        "manhaj",
+        "adab",
+        "family",
+        "ibadah",
+        "dawah",
+        "ruqyah",
+        "arabic",
+      ]),
+    )
+    .default([]),
   audio_url: z.string().min(1, "Audio URL is required"),
   duration_seconds: z.number().int().positive().optional(),
   recorded_date: z.string().optional(),
@@ -58,6 +73,7 @@ export async function POST(request: NextRequest) {
   const {
     title,
     series_id,
+    scholar_id: bodyScholarId,
     language,
     tags,
     audio_url,
@@ -69,47 +85,102 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createClient();
 
-  const { data: series, error: seriesError } = await supabase
-    .from("series")
-    .select("scholar_id")
-    .eq("id", series_id)
-    .single();
+  let resolvedScholarId: string;
 
-  if (seriesError || !series) {
-    return NextResponse.json(
-      {
-        error: { code: "NOT_FOUND", message: "Series not found" },
-      },
-      { status: 404 },
-    );
-  }
-
-  if (
-    admin.role === "scholar_admin" &&
-    series.scholar_id !== admin.scholarId
-  ) {
-    return NextResponse.json(
-      {
-        error: {
-          code: "FORBIDDEN",
-          message: "You can only create episodes for your assigned scholar",
+  if (admin.role === "super_admin") {
+    if (!bodyScholarId) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Scholar is required",
+          },
         },
-      },
-      { status: 403 },
-    );
+        { status: 422 },
+      );
+    }
+    resolvedScholarId = bodyScholarId;
+
+    if (series_id) {
+      const { data: series, error: seriesError } = await supabase
+        .from("series")
+        .select("scholar_id")
+        .eq("id", series_id)
+        .single();
+
+      if (seriesError || !series) {
+        return NextResponse.json(
+          {
+            error: { code: "NOT_FOUND", message: "Series not found" },
+          },
+          { status: 404 },
+        );
+      }
+
+      if (series.scholar_id !== resolvedScholarId) {
+        return NextResponse.json(
+          {
+            error: {
+              code: "VALIDATION_ERROR",
+              message: "Series does not belong to the selected scholar",
+            },
+          },
+          { status: 422 },
+        );
+      }
+    }
+  } else {
+    if (!admin.scholarId) {
+      return NextResponse.json(
+        {
+          error: { code: "FORBIDDEN", message: "No scholar assigned" },
+        },
+        { status: 403 },
+      );
+    }
+    resolvedScholarId = admin.scholarId;
+
+    if (series_id) {
+      const { data: series, error: seriesError } = await supabase
+        .from("series")
+        .select("scholar_id")
+        .eq("id", series_id)
+        .single();
+
+      if (seriesError || !series) {
+        return NextResponse.json(
+          {
+            error: { code: "NOT_FOUND", message: "Series not found" },
+          },
+          { status: 404 },
+        );
+      }
+
+      if (series.scholar_id !== resolvedScholarId) {
+        return NextResponse.json(
+          {
+            error: {
+              code: "FORBIDDEN",
+              message: "You can only create episodes for your assigned scholar",
+            },
+          },
+          { status: 403 },
+        );
+      }
+    }
   }
 
   const baseSlug = slugify(title);
   const uniqueSlug = baseSlug
-    ? `${baseSlug}-${Date.now().toString(36)}`
-    : `episode-${Date.now().toString(36)}`;
+    ? `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
+    : `episode-${crypto.randomUUID().slice(0, 8)}`;
 
   const { data: episode, error: insertError } = await supabase
     .from("episodes")
     .insert({
       title,
-      series_id,
-      scholar_id: series.scholar_id,
+      series_id: series_id ?? null,
+      scholar_id: resolvedScholarId,
       slug: uniqueSlug,
       language,
       tags,

@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Download, ExternalLink, Share2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { EpisodeCard } from "@/components/episodes/episode-card";
 import { PlayButton } from "@/components/player/play-button";
 import { PlayerControls } from "@/components/player/player-controls";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDuration } from "@/lib/audio";
 import { downloadEpisode } from "@/lib/download";
 import { usePlayerStore } from "@/store/player";
@@ -21,7 +21,6 @@ interface LectureContentProps {
 const SLEEP_TIMER_OPTIONS = [15, 30, 60] as const;
 
 export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [sleepTimerIndex, setSleepTimerIndex] = useState(-1);
 
@@ -33,12 +32,11 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     speed,
     isLoading,
     sleepTimerRemaining,
+    audioRef,
     setEpisode,
     setPlaying,
     setCurrentTime,
-    setDuration,
     setSpeed,
-    setLoading,
     setSleepTimer,
     tickSleepTimer,
   } = usePlayerStore();
@@ -56,11 +54,11 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   const handleSeek = useCallback(
     (time: number) => {
       setCurrentTime(time);
-      if (audioRef.current) {
-        audioRef.current.currentTime = time;
+      if (audioRef) {
+        audioRef.currentTime = time;
       }
     },
-    [setCurrentTime],
+    [setCurrentTime, audioRef],
   );
 
   const handleSkipBack = useCallback(() => {
@@ -74,9 +72,6 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   const handleSpeedChange = useCallback(
     (newSpeed: Speed) => {
       setSpeed(newSpeed);
-      if (audioRef.current) {
-        audioRef.current.playbackRate = newSpeed;
-      }
     },
     [setSpeed],
   );
@@ -98,7 +93,9 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
       await downloadEpisode(episode);
     } catch (err) {
       console.error("Download failed:", err);
-      toast.error(`Couldn't download "${episode.title}". Check your connection and storage space.`);
+      toast.error(
+        `Couldn't download "${episode.title}". Check your connection and storage space.`,
+      );
     } finally {
       setIsDownloading(false);
     }
@@ -119,7 +116,9 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     } catch (error) {
       if ((error as DOMException).name !== "AbortError") {
         console.error("Share failed:", error);
-        toast.error("Couldn't share this lecture. Check your sharing permissions.");
+        toast.error(
+          "Couldn't share this lecture. Check your sharing permissions.",
+        );
       }
     }
   }, [episode]);
@@ -133,42 +132,6 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
       "noopener,noreferrer",
     );
   }, [episode]);
-
-  useEffect(() => {
-    if (!isCurrentEpisode || !audioRef.current) return;
-
-    const audio = audioRef.current;
-    audio.playbackRate = speed;
-
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoadedMetadata = () => {
-      setDuration(audio.duration);
-      setLoading(false);
-    };
-    const onEnded = () => setPlaying(false);
-    const onWaiting = () => setLoading(true);
-    const onCanPlay = () => setLoading(false);
-
-    audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("loadedmetadata", onLoadedMetadata);
-    audio.addEventListener("ended", onEnded);
-    audio.addEventListener("waiting", onWaiting);
-    audio.addEventListener("canplay", onCanPlay);
-
-    if (isPlaying && audio.paused) {
-      audio.play().catch(() => setPlaying(false));
-    } else if (!isPlaying && !audio.paused) {
-      audio.pause();
-    }
-
-    return () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("loadedmetadata", onLoadedMetadata);
-      audio.removeEventListener("ended", onEnded);
-      audio.removeEventListener("waiting", onWaiting);
-      audio.removeEventListener("canplay", onCanPlay);
-    };
-  }, [isCurrentEpisode, isPlaying, speed, setCurrentTime, setDuration, setLoading, setPlaying]);
 
   useEffect(() => {
     if (isCurrentEpisode && sleepTimerRemaining !== null) {
@@ -190,13 +153,6 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
 
   return (
     <article className="mx-auto max-w-6xl px-4 py-6">
-      <audio
-        ref={audioRef}
-        src={episode.audio_url}
-        preload="metadata"
-        onError={() => setLoading(false)}
-      />
-
       <div className="flex flex-col items-center">
         <PlayButton
           isPlaying={isThisEpisodePlaying ?? false}
@@ -236,9 +192,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
         isPlaying={isThisEpisodePlaying ?? false}
         isLoading={isThisEpisodeLoading ?? false}
         currentTime={isCurrentEpisode ? currentTime : 0}
-        duration={
-          isCurrentEpisode ? duration : (episode.duration_seconds ?? 0)
-        }
+        duration={isCurrentEpisode ? duration : (episode.duration_seconds ?? 0)}
         speed={speed}
         sleepTimerRemaining={sleepTimerRemaining}
         onPlay={handlePlay}

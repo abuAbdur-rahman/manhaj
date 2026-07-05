@@ -72,7 +72,7 @@ export default function SearchPage() {
         </div>
       </Header>
 
-      <main className="flex-1 pb-28">
+      <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 pb-8">
           <fieldset className="m-0 flex flex-wrap gap-2 border-0 px-0 py-3">
             <legend className="sr-only">Filter by language</legend>

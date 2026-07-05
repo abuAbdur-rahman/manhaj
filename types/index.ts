@@ -99,4 +99,5 @@ export interface DownloadedEpisode {
   downloadedAt: string;
   cacheKey: string;
   fileSizeBytes: number;
+  audioBlob?: Blob;
 }

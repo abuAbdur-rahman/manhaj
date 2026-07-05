@@ -1,9 +1,6 @@
 import { notFound } from "next/navigation";
 import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
-import {
-  getEpisodeBySlug,
-  getSeriesEpisodes,
-} from "@/lib/data";
+import { getEpisodeBySlug, getSeriesEpisodes } from "@/lib/data";
 import { LectureContent } from "./lecture-content";
 
 interface Props {
@@ -32,7 +29,7 @@ export default async function LecturePage({ params }: Props) {
         <HeaderCenter title={episode.title} />
       </Header>
 
-      <main className="flex-1 pb-14">
+      <main className="flex-1">
         <LectureContent episode={episode} moreEpisodes={moreEpisodes} />
       </main>
     </>
