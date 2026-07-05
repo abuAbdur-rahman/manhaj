@@ -87,6 +87,7 @@ export function NewEpisodeForm({
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const xhrRef = useRef<XMLHttpRequest | null>(null);
 
   const [title, setTitle] = useState("");
   const [scholarId, setScholarId] = useState(
@@ -121,6 +122,11 @@ export function NewEpisodeForm({
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+
+      if (xhrRef.current) {
+        xhrRef.current.abort();
+        xhrRef.current = null;
+      }
 
       const ext = file.name.split(".").pop()?.toLowerCase();
       if (!ext || !ALLOWED_AUDIO_EXTENSIONS.includes(ext)) {
@@ -169,6 +175,9 @@ export function NewEpisodeForm({
           });
           xhr.addEventListener("error", () =>
             reject(new Error("Network error")),
+          );
+          xhr.addEventListener("abort", () =>
+            reject(new DOMException("Upload cancelled", "AbortError")),
           );
           xhr.open("POST", "/api/admin/upload");
           xhr.send(formData);

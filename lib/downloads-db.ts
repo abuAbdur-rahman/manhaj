@@ -1,4 +1,4 @@
-import { type DBSchema, openDB } from "idb";
+import { type DBSchema, type IDBPDatabase, openDB } from "idb";
 import type { DownloadedEpisode } from "@/types";
 
 interface ManhajDB extends DBSchema {
@@ -8,7 +8,7 @@ interface ManhajDB extends DBSchema {
   };
 }
 
-let dbPromise: ReturnType<typeof openDB<ManhajDB>> | null = null;
+let dbPromise: Promise<IDBPDatabase<ManhajDB> | null> | null = null;
 
 async function getDb() {
   if (typeof indexedDB === "undefined") return null;
@@ -17,6 +17,10 @@ async function getDb() {
       upgrade(db) {
         db.createObjectStore("downloads");
       },
+    }).catch((err) => {
+      console.error("IndexedDB open failed, will retry:", err);
+      dbPromise = null;
+      return null;
     });
   }
   return dbPromise;
@@ -43,7 +47,7 @@ export async function saveDownload(
   );
 }
 
-export async function listDownloads() {
+export async function listDownloads(): Promise<DownloadedEpisode[]> {
   const db = await getDb();
   if (!db) return [];
   return db.getAll("downloads");

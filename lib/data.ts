@@ -98,7 +98,7 @@ export async function getScholarBySlug(slug: string): Promise<Scholar | null> {
     .select("*, episode_count:episodes(count), series_count:series(count)")
     .eq("slug", slug)
     .eq("is_active", true)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("Failed to fetch scholar:", error.message);
@@ -178,7 +178,7 @@ export async function getSeriesWithEpisodes(
     .select("id, name, slug")
     .eq("slug", scholarSlug)
     .eq("is_active", true)
-    .single();
+    .maybeSingle();
 
   if (scholarError) {
     console.error("Failed to fetch scholar for series:", scholarError.message);
@@ -193,7 +193,7 @@ export async function getSeriesWithEpisodes(
     .eq("scholar_id", scholar.id)
     .eq("slug", seriesSlug)
     .eq("is_active", true)
-    .single();
+    .maybeSingle();
 
   if (seriesError) {
     console.error("Failed to fetch series:", seriesError.message);

@@ -1,8 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+const ALLOWED_HOSTNAMES = [
+  "pub-53cce9077a4c4e4489d9f658105eb443.r2.dev",
+  "manhaj.abdurrahman.org",
+];
+
 export async function GET(request: NextRequest) {
-  const url = request.nextUrl.searchParams.get("url");
-  if (!url) {
+  const rawUrl = request.nextUrl.searchParams.get("url");
+  if (!rawUrl) {
     return NextResponse.json(
       {
         error: {
@@ -14,10 +19,32 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(rawUrl);
+  } catch {
+    return NextResponse.json(
+      {
+        error: { code: "INVALID_URL", message: "Invalid URL format" },
+      },
+      { status: 400 },
+    );
+  }
+
+  if (!ALLOWED_HOSTNAMES.includes(parsedUrl.hostname)) {
+    return NextResponse.json(
+      {
+        error: { code: "FORBIDDEN", message: "URL hostname not allowed" },
+      },
+      { status: 403 },
+    );
+  }
+
   try {
     const rangeHeader = request.headers.get("range");
-    const upstream = await fetch(url, {
+    const upstream = await fetch(rawUrl, {
       headers: rangeHeader ? { Range: rangeHeader } : undefined,
+      signal: AbortSignal.timeout(30000),
     });
 
     if (!upstream.ok) {

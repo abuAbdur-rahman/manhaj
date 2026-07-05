@@ -4,11 +4,7 @@ import type { Admin } from "@/types";
 import { AdminsList } from "./admins-list";
 
 export default async function AdminAdminsPage() {
-  const admin = await requireAdmin();
-
-  if (admin.role !== "super_admin") {
-    throw new Error("Not found");
-  }
+  await requireAdmin("super_admin");
 
   const supabase = await createClient();
 

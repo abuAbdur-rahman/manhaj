@@ -15,9 +15,6 @@ const ALLOWED_EXTENSIONS = new Set([
   "oga",
 ]);
 
-const MAX_FILE_SIZE = 500 * 1024 * 1024;
-const ALLOWED_EXTENSIONS = new Set(["mp3", "wav", "ogg", "aac", "m4a", "wma"]);
-
 export async function POST(request: NextRequest) {
   const authResult = await requireAdminApi();
   if (authResult instanceof Response) return authResult;

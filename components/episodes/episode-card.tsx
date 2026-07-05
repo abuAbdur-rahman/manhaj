@@ -25,7 +25,7 @@ export function EpisodeCard({
 }: EpisodeCardProps) {
   const { setEpisode } = usePlayerStore();
 
-  const cardBody = (
+  const contentBody = (
     <>
       <div className="flex items-start justify-between">
         <Avatar
@@ -55,49 +55,56 @@ export function EpisodeCard({
           </Badge>
         ))}
       </div>
+    </>
+  );
 
-      <div className="flex items-center gap-1">
+  const actionsBody = (
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setEpisode(episode);
+        }}
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-forest-500 text-white hover:bg-forest-600 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
+        aria-label={`Play: ${episode.title}`}
+      >
+        <Play className="h-4 w-4" />
+      </button>
+
+      {onDownload && (
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            setEpisode(episode);
+            onDownload(episode);
           }}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-forest-500 text-white hover:bg-forest-600 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
-          aria-label={`Play: ${episode.title}`}
+          className="flex h-10 w-10 items-center justify-center rounded-full text-sand-300 hover:text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
+          aria-label={`Download: ${episode.title}`}
         >
-          <Play className="h-4 w-4" />
+          <Download className="h-4 w-4" />
         </button>
-
-        {onDownload && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDownload(episode);
-            }}
-            className="flex h-10 w-10 items-center justify-center rounded-full text-sand-300 hover:text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
-            aria-label={`Download: ${episode.title}`}
-          >
-            <Download className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-    </>
+      )}
+    </div>
   );
 
   if (href) {
     return (
-      <Link
-        href={href}
+      <div
         className={cn(
-          "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+          "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3 transition-colors",
           className,
         )}
-        aria-label={`View: ${episode.title}`}
       >
-        {cardBody}
-      </Link>
+        <Link
+          href={href}
+          className="flex flex-col gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 rounded-sm"
+          aria-label={`View: ${episode.title}`}
+        >
+          {contentBody}
+        </Link>
+        {actionsBody}
+      </div>
     );
   }
 
@@ -108,7 +115,8 @@ export function EpisodeCard({
         className,
       )}
     >
-      {cardBody}
+      {contentBody}
+      {actionsBody}
     </div>
   );
 }

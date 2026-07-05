@@ -33,7 +33,7 @@ export function AudioProvider() {
         URL.revokeObjectURL(objectUrlRef.current);
         objectUrlRef.current = null;
       }
-      audio.src = "";
+      audio.removeAttribute("src");
       return;
     }
 
