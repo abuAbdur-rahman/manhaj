@@ -37,6 +37,7 @@ export function DownloadsContent() {
   );
 
   const inProgress = useDownloadsStore((s) => s.inProgress);
+  const downloadRevision = useDownloadsStore((s) => s.downloadRevision);
 
   const handlePlay = useCallback(
     (downloaded: DownloadedEpisode) => {
@@ -60,6 +61,7 @@ export function DownloadsContent() {
     }
   }, [deleteTarget]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reactivity trigger — re-fetch on download completion
   const loadDownloads = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -71,7 +73,7 @@ export function DownloadsContent() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [downloadRevision]);
 
   useEffect(() => {
     loadDownloads();

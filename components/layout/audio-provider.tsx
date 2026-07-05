@@ -10,6 +10,7 @@ export function AudioProvider() {
   const {
     currentEpisode,
     isPlaying,
+    currentTime,
     speed,
     setPlaying,
     setCurrentTime,
@@ -82,6 +83,15 @@ export function AudioProvider() {
 
     audio.playbackRate = speed;
   }, [speed, currentEpisode]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentEpisode) return;
+
+    if (Math.abs(audio.currentTime - currentTime) > 0.5) {
+      audio.currentTime = currentTime;
+    }
+  }, [currentTime, currentEpisode]);
 
   useEffect(() => {
     const audio = audioRef.current;
