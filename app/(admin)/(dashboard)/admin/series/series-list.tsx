@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Header,
   HeaderCenter,
@@ -10,13 +11,13 @@ import {
   HeaderRight,
 } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 interface ScholarOption {
   id: string;
   name: string;
@@ -54,7 +56,6 @@ interface SeriesListProps {
   adminScholarId: string | null;
 }
 
-type ConfirmAction = "delete" | null;
 type FormMode = "create" | "edit";
 
 export function SeriesList({
@@ -124,7 +125,9 @@ export function SeriesList({
         );
         router.refresh();
       } catch (err) {
-        setActionError(err instanceof Error ? err.message : "Something went wrong");
+        setActionError(
+          err instanceof Error ? err.message : "Something went wrong",
+        );
       } finally {
         setPendingId(null);
         setConfirmDelete(null);
@@ -138,25 +141,24 @@ export function SeriesList({
     setEditingId(null);
     setFormTitle("");
     setFormDescription("");
-    setFormScholarId(adminRole === "scholar_admin" ? (adminScholarId ?? "") : "");
+    setFormScholarId(
+      adminRole === "scholar_admin" ? (adminScholarId ?? "") : "",
+    );
     setFormFeatured(false);
     setFormError("");
     setDialogOpen(true);
   }, [adminRole, adminScholarId]);
 
-  const openEditDialog = useCallback(
-    (series: SeriesRow) => {
-      setFormMode("edit");
-      setEditingId(series.id);
-      setFormTitle(series.title);
-      setFormDescription(series.description ?? "");
-      setFormScholarId(series.scholar_id);
-      setFormFeatured(series.is_featured);
-      setFormError("");
-      setDialogOpen(true);
-    },
-    [],
-  );
+  const openEditDialog = useCallback((series: SeriesRow) => {
+    setFormMode("edit");
+    setEditingId(series.id);
+    setFormTitle(series.title);
+    setFormDescription(series.description ?? "");
+    setFormScholarId(series.scholar_id);
+    setFormFeatured(series.is_featured);
+    setFormError("");
+    setDialogOpen(true);
+  }, []);
 
   const handleFormSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -168,7 +170,11 @@ export function SeriesList({
         return;
       }
 
-      if (formMode === "create" && adminRole === "super_admin" && !formScholarId) {
+      if (
+        formMode === "create" &&
+        adminRole === "super_admin" &&
+        !formScholarId
+      ) {
         setFormError("Scholar is required");
         return;
       }
@@ -214,12 +220,23 @@ export function SeriesList({
         router.refresh();
         setDialogOpen(false);
       } catch (err) {
-        setFormError(err instanceof Error ? err.message : "Something went wrong");
+        setFormError(
+          err instanceof Error ? err.message : "Something went wrong",
+        );
       } finally {
         setFormPending(false);
       }
     },
-    [formMode, editingId, formTitle, formDescription, formFeatured, formScholarId, adminRole, router],
+    [
+      formMode,
+      editingId,
+      formTitle,
+      formDescription,
+      formFeatured,
+      formScholarId,
+      adminRole,
+      router,
+    ],
   );
 
   return (
@@ -240,7 +257,7 @@ export function SeriesList({
         </HeaderRight>
       </Header>
 
-      <main className="flex-1 pb-20 lg:pb-0">
+      <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
           {actionError && (
             <div
@@ -295,82 +312,91 @@ export function SeriesList({
               {filtered.map((series) => (
                 <div
                   key={series.id}
-                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100"
+                  className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-sand-100 sm:flex-row sm:items-center sm:gap-3"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-sand-200 text-xs font-medium text-sand-300">
-                    {series.cover_url ? (
-                      <img
-                        src={series.cover_url}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      series.title.charAt(0).toUpperCase()
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-forest-900 truncate">
-                        {series.title}
-                      </p>
-                      {series.is_featured && (
-                        <Badge variant="clay" className="shrink-0 text-[10px]">
-                          Featured
-                        </Badge>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-sand-200 text-xs font-medium text-sand-300">
+                      {series.cover_url ? (
+                        <Image
+                          src={series.cover_url}
+                          alt=""
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        series.title.charAt(0).toUpperCase()
                       )}
                     </div>
-                    <div className="mt-0.5 flex items-center gap-2">
-                      <span className="text-xs text-forest-700">
-                        {series.scholar?.name}
-                      </span>
-                      <span className="text-xs text-sand-300">·</span>
-                      <span className="text-xs text-sand-300">
-                        {series.episode_count} episodes
-                      </span>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-forest-900 truncate">
+                          {series.title}
+                        </p>
+                        {series.is_featured && (
+                          <Badge
+                            variant="clay"
+                            className="shrink-0 text-[10px]"
+                          >
+                            Featured
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <span className="text-xs text-forest-700">
+                          {series.scholar?.name}
+                        </span>
+                        <span className="text-xs text-sand-300">·</span>
+                        <span className="text-xs text-sand-300">
+                          {series.episode_count} episodes
+                        </span>
+                      </div>
                     </div>
+
+                    <Badge
+                      variant={series.is_active ? "default" : "outline"}
+                      className="shrink-0"
+                    >
+                      {series.is_active ? "Active" : "Inactive"}
+                    </Badge>
                   </div>
 
-                  <Badge
-                    variant={series.is_active ? "default" : "outline"}
-                    className="shrink-0"
-                  >
-                    {series.is_active ? "Active" : "Inactive"}
-                  </Badge>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={pendingId === series.id}
-                    onClick={() => openEditDialog(series)}
-                  >
-                    Edit
-                  </Button>
-
-                  {series.is_active && (
+                  <div className="flex items-center gap-2 justify-end sm:justify-start">
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       disabled={pendingId === series.id}
-                      onClick={() =>
-                        confirmDelete === series.id
-                          ? handleDelete(series.id)
-                          : setConfirmDelete(series.id)
-                      }
-                      className="shrink-0 text-sand-300 hover:text-red-500"
-                      aria-label={`Delete ${series.title}`}
+                      onClick={() => openEditDialog(series)}
                     >
-                      {pendingId === series.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : confirmDelete === series.id ? (
-                        <span className="text-xs font-medium text-red-500">
-                          Sure?
-                        </span>
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
+                      Edit
                     </Button>
-                  )}
+
+                    {series.is_active && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={pendingId === series.id}
+                        onClick={() =>
+                          confirmDelete === series.id
+                            ? handleDelete(series.id)
+                            : setConfirmDelete(series.id)
+                        }
+                        className="shrink-0 text-sand-300 hover:text-red-500"
+                        aria-label={`Delete ${series.title}`}
+                      >
+                        {pendingId === series.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : confirmDelete === series.id ? (
+                          <span className="text-xs font-medium text-red-500">
+                            Sure?
+                          </span>
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -388,19 +414,19 @@ export function SeriesList({
                     : "Create your first series to get started."
                 }
                 action={
-                  !search && scholarFilter === "all" && statusFilter === "all"
-                    ? (
-                      <Button variant="primary" onClick={openCreateDialog}>
-                        Create series
-                      </Button>
-                    )
-                    : undefined
+                  !search &&
+                  scholarFilter === "all" &&
+                  statusFilter === "all" ? (
+                    <Button variant="primary" onClick={openCreateDialog}>
+                      Create series
+                    </Button>
+                  ) : undefined
                 }
               />
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
@@ -423,10 +449,14 @@ export function SeriesList({
             )}
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
+              <label
+                htmlFor="series-title"
+                className="text-sm font-medium text-forest-900"
+              >
                 Title
               </label>
               <Input
+                id="series-title"
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
                 placeholder="Series title"
@@ -435,10 +465,14 @@ export function SeriesList({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
+              <label
+                htmlFor="series-desc"
+                className="text-sm font-medium text-forest-900"
+              >
                 Description
               </label>
               <Input
+                id="series-desc"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder="Optional description"
@@ -447,14 +481,14 @@ export function SeriesList({
 
             {formMode === "create" && adminRole === "super_admin" && (
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-forest-900">
+                <label
+                  htmlFor="series-scholar"
+                  className="text-sm font-medium text-forest-900"
+                >
                   Scholar
                 </label>
-                <Select
-                  value={formScholarId}
-                  onValueChange={setFormScholarId}
-                >
-                  <SelectTrigger>
+                <Select value={formScholarId} onValueChange={setFormScholarId}>
+                  <SelectTrigger id="series-scholar">
                     <SelectValue placeholder="Select scholar" />
                   </SelectTrigger>
                   <SelectContent>
@@ -486,11 +520,7 @@ export function SeriesList({
               >
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={formPending}
-              >
+              <Button variant="primary" type="submit" disabled={formPending}>
                 {formPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />

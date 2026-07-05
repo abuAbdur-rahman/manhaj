@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient();
 
   const baseSlug = slugify(name);
-  const uniqueSlug = `${baseSlug}-${Date.now().toString(36)}`;
+  const uniqueSlug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`;
 
   const { data: scholar, error: insertError } = await supabase
     .from("scholars")

@@ -35,7 +35,7 @@ export default async function ScholarProfilePage({
         <HeaderCenter title={scholar.name} />
       </Header>
 
-      <main className="flex-1 pb-14">
+      <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 pb-8">
           <div className="relative flex flex-col items-center py-10">
             <div className="relative">

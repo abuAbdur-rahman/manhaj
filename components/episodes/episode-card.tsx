@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, Play } from "lucide-react";
+import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/cn";
@@ -11,24 +12,21 @@ import type { Episode } from "@/types";
 
 interface EpisodeCardProps {
   episode: Episode;
+  href?: string;
   className?: string;
   onDownload?: (episode: Episode) => void;
 }
 
 export function EpisodeCard({
   episode,
+  href,
   className,
   onDownload,
 }: EpisodeCardProps) {
   const { setEpisode } = usePlayerStore();
 
-  return (
-    <div
-      className={cn(
-        "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3",
-        className,
-      )}
-    >
+  const cardBody = (
+    <>
       <div className="flex items-start justify-between">
         <Avatar
           size="sm"
@@ -61,7 +59,10 @@ export function EpisodeCard({
       <div className="flex items-center gap-1">
         <button
           type="button"
-          onClick={() => setEpisode(episode)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setEpisode(episode);
+          }}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-forest-500 text-white hover:bg-forest-600 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
           aria-label={`Play: ${episode.title}`}
         >
@@ -71,7 +72,10 @@ export function EpisodeCard({
         {onDownload && (
           <button
             type="button"
-            onClick={() => onDownload(episode)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDownload(episode);
+            }}
             className="flex h-10 w-10 items-center justify-center rounded-full text-sand-300 hover:text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
             aria-label={`Download: ${episode.title}`}
           >
@@ -79,6 +83,32 @@ export function EpisodeCard({
           </button>
         )}
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cn(
+          "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+          className,
+        )}
+        aria-label={`View: ${episode.title}`}
+      >
+        {cardBody}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3",
+        className,
+      )}
+    >
+      {cardBody}
     </div>
   );
 }

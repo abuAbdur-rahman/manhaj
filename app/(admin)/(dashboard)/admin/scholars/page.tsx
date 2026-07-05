@@ -15,8 +15,11 @@ export default async function AdminScholarsPage() {
 
   const { data: scholars, error } = await supabase
     .from("scholars")
-    .select("*")
-    .order("name");
+    .select(
+      "id, name, slug, bio, photo_url, languages, social_links, is_active, created_at, updated_at",
+    )
+    .order("name")
+    .limit(100);
 
   if (error) throw error;
 

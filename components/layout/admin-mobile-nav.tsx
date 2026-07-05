@@ -52,7 +52,7 @@ export function AdminMobileNav({
   return (
     <nav
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-40 flex h-14 items-center justify-around border-t border-sand-200 bg-sand-100",
+        "fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-sand-200 bg-sand-100 h-[calc(3.5rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)]",
         className,
       )}
       aria-label="Admin navigation"
@@ -74,6 +74,7 @@ export function AdminMobileNav({
                 ? "text-forest-600"
                 : "text-sand-300 hover:text-forest-700",
             )}
+            aria-current={isActive ? "page" : undefined}
           >
             <Icon className="h-[22px] w-[22px]" aria-hidden="true" />
             <span className="text-[13px] font-medium leading-none">

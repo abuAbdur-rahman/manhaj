@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import { LogOut, Shield, Users } from "lucide-react";
 import Link from "next/link";
-import { AdminSidebar } from "@/components/layout/admin-sidebar";
+import { useRouter } from "next/navigation";
+import { type ReactNode, useCallback, useState } from "react";
 import { AdminMobileNav } from "@/components/layout/admin-mobile-nav";
-import { Button } from "@/components/ui/button";
+import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import {
   Sheet,
   SheetContent,

@@ -27,6 +27,10 @@ export const metadata: Metadata = {
   description:
     "A focused audio lecture platform for Nigerian Sunni/Salafi scholars. Stream, download, and organize lectures from trusted scholars.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "Manhaj — Ilm, organized.",
     description:

@@ -22,7 +22,7 @@ export function MiniPlayer({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 h-14 px-4 bg-sand-100 border-t border-sand-200",
+        "flex items-center gap-3 px-4 bg-sand-100 border-t border-sand-200 h-14",
         className,
       )}
     >

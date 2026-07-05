@@ -1,5 +1,3 @@
-import { Plus } from "lucide-react";
-import Link from "next/link";
 import {
   Header,
   HeaderCenter,
@@ -7,8 +5,6 @@ import {
   HeaderRight,
 } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/components/ui/cn";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDuration } from "@/lib/audio";
 import { getCurrentAdmin } from "@/lib/auth";
@@ -17,12 +13,15 @@ import {
   getEpisodesForAdmin,
   getScholarById,
 } from "@/lib/data";
+import { CreateEpisodeAction, DashboardActions } from "./dashboard-actions";
 
 export default async function AdminDashboardPage() {
   const admin = await getCurrentAdmin();
 
   const scopedScholarId =
-    admin?.role === "scholar_admin" ? (admin.scholarId ?? undefined) : undefined;
+    admin?.role === "scholar_admin"
+      ? (admin.scholarId ?? undefined)
+      : undefined;
 
   if (admin?.role === "scholar_admin" && !scopedScholarId) {
     throw new Error("Scholar admin is missing scholar scope");
@@ -52,24 +51,9 @@ export default async function AdminDashboardPage() {
         </HeaderRight>
       </Header>
 
-      <main className="flex-1 pb-20 lg:pb-0">
+      <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href="/admin/episodes/new"
-              className={cn(buttonVariants({ variant: "primary" }), "gap-2")}
-            >
-              <Plus className="h-4 w-4" />
-              New episode
-            </Link>
-            <Link
-              href="/admin/series/new"
-              className={cn(buttonVariants({ variant: "outline" }), "gap-2")}
-            >
-              <Plus className="h-4 w-4" />
-              New series
-            </Link>
-          </div>
+          <DashboardActions />
 
           {scholar && (
             <div className="mt-6 rounded-lg border border-sand-200 bg-sand-100 px-4 py-3">
@@ -147,20 +131,13 @@ export default async function AdminDashboardPage() {
                 <EmptyState
                   title="No episodes yet"
                   description="Create your first episode."
-                  action={
-                    <Link
-                      href="/admin/episodes/new"
-                      className={buttonVariants({ variant: "primary" })}
-                    >
-                      Create episode
-                    </Link>
-                  }
+                  action={<CreateEpisodeAction />}
                 />
               </div>
             )}
           </section>
         </div>
-      </main>
+      </div>
     </>
   );
 }

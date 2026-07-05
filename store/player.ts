@@ -9,6 +9,7 @@ interface PlayerStore {
   speed: Speed;
   isLoading: boolean;
   sleepTimerRemaining: number | null;
+  audioRef: HTMLAudioElement | null;
   setEpisode: (episode: Episode) => void;
   setPlaying: (playing: boolean) => void;
   setCurrentTime: (time: number) => void;
@@ -17,6 +18,7 @@ interface PlayerStore {
   setLoading: (loading: boolean) => void;
   setSleepTimer: (seconds: number | null) => void;
   tickSleepTimer: () => void;
+  setAudioRef: (ref: HTMLAudioElement | null) => void;
   clear: () => void;
 }
 
@@ -28,12 +30,14 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   speed: 1,
   isLoading: false,
   sleepTimerRemaining: null,
+  audioRef: null,
   setEpisode: (episode) =>
     set({
       currentEpisode: episode,
       currentTime: 0,
       duration: episode.duration_seconds ?? 0,
       isPlaying: true,
+      isLoading: true,
     }),
   setPlaying: (playing) => set({ isPlaying: playing }),
   setCurrentTime: (time) => set({ currentTime: time }),
@@ -41,6 +45,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   setSpeed: (speed) => set({ speed }),
   setLoading: (loading) => set({ isLoading: loading }),
   setSleepTimer: (seconds) => set({ sleepTimerRemaining: seconds }),
+  setAudioRef: (ref) => set({ audioRef: ref }),
   tickSleepTimer: () => {
     const current = get().sleepTimerRemaining;
     if (current === null) return;
@@ -59,5 +64,6 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
       speed: 1,
       isLoading: false,
       sleepTimerRemaining: null,
+      audioRef: null,
     }),
 }));

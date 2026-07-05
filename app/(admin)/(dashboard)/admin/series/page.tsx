@@ -44,13 +44,16 @@ export default async function AdminSeriesPage() {
           episode_count:episodes(count)`,
         )
         .eq("scholar_id", admin.scholarId)
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
 
     if (seriesResult.error) throw seriesResult.error;
     series = (seriesResult.data ?? []).map((s) => ({
       ...s,
-      episode_count: (s as unknown as { episode_count: { count: number }[] }).episode_count?.[0]?.count ?? 0,
+      episode_count:
+        (s as unknown as { episode_count: { count: number }[] })
+          .episode_count?.[0]?.count ?? 0,
     })) as SeriesWithCount[];
     scholars = [];
   } else {
@@ -62,12 +65,14 @@ export default async function AdminSeriesPage() {
           scholar:scholar_id(id, name),
           episode_count:episodes(count)`,
         )
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(100),
       supabase
         .from("scholars")
         .select("id, name")
         .eq("is_active", true)
-        .order("name"),
+        .order("name")
+        .limit(100),
     ]);
 
     if (seriesResult.error) throw seriesResult.error;
@@ -75,7 +80,9 @@ export default async function AdminSeriesPage() {
 
     series = (seriesResult.data ?? []).map((s) => ({
       ...s,
-      episode_count: (s as unknown as { episode_count: { count: number }[] }).episode_count?.[0]?.count ?? 0,
+      episode_count:
+        (s as unknown as { episode_count: { count: number }[] })
+          .episode_count?.[0]?.count ?? 0,
     })) as SeriesWithCount[];
     scholars = scholarsResult.data ?? [];
   }
