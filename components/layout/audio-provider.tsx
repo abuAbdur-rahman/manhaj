@@ -10,6 +10,7 @@ export function AudioProvider() {
   const {
     currentEpisode,
     isPlaying,
+    currentTime,
     speed,
     setPlaying,
     setCurrentTime,
@@ -38,7 +39,12 @@ export function AudioProvider() {
     }
 
     const resolveSrc = async () => {
-      const downloads = await listDownloads();
+      let downloads: Awaited<ReturnType<typeof listDownloads>> = [];
+      try {
+        downloads = await listDownloads();
+      } catch {
+        // IDB unavailable — stream from network
+      }
       const local = downloads.find((d) => d.episode.id === currentEpisode.id);
 
       if (objectUrlRef.current) {
@@ -77,6 +83,15 @@ export function AudioProvider() {
 
     audio.playbackRate = speed;
   }, [speed, currentEpisode]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentEpisode) return;
+
+    if (Math.abs(audio.currentTime - currentTime) > 0.5) {
+      audio.currentTime = currentTime;
+    }
+  }, [currentTime, currentEpisode]);
 
   useEffect(() => {
     const audio = audioRef.current;

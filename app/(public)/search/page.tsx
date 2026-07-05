@@ -1,10 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  EpisodeRow,
-  EpisodeRowSkeleton,
-} from "@/components/episodes/episode-row";
+import { AudioCard, AudioCardSkeleton } from "@/components/episodes/audio-card";
 import { Header, HeaderLeft } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -98,7 +95,7 @@ export default function SearchPage() {
           {status === "loading" && (
             <div className="divide-y divide-sand-200">
               {SKELETON_KEYS.map((key) => (
-                <EpisodeRowSkeleton key={key} />
+                <AudioCardSkeleton key={key} />
               ))}
             </div>
           )}
@@ -125,7 +122,7 @@ export default function SearchPage() {
           {status === "done" && results.length > 0 && (
             <div className="divide-y divide-sand-200">
               {results.map((episode, i) => (
-                <EpisodeRow key={episode.id} episode={episode} index={i + 1} />
+                <AudioCard key={episode.id} episode={episode} number={i + 1} />
               ))}
             </div>
           )}
