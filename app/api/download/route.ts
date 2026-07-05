@@ -1,9 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_HOSTNAMES = [
-  "pub-53cce9077a4c4e4489d9f658105eb443.r2.dev",
-  "manhaj.abdurrahman.org",
-];
+function getAllowedHostnames(): string[] {
+  const hostnames = ["manhaj.abdurrahman.org"];
+
+  const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
+  if (r2PublicUrl) {
+    try {
+      const parsed = new URL(r2PublicUrl);
+      hostnames.push(parsed.hostname);
+    } catch {
+      // ignore invalid URL
+    }
+  }
+
+  return hostnames;
+}
+
+const ALLOWED_HOSTNAMES = getAllowedHostnames();
 
 export async function GET(request: NextRequest) {
   const rawUrl = request.nextUrl.searchParams.get("url");
