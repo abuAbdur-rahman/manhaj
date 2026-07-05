@@ -34,6 +34,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     speed,
     isLoading,
     sleepTimerRemaining,
+    audioRef,
     setEpisode,
     setPlaying,
     setCurrentTime,
@@ -89,8 +90,13 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   const handleDownload = useCallback(async () => {
     if (isDownloading || downloadedIds.has(episode.id)) return;
     setIsDownloading(true);
-    await downloadEpisode(episode);
-    setIsDownloading(false);
+    try {
+      await downloadEpisode(episode);
+    } catch (err) {
+      console.error("Download failed:", err);
+    } finally {
+      setIsDownloading(false);
+    }
   }, [episode, isDownloading, downloadedIds]);
 
   const handleWhatsAppShare = useCallback(() => {

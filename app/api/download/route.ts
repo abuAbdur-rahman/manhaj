@@ -1,18 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_PATTERNS = [
-  /^pub-[a-f0-9]+\.r2\.dev$/,
-  /^.+\.r2\.cloudflarestorage\.com$/,
+const ALLOWED_HOSTNAMES = [
+  "pub-53cce9077a4c4e4489d9f658105eb443.r2.dev",
+  "manhaj.abdurrahman.org",
 ];
-
-function isAllowed(url: string): boolean {
-  try {
-    const { hostname } = new URL(url);
-    return ALLOWED_PATTERNS.some((p) => p.test(hostname));
-  } catch {
-    return false;
-  }
-}
 
 export async function GET(request: NextRequest) {
   const rawUrl = request.nextUrl.searchParams.get("url");
@@ -28,9 +19,23 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (!isAllowed(rawUrl)) {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(rawUrl);
+  } catch {
     return NextResponse.json(
-      { error: { code: "FORBIDDEN", message: "URL hostname not allowed" } },
+      {
+        error: { code: "INVALID_URL", message: "Invalid URL format" },
+      },
+      { status: 400 },
+    );
+  }
+
+  if (!ALLOWED_HOSTNAMES.includes(parsedUrl.hostname)) {
+    return NextResponse.json(
+      {
+        error: { code: "FORBIDDEN", message: "URL hostname not allowed" },
+      },
       { status: 403 },
     );
   }
@@ -72,7 +77,10 @@ export async function GET(request: NextRequest) {
   } catch {
     return NextResponse.json(
       {
-        error: { code: "PROXY_ERROR", message: "Failed to fetch audio source" },
+        error: {
+          code: "PROXY_ERROR",
+          message: "Failed to fetch audio source",
+        },
       },
       { status: 502 },
     );
