@@ -29,15 +29,13 @@ export default async function AdminEpisodesPage() {
         .from("episodes")
         .select("*, scholar:scholar_id(*), series:series_id(*)")
         .eq("scholar_id", admin.scholarId)
-        .order("created_at", { ascending: false })
-        .limit(100),
+        .order("created_at", { ascending: false }),
       supabase
         .from("series")
         .select("id, title, scholar_id, scholar:scholar_id(name)")
         .eq("scholar_id", admin.scholarId)
         .eq("is_active", true)
-        .order("title")
-        .limit(100),
+        .order("title"),
     ]);
 
     if (epResult.error) throw epResult.error;
@@ -50,20 +48,17 @@ export default async function AdminEpisodesPage() {
       supabase
         .from("episodes")
         .select("*, scholar:scholar_id(*), series:series_id(*)")
-        .order("created_at", { ascending: false })
-        .limit(100),
+        .order("created_at", { ascending: false }),
       supabase
         .from("scholars")
         .select("id, name")
         .eq("is_active", true)
-        .order("name")
-        .limit(100),
+        .order("name"),
       supabase
         .from("series")
         .select("id, title, scholar_id, scholar:scholar_id(name)")
         .eq("is_active", true)
-        .order("title")
-        .limit(100),
+        .order("title"),
     ]);
 
     if (epResult.error) throw epResult.error;

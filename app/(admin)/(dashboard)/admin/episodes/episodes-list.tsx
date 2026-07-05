@@ -1,9 +1,9 @@
 "use client";
 
+import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
 import {
   Header,
   HeaderCenter,
@@ -100,33 +100,34 @@ export function EpisodesList({
     return result;
   }, [items, search, scholarFilter, seriesFilter, statusFilter]);
 
-  const handleTogglePublish = useCallback(async (episode: Episode) => {
-    setActionError("");
-    setPendingId(episode.id);
-    try {
-      const res = await fetch(`/api/admin/episodes/${episode.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_published: !episode.is_published }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message ?? "Failed to update");
+  const handleTogglePublish = useCallback(
+    async (episode: Episode) => {
+      setActionError("");
+      setPendingId(episode.id);
+      try {
+        const res = await fetch(`/api/admin/episodes/${episode.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ is_published: !episode.is_published }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error?.message ?? "Failed to update");
+        }
+        setItems((prev) =>
+          prev.map((e) =>
+            e.id === episode.id ? { ...e, is_published: !e.is_published } : e,
+          ),
+        );
+      } catch (err) {
+        setActionError(err instanceof Error ? err.message : "Something went wrong");
+      } finally {
+        setPendingId(null);
+        setConfirmAction(null);
       }
-      setItems((prev) =>
-        prev.map((e) =>
-          e.id === episode.id ? { ...e, is_published: !e.is_published } : e,
-        ),
-      );
-    } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Something went wrong",
-      );
-    } finally {
-      setPendingId(null);
-      setConfirmAction(null);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -143,9 +144,7 @@ export function EpisodesList({
         setItems((prev) => prev.filter((e) => e.id !== id));
         router.refresh();
       } catch (err) {
-        setActionError(
-          err instanceof Error ? err.message : "Something went wrong",
-        );
+        setActionError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
         setPendingId(null);
         setConfirmAction(null);
@@ -154,9 +153,12 @@ export function EpisodesList({
     [router],
   );
 
-  const promptConfirm = useCallback((id: string, action: ConfirmAction) => {
-    setConfirmAction({ id, action });
-  }, []);
+  const promptConfirm = useCallback(
+    (id: string, action: ConfirmAction) => {
+      setConfirmAction({ id, action });
+    },
+    [],
+  );
 
   return (
     <>
@@ -166,10 +168,7 @@ export function EpisodesList({
         <HeaderRight>
           <Link
             href="/admin/episodes/new"
-            className={cn(
-              buttonVariants({ variant: "primary", size: "sm" }),
-              "gap-1.5",
-            )}
+            className={cn(buttonVariants({ variant: "primary", size: "sm" }), "gap-1.5")}
           >
             <Plus className="h-4 w-4" />
             New
@@ -177,7 +176,7 @@ export function EpisodesList({
         </HeaderRight>
       </Header>
 
-      <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
           {actionError && (
             <div
@@ -246,94 +245,86 @@ export function EpisodesList({
               {filtered.map((episode) => (
                 <div
                   key={episode.id}
-                  className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-sand-100 sm:flex-row sm:items-center sm:gap-3"
+                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100"
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-forest-900 truncate">
-                        {episode.title}
-                      </p>
-                      <div className="mt-0.5 flex items-center gap-2">
-                        <span className="text-xs text-forest-700">
-                          {episode.scholar?.name}
-                        </span>
-                        {episode.series && (
-                          <>
-                            <span className="text-xs text-sand-300">·</span>
-                            <span className="text-xs text-forest-700 truncate max-w-[180px]">
-                              {episode.series.title}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-forest-900 truncate">
+                      {episode.title}
+                    </p>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <span className="text-xs text-forest-700">
+                        {episode.scholar?.name}
+                      </span>
+                      {episode.series && (
+                        <>
+                          <span className="text-xs text-sand-300">·</span>
+                          <span className="text-xs text-forest-700 truncate max-w-[180px]">
+                            {episode.series.title}
+                          </span>
+                        </>
+                      )}
                     </div>
-
-                    <span className="font-mono text-xs text-sand-300 shrink-0">
-                      {formatDuration(episode.duration_seconds ?? 0)}
-                    </span>
-
-                    <Badge
-                      variant={episode.is_published ? "default" : "outline"}
-                      className="shrink-0"
-                    >
-                      {episode.is_published ? "Published" : "Draft"}
-                    </Badge>
                   </div>
 
-                  <div className="flex items-center gap-2 justify-end sm:justify-start">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={pendingId === episode.id}
-                      onClick={() =>
-                        confirmAction?.id === episode.id &&
-                        confirmAction.action === "toggle"
-                          ? handleTogglePublish(episode)
-                          : promptConfirm(episode.id, "toggle")
-                      }
-                      className="shrink-0"
-                    >
-                      {pendingId === episode.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : confirmAction?.id === episode.id &&
-                        confirmAction.action === "toggle" ? (
-                        episode.is_published ? (
-                          "Unpublish?"
-                        ) : (
-                          "Publish?"
-                        )
-                      ) : episode.is_published ? (
-                        "Unpublish"
-                      ) : (
-                        "Publish"
-                      )}
-                    </Button>
+                  <span className="font-mono text-xs text-sand-300 shrink-0">
+                    {formatDuration(episode.duration_seconds ?? 0)}
+                  </span>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={pendingId === episode.id}
-                      onClick={() =>
-                        confirmAction?.id === episode.id &&
-                        confirmAction.action === "delete"
-                          ? handleDelete(episode.id)
-                          : promptConfirm(episode.id, "delete")
-                      }
-                      className="shrink-0 text-sand-300 hover:text-red-500"
-                      aria-label={`Delete ${episode.title}`}
-                    >
-                      {pendingId === episode.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : confirmAction?.id === episode.id &&
-                        confirmAction.action === "delete" ? (
-                        <span className="text-xs font-medium text-red-500">
-                          Sure?
-                        </span>
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+                  <Badge
+                    variant={episode.is_published ? "default" : "outline"}
+                    className="shrink-0"
+                  >
+                    {episode.is_published ? "Published" : "Draft"}
+                  </Badge>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={pendingId === episode.id}
+                    onClick={() =>
+                      confirmAction?.id === episode.id &&
+                      confirmAction.action === "toggle"
+                        ? handleTogglePublish(episode)
+                        : promptConfirm(episode.id, "toggle")
+                    }
+                    className="shrink-0"
+                  >
+                    {pendingId === episode.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : confirmAction?.id === episode.id &&
+                      confirmAction.action === "toggle" ? (
+                      episode.is_published ? "Unpublish?" : "Publish?"
+                    ) : episode.is_published ? (
+                      "Unpublish"
+                    ) : (
+                      "Publish"
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={pendingId === episode.id}
+                    onClick={() =>
+                      confirmAction?.id === episode.id &&
+                      confirmAction.action === "delete"
+                        ? handleDelete(episode.id)
+                        : promptConfirm(episode.id, "delete")
+                    }
+                    className="shrink-0 text-sand-300 hover:text-red-500"
+                    aria-label={`Delete ${episode.title}`}
+                  >
+                    {pendingId === episode.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : confirmAction?.id === episode.id &&
+                      confirmAction.action === "delete" ? (
+                      <span className="text-xs font-medium text-red-500">
+                        Sure?
+                      </span>
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
               ))}
             </div>
@@ -341,39 +332,32 @@ export function EpisodesList({
             <div className="mt-4">
               <EmptyState
                 title={
-                  search ||
-                  scholarFilter !== "all" ||
-                  seriesFilter !== "all" ||
-                  statusFilter !== "all"
+                  search || scholarFilter !== "all" || seriesFilter !== "all" || statusFilter !== "all"
                     ? "No matching episodes"
                     : "No episodes yet"
                 }
                 description={
-                  search ||
-                  scholarFilter !== "all" ||
-                  seriesFilter !== "all" ||
-                  statusFilter !== "all"
+                  search || scholarFilter !== "all" || seriesFilter !== "all" || statusFilter !== "all"
                     ? "Try adjusting your search or filters."
                     : "Create your first episode to get started."
                 }
                 action={
-                  !search &&
-                  scholarFilter === "all" &&
-                  seriesFilter === "all" &&
-                  statusFilter === "all" ? (
-                    <Link
-                      href="/admin/episodes/new"
-                      className={buttonVariants({ variant: "primary" })}
-                    >
-                      Create episode
-                    </Link>
-                  ) : undefined
+                  !search && scholarFilter === "all" && seriesFilter === "all" && statusFilter === "all"
+                    ? (
+                      <Link
+                        href="/admin/episodes/new"
+                        className={buttonVariants({ variant: "primary" })}
+                      >
+                        Create episode
+                      </Link>
+                    )
+                    : undefined
                 }
               />
             </div>
           )}
         </div>
-      </div>
+      </main>
     </>
   );
 }

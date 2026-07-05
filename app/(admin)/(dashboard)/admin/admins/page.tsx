@@ -19,10 +19,5 @@ export default async function AdminAdminsPage() {
 
   if (error) throw error;
 
-  return (
-    <AdminsList
-      admins={(admins as unknown as Admin[]) ?? []}
-      currentAdminId={admin.id}
-    />
-  );
+  return <AdminsList admins={(admins as unknown as Admin[]) ?? []} />;
 }

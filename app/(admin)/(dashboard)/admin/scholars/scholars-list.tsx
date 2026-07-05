@@ -1,9 +1,8 @@
 "use client";
 
-import { Loader2, Plus, Search, Trash2 } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import {
   Header,
   HeaderCenter,
@@ -15,9 +14,9 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -133,20 +132,23 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
     setDialogOpen(true);
   }, [resetForm]);
 
-  const openEditDialog = useCallback((scholar: Scholar) => {
-    setFormMode("edit");
-    setEditingId(scholar.id);
-    setFormName(scholar.name);
-    setFormBio(scholar.bio ?? "");
-    setFormLanguages(scholar.languages);
-    setFormPhotoUrl(scholar.photo_url ?? "");
-    setFormSocialWhatsapp(scholar.social_links?.whatsapp ?? "");
-    setFormSocialYoutube(scholar.social_links?.youtube ?? "");
-    setFormSocialTelegram(scholar.social_links?.telegram ?? "");
-    setFormSocialWebsite(scholar.social_links?.website ?? "");
-    setFormError("");
-    setDialogOpen(true);
-  }, []);
+  const openEditDialog = useCallback(
+    (scholar: Scholar) => {
+      setFormMode("edit");
+      setEditingId(scholar.id);
+      setFormName(scholar.name);
+      setFormBio(scholar.bio ?? "");
+      setFormLanguages(scholar.languages);
+      setFormPhotoUrl(scholar.photo_url ?? "");
+      setFormSocialWhatsapp(scholar.social_links?.whatsapp ?? "");
+      setFormSocialYoutube(scholar.social_links?.youtube ?? "");
+      setFormSocialTelegram(scholar.social_links?.telegram ?? "");
+      setFormSocialWebsite(scholar.social_links?.website ?? "");
+      setFormError("");
+      setDialogOpen(true);
+    },
+    [],
+  );
 
   const handlePhotoUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -268,17 +270,8 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
       }
     },
     [
-      formMode,
-      editingId,
-      formName,
-      formBio,
-      formLanguages,
-      formPhotoUrl,
-      formSocialWhatsapp,
-      formSocialYoutube,
-      formSocialTelegram,
-      formSocialWebsite,
-      photoUploading,
+      formMode, editingId, formName, formBio, formLanguages, formPhotoUrl,
+      formSocialWhatsapp, formSocialYoutube, formSocialTelegram, formSocialWebsite,
       router,
     ],
   );
@@ -301,7 +294,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
         </HeaderRight>
       </Header>
 
-      <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
           {actionError && (
             <div
@@ -340,83 +333,73 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
               {filtered.map((scholar) => (
                 <div
                   key={scholar.id}
-                  className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-sand-100 sm:flex-row sm:items-center sm:gap-3"
+                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100"
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-sand-200 text-xs font-medium text-sand-300">
-                      {scholar.photo_url ? (
-                        <Image
-                          src={scholar.photo_url}
-                          alt=""
-                          width={40}
-                          height={40}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        scholar.name.charAt(0).toUpperCase()
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-forest-900 truncate">
-                        {scholar.name}
-                      </p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-1">
-                        {scholar.languages.map((lang) => (
-                          <Badge
-                            key={lang}
-                            variant="default"
-                            className="text-[10px]"
-                          >
-                            {lang}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <Badge
-                      variant={scholar.is_active ? "default" : "outline"}
-                      className="shrink-0"
-                    >
-                      {scholar.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center gap-2 justify-end sm:justify-start">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={pendingId === scholar.id}
-                      onClick={() => openEditDialog(scholar)}
-                    >
-                      Edit
-                    </Button>
-
-                    {scholar.is_active && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={pendingId === scholar.id}
-                        onClick={() =>
-                          confirmDelete === scholar.id
-                            ? handleDelete(scholar.id)
-                            : setConfirmDelete(scholar.id)
-                        }
-                        className="shrink-0 text-sand-300 hover:text-red-500"
-                        aria-label={`Delete ${scholar.name}`}
-                      >
-                        {pendingId === scholar.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : confirmDelete === scholar.id ? (
-                          <span className="text-xs font-medium text-red-500">
-                            Sure?
-                          </span>
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-sand-200 text-xs font-medium text-sand-300">
+                    {scholar.photo_url ? (
+                      <img
+                        src={scholar.photo_url}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      scholar.name.charAt(0).toUpperCase()
                     )}
                   </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-forest-900 truncate">
+                      {scholar.name}
+                    </p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                      {scholar.languages.map((lang) => (
+                        <Badge key={lang} variant="default" className="text-[10px]">
+                          {lang}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Badge
+                    variant={scholar.is_active ? "default" : "outline"}
+                    className="shrink-0"
+                  >
+                    {scholar.is_active ? "Active" : "Inactive"}
+                  </Badge>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={pendingId === scholar.id}
+                    onClick={() => openEditDialog(scholar)}
+                  >
+                    Edit
+                  </Button>
+
+                  {scholar.is_active && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={pendingId === scholar.id}
+                      onClick={() =>
+                        confirmDelete === scholar.id
+                          ? handleDelete(scholar.id)
+                          : setConfirmDelete(scholar.id)
+                      }
+                      className="shrink-0 text-sand-300 hover:text-red-500"
+                      aria-label={`Delete ${scholar.name}`}
+                    >
+                      {pendingId === scholar.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : confirmDelete === scholar.id ? (
+                        <span className="text-xs font-medium text-red-500">
+                          Sure?
+                        </span>
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -434,17 +417,19 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                     : "Create your first scholar to get started."
                 }
                 action={
-                  !search && !statusFilter ? (
-                    <Button variant="primary" onClick={openCreateDialog}>
-                      Create scholar
-                    </Button>
-                  ) : undefined
+                  !search && !statusFilter
+                    ? (
+                      <Button variant="primary" onClick={openCreateDialog}>
+                        Create scholar
+                      </Button>
+                    )
+                    : undefined
                 }
               />
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -467,14 +452,10 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             )}
 
             <div className="space-y-1.5">
-              <label
-                htmlFor="scholar-name"
-                className="text-sm font-medium text-forest-900"
-              >
+              <label className="text-sm font-medium text-forest-900">
                 Name
               </label>
               <Input
-                id="scholar-name"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="Scholar name"
@@ -483,24 +464,20 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label
-                htmlFor="scholar-bio"
-                className="text-sm font-medium text-forest-900"
-              >
+              <label className="text-sm font-medium text-forest-900">
                 Bio
               </label>
               <Input
-                id="scholar-bio"
                 value={formBio}
                 onChange={(e) => setFormBio(e.target.value)}
                 placeholder="Short biography"
               />
             </div>
 
-            <fieldset className="space-y-1.5">
-              <legend className="text-sm font-medium text-forest-900">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-forest-900">
                 Languages
-              </legend>
+              </label>
               <div className="flex flex-wrap gap-1.5">
                 {LANGUAGES.map((lang) => (
                   <button
@@ -517,20 +494,18 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                   </button>
                 ))}
               </div>
-            </fieldset>
+            </div>
 
-            <fieldset className="space-y-1.5">
-              <legend className="text-sm font-medium text-forest-900">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-forest-900">
                 Photo
-              </legend>
+              </label>
               <div className="flex items-center gap-3">
                 {formPhotoUrl && (
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-sand-200">
-                    <Image
+                    <img
                       src={formPhotoUrl}
                       alt=""
-                      width={48}
-                      height={48}
                       className="h-full w-full object-cover"
                     />
                   </div>
@@ -557,15 +532,15 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                   accept="image/*"
                   onChange={handlePhotoUpload}
                   className="hidden"
-                  id="scholar-photo"
+                  aria-label="Upload scholar photo"
                 />
               </div>
-            </fieldset>
+            </div>
 
-            <fieldset className="space-y-1.5">
-              <legend className="text-sm font-medium text-forest-900">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-forest-900">
                 Social links
-              </legend>
+              </label>
               <div className="space-y-2">
                 <Input
                   value={formSocialWhatsapp}
@@ -588,7 +563,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                   placeholder="Website link"
                 />
               </div>
-            </fieldset>
+            </div>
 
             <div className="flex justify-end gap-3 pt-2">
               <Button
@@ -598,11 +573,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
               >
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={formPending || photoUploading}
-              >
+              <Button variant="primary" type="submit" disabled={formPending || photoUploading}>
                 {formPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />

@@ -1,8 +1,8 @@
 "use client";
 
-import { Loader2, Plus, Search, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import {
   Header,
   HeaderCenter,
@@ -14,9 +14,9 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -35,7 +35,6 @@ interface AdminWithScholar extends Admin {
 
 interface AdminListProps {
   admins: AdminWithScholar[];
-  currentAdminId: string;
 }
 
 function formatDate(iso: string): string {
@@ -46,10 +45,7 @@ function formatDate(iso: string): string {
   });
 }
 
-export function AdminsList({
-  admins: initialAdmins,
-  currentAdminId,
-}: AdminListProps) {
+export function AdminsList({ admins: initialAdmins }: AdminListProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -84,7 +80,8 @@ export function AdminsList({
       const q = search.toLowerCase();
       result = result.filter(
         (a) =>
-          a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q),
+          a.name.toLowerCase().includes(q) ||
+          a.email.toLowerCase().includes(q),
       );
     }
 
@@ -218,7 +215,7 @@ export function AdminsList({
         </HeaderRight>
       </Header>
 
-      <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
           {actionError && (
             <div
@@ -268,82 +265,76 @@ export function AdminsList({
               {filtered.map((admin) => (
                 <div
                   key={admin.id}
-                  className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-sand-100 sm:flex-row sm:items-center sm:gap-3"
+                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100"
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-forest-900 truncate">
-                          {admin.name}
-                        </p>
-                        {admin.id === currentAdminId && (
-                          <span className="text-[10px] text-sand-300">
-                            (you)
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-0.5 flex items-center gap-2">
-                        <span className="text-xs text-forest-700">
-                          {admin.email}
-                        </span>
-                        {admin.scholar && (
-                          <>
-                            <span className="text-xs text-sand-300">·</span>
-                            <span className="text-xs text-forest-700">
-                              {admin.scholar.name}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-forest-900 truncate">
+                        {admin.name}
+                      </p>
+                      {admin.id === initialAdmins[0]?.id && (
+                        <span className="text-[10px] text-sand-300">(you)</span>
+                      )}
                     </div>
-
-                    <Badge
-                      variant={
-                        admin.role === "super_admin" ? "clay" : "default"
-                      }
-                      className="shrink-0 text-[10px]"
-                    >
-                      {admin.role === "super_admin" ? "Super" : "Scholar"}
-                    </Badge>
-
-                    <Badge
-                      variant={admin.is_active ? "default" : "outline"}
-                      className="shrink-0"
-                    >
-                      {admin.is_active ? "Active" : "Inactive"}
-                    </Badge>
-
-                    <span className="font-mono text-[10px] text-sand-300 shrink-0">
-                      {formatDate(admin.created_at)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 justify-end sm:justify-start">
-                    {admin.is_active && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        disabled={pendingId === admin.id}
-                        onClick={() =>
-                          confirmDelete === admin.id
-                            ? handleDeactivate(admin.id)
-                            : setConfirmDelete(admin.id)
-                        }
-                        className="shrink-0 text-sand-300 hover:text-red-500"
-                        aria-label={`Deactivate ${admin.name}`}
-                      >
-                        {pendingId === admin.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : confirmDelete === admin.id ? (
-                          <span className="text-xs font-medium text-red-500">
-                            Sure?
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <span className="text-xs text-forest-700">
+                        {admin.email}
+                      </span>
+                      {admin.scholar && (
+                        <>
+                          <span className="text-xs text-sand-300">·</span>
+                          <span className="text-xs text-forest-700">
+                            {admin.scholar.name}
                           </span>
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
-                    )}
+                        </>
+                      )}
+                    </div>
                   </div>
+
+                  <Badge
+                    variant={
+                      admin.role === "super_admin" ? "clay" : "default"
+                    }
+                    className="shrink-0 text-[10px]"
+                  >
+                    {admin.role === "super_admin" ? "Super" : "Scholar"}
+                  </Badge>
+
+                  <Badge
+                    variant={admin.is_active ? "default" : "outline"}
+                    className="shrink-0"
+                  >
+                    {admin.is_active ? "Active" : "Inactive"}
+                  </Badge>
+
+                  <span className="font-mono text-[10px] text-sand-300 shrink-0">
+                    {formatDate(admin.created_at)}
+                  </span>
+
+                  {admin.is_active && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={pendingId === admin.id}
+                      onClick={() =>
+                        confirmDelete === admin.id
+                          ? handleDeactivate(admin.id)
+                          : setConfirmDelete(admin.id)
+                      }
+                      className="shrink-0 text-sand-300 hover:text-red-500"
+                      aria-label={`Deactivate ${admin.name}`}
+                    >
+                      {pendingId === admin.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : confirmDelete === admin.id ? (
+                        <span className="text-xs font-medium text-red-500">
+                          Sure?
+                        </span>
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -361,17 +352,19 @@ export function AdminsList({
                     : "Invite your first admin to get started."
                 }
                 action={
-                  !search && roleFilter === "all" && statusFilter === "all" ? (
-                    <Button variant="primary" onClick={openInviteDialog}>
-                      Invite admin
-                    </Button>
-                  ) : undefined
+                  !search && roleFilter === "all" && statusFilter === "all"
+                    ? (
+                      <Button variant="primary" onClick={openInviteDialog}>
+                        Invite admin
+                      </Button>
+                    )
+                    : undefined
                 }
               />
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       <Dialog
         open={dialogOpen}
@@ -392,9 +385,7 @@ export function AdminsList({
               <div className="space-y-3 rounded-lg border border-sand-200 bg-sand-100 p-4">
                 <div className="space-y-0.5">
                   <p className="text-xs font-medium text-sand-300">Email</p>
-                  <p className="text-sm text-forest-900">
-                    {inviteResult.email}
-                  </p>
+                  <p className="text-sm text-forest-900">{inviteResult.email}</p>
                 </div>
                 <div className="space-y-0.5">
                   <p className="text-xs font-medium text-sand-300">
@@ -435,14 +426,10 @@ export function AdminsList({
                 )}
 
                 <div className="space-y-1.5">
-                  <label
-                    htmlFor="admin-name"
-                    className="text-sm font-medium text-forest-900"
-                  >
+                  <label className="text-sm font-medium text-forest-900">
                     Name
                   </label>
                   <Input
-                    id="admin-name"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="Admin name"
@@ -451,14 +438,10 @@ export function AdminsList({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label
-                    htmlFor="admin-email"
-                    className="text-sm font-medium text-forest-900"
-                  >
+                  <label className="text-sm font-medium text-forest-900">
                     Email
                   </label>
                   <Input
-                    id="admin-email"
                     type="email"
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
@@ -468,10 +451,7 @@ export function AdminsList({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label
-                    htmlFor="admin-role"
-                    className="text-sm font-medium text-forest-900"
-                  >
+                  <label className="text-sm font-medium text-forest-900">
                     Role
                   </label>
                   <Select
@@ -480,11 +460,13 @@ export function AdminsList({
                       setFormRole(v as "super_admin" | "scholar_admin")
                     }
                   >
-                    <SelectTrigger id="admin-role">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="super_admin">Super admin</SelectItem>
+                      <SelectItem value="super_admin">
+                        Super admin
+                      </SelectItem>
                       <SelectItem value="scholar_admin">
                         Scholar admin
                       </SelectItem>
@@ -494,14 +476,10 @@ export function AdminsList({
 
                 {formRole === "scholar_admin" && (
                   <div className="space-y-1.5">
-                    <label
-                      htmlFor="admin-scholar"
-                      className="text-sm font-medium text-forest-900"
-                    >
+                    <label className="text-sm font-medium text-forest-900">
                       Scholar
                     </label>
                     <Input
-                      id="admin-scholar"
                       value={formScholarId}
                       onChange={(e) => setFormScholarId(e.target.value)}
                       placeholder="Scholar ID"

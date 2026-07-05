@@ -15,6 +15,9 @@ const ALLOWED_EXTENSIONS = new Set([
   "oga",
 ]);
 
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = new Set(["mp3", "wav", "ogg", "aac", "m4a", "wma"]);
+
 export async function POST(request: NextRequest) {
   const authResult = await requireAdminApi();
   if (authResult instanceof Response) return authResult;
@@ -41,6 +44,18 @@ export async function POST(request: NextRequest) {
   const file = entry;
 
   if (file.size > MAX_FILE_SIZE) {
+    return NextResponse.json(
+      {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "File exceeds 500 MB limit",
+        },
+      },
+      { status: 413 },
+    );
+  }
+
+  if (!file.type.startsWith("audio/")) {
     return NextResponse.json(
       {
         error: {

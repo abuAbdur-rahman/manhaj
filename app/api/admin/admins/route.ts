@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const CreateAdminSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const password = `${crypto.randomUUID().slice(0, 16)}A1!`;
+  const password = crypto.randomUUID().slice(0, 16) + "A1!";
 
   const { data: authUser, error: createUserError } =
     await adminClient.auth.admin.createUser({
@@ -132,5 +132,5 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(newAdmin, { status: 201 });
+  return NextResponse.json({ ...newAdmin, tempPassword: password }, { status: 201 });
 }

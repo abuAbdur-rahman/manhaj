@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -7,24 +7,10 @@ const UpdateEpisodeSchema = z.object({
   title: z.string().min(1).optional(),
   series_id: z.string().min(1).optional(),
   language: z.enum(["yoruba", "english", "arabic"]).optional(),
-  tags: z
-    .array(
-      z.enum([
-        "aqeedah",
-        "fiqh",
-        "tafseer",
-        "hadith",
-        "seerah",
-        "manhaj",
-        "adab",
-        "family",
-        "ibadah",
-        "dawah",
-        "ruqyah",
-        "arabic",
-      ]),
-    )
-    .optional(),
+  tags: z.array(z.enum([
+    "aqeedah", "fiqh", "tafseer", "hadith", "seerah",
+    "manhaj", "adab", "family", "ibadah", "dawah", "ruqyah", "arabic",
+  ])).optional(),
   description: z.string().optional(),
   is_published: z.boolean().optional(),
 });
@@ -179,7 +165,7 @@ export async function DELETE(
 
   const { error: deleteError } = await supabase
     .from("episodes")
-    .update({ is_published: false })
+    .delete()
     .eq("id", id);
 
   if (deleteError) {

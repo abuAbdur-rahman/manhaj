@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -48,13 +48,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const {
-    title,
-    description,
-    cover_url,
-    is_featured,
-    scholar_id: bodyScholarId,
-  } = result.data;
+  const { title, description, cover_url, is_featured, scholar_id: bodyScholarId } = result.data;
   const supabase = await createClient();
 
   if (admin.role === "scholar_admin" && !admin.scholarId) {
@@ -96,8 +90,8 @@ export async function POST(request: NextRequest) {
 
   const baseSlug = slugify(title);
   const uniqueSlug = baseSlug
-    ? `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`
-    : `series-${crypto.randomUUID().slice(0, 8)}`;
+    ? `${baseSlug}-${Date.now().toString(36)}`
+    : `series-${Date.now().toString(36)}`;
 
   const { data: series, error: insertError } = await supabase
     .from("series")

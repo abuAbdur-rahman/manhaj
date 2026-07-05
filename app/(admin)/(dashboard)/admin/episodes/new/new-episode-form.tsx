@@ -86,7 +86,7 @@ export function NewEpisodeForm({
 }: NewEpisodeFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const xhrRef = useRef<XMLHttpRequest | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const [title, setTitle] = useState("");
   const [scholarId, setScholarId] = useState(
@@ -176,20 +176,14 @@ export function NewEpisodeForm({
 
         setAudioUrl(result.url);
 
-        const tempAudio = new Audio();
-        const objectUrl = URL.createObjectURL(file);
-        tempAudio.preload = "metadata";
-        await new Promise<void>((resolve, reject) => {
-          tempAudio.addEventListener("loadedmetadata", () => {
-            setDurationSeconds(Math.round(tempAudio.duration));
-            resolve();
-          });
-          tempAudio.addEventListener("error", () => {
-            reject(new Error("Could not read audio duration"));
-          });
-          tempAudio.src = objectUrl;
-        });
-        URL.revokeObjectURL(objectUrl);
+        const arrayBuffer = await file.arrayBuffer();
+        const tempCtx = new AudioContext();
+        try {
+          const audioBuffer = await tempCtx.decodeAudioData(arrayBuffer);
+          setDurationSeconds(Math.round(audioBuffer.duration));
+        } finally {
+          tempCtx.close();
+        }
 
         setUploadState("uploaded");
       } catch (err) {
