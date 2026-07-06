@@ -2,8 +2,8 @@
 
 import { Clock, Download, Loader2, Play, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { forwardRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { forwardRef, useCallback, useMemo } from "react";
 import { cn } from "@/components/ui/cn";
 import { formatDuration } from "@/lib/audio";
 import { downloadEpisode } from "@/lib/download";
@@ -45,6 +45,17 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
     );
     const isDownloaded = downloadedIds.has(episode.id);
 
+    const getNavigationHref = useCallback(() => {
+      if (
+        variant === "download" &&
+        typeof navigator !== "undefined" &&
+        !navigator.onLine
+      ) {
+        return `/offline/${episode.slug}`;
+      }
+      return href;
+    }, [episode.slug, href, variant]);
+
     const durationText = useMemo(
       () => formatDuration(episode.duration_seconds ?? 0),
       [episode.duration_seconds],
@@ -70,13 +81,12 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
             "group flex items-center gap-3 rounded-lg px-4 py-3 transition-all hover:bg-sand-100 cursor-pointer",
             className,
           )}
-          onClick={() => router.push(href)}
-          role="button"
+          onClick={() => router.push(getNavigationHref())}
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              router.push(href);
+              router.push(getNavigationHref());
             }
           }}
         >
@@ -284,7 +294,6 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
           }
           onPlay?.(episode);
         }}
-        role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {

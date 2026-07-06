@@ -24,7 +24,7 @@ const serwist = new Serwist({
   fallbacks: {
     entries: [
       {
-        url: "/offline.html",
+        url: "/downloads",
         matcher({ request }) {
           return request.destination === "document";
         },
