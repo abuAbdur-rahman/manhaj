@@ -17,21 +17,31 @@ export function OfflineDetector() {
   useEffect(() => {
     if (!mounted || !offline) return;
 
+    if (pathname.startsWith("/offline/") || pathname === "/downloads") {
+      return;
+    }
+
     if (
       pathname.startsWith("/lectures/") &&
-      !pathname.includes("mode=offline")
+      !pathname.startsWith("/offline/")
     ) {
-      router.replace(`${pathname}?mode=offline`);
-    } else if (pathname !== "/downloads") {
+      router.replace(pathname.replace("/lectures/", "/offline/"));
+    } else {
       router.replace("/downloads");
     }
   }, [mounted, offline, pathname, router]);
 
   const handleOffline = useCallback(() => {
     setOffline(true);
-    if (pathname.startsWith("/lectures/")) {
-      router.replace(`${pathname}?mode=offline`);
-    } else if (pathname !== "/downloads") {
+    if (pathname.startsWith("/offline/") || pathname === "/downloads") {
+      return;
+    }
+    if (
+      pathname.startsWith("/lectures/") &&
+      !pathname.startsWith("/offline/")
+    ) {
+      router.replace(pathname.replace("/lectures/", "/offline/"));
+    } else {
       router.replace("/downloads");
     }
   }, [pathname, router]);

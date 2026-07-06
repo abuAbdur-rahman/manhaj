@@ -26,6 +26,16 @@ async function checkStorageQuota(): Promise<{
   return { available: 50 * 1024 * 1024, used: 0, quota: 50 * 1024 * 1024 };
 }
 
+async function requestPersistentStorage(): Promise<void> {
+  try {
+    if ("storage" in navigator && "persist" in navigator.storage) {
+      await navigator.storage.persist();
+    }
+  } catch (error) {
+    console.warn("Persistent storage request failed:", error);
+  }
+}
+
 export async function downloadEpisode(
   episode: Episode,
   onProgress?: (progress: DownloadProgress) => void,
@@ -95,6 +105,7 @@ export async function downloadEpisode(
     store.updateProgress(episode.id, { status: "saving" });
     const blob = new Blob(chunks, { type: "audio/mpeg" });
     await saveDownload(episode, blob);
+    await requestPersistentStorage();
 
     store.updateProgress(episode.id, { status: "completed", percent: 100 });
     toast.success(`Downloaded "${episode.title}"`);
