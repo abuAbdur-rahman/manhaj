@@ -4,7 +4,7 @@ import { Download, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AudioCard } from "@/components/episodes/audio-card";
-import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -86,10 +86,16 @@ export function DownloadsContent() {
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="back" label="Downloads" />
-        <HeaderCenter title="Downloads" />
-      </Header>
+      <Header
+        title="Downloads"
+        actions={
+          downloads.length > 0 ? (
+            <span className="font-mono text-xs font-medium text-forest-500 dark:text-ink-500">
+              {formatBytes(totalBytes)} used
+            </span>
+          ) : null
+        }
+      />
 
       <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4">

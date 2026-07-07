@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { ScholarRow } from "@/components/scholars/scholar-row";
 import { getAllScholars } from "@/lib/data";
 
@@ -8,10 +8,7 @@ export default async function ScholarsPage() {
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="back" label="Scholars" />
-        <HeaderCenter title="Scholars" />
-      </Header>
+      <Header title="Scholars" />
 
       <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 pb-8">

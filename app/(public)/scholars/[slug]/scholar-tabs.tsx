@@ -33,7 +33,7 @@ export function ScholarTabs({ series, episodes }: ScholarTabsProps) {
             ))}
           </div>
         ) : (
-          <p className="py-8 text-center text-sm text-sand-300">
+          <p className="py-8 text-center text-sm text-sand-300 dark:text-ink-500">
             No series yet. Check back soon.
           </p>
         )}
@@ -41,13 +41,13 @@ export function ScholarTabs({ series, episodes }: ScholarTabsProps) {
 
       <TabsContent value="episodes">
         {episodes.length > 0 ? (
-          <div className="divide-y divide-sand-200">
+          <div className="divide-y divide-sand-200 dark:divide-ink-700">
             {episodes.map((episode, i) => (
               <AudioCard key={episode.id} episode={episode} number={i + 1} />
             ))}
           </div>
         ) : (
-          <p className="py-8 text-center text-sm text-sand-300">
+          <p className="py-8 text-center text-sm text-sand-300 dark:text-ink-500">
             No episodes yet. Check back soon.
           </p>
         )}

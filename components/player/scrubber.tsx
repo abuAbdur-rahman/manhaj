@@ -75,7 +75,7 @@ export function Scrubber({
     <div
       ref={trackRef}
       className={cn(
-        "relative h-2 w-full cursor-pointer rounded-full bg-sand-200",
+        "relative h-2 w-full cursor-pointer rounded-full bg-sand-200 dark:bg-ink-800",
         className,
       )}
       onMouseDown={handleMouseDown}

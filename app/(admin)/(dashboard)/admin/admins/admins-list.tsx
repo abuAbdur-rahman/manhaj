@@ -3,12 +3,7 @@
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Header,
-  HeaderCenter,
-  HeaderLeft,
-  HeaderRight,
-} from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -198,10 +193,9 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="logo" />
-        <HeaderCenter title="Admins" />
-        <HeaderRight>
+      <Header
+        title="Admins"
+        actions={
           <Button
             variant="primary"
             size="sm"
@@ -211,8 +205,8 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
             <Plus className="h-4 w-4" />
             Invite
           </Button>
-        </HeaderRight>
-      </Header>
+        }
+      />
 
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
@@ -423,10 +417,14 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-forest-900">
+                  <label
+                    htmlFor="admin-name"
+                    className="text-sm font-medium text-forest-900"
+                  >
                     Name
                   </label>
                   <Input
+                    id="admin-name"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="Admin name"
@@ -435,10 +433,14 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-forest-900">
+                  <label
+                    htmlFor="admin-email"
+                    className="text-sm font-medium text-forest-900"
+                  >
                     Email
                   </label>
                   <Input
+                    id="admin-email"
                     type="email"
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
@@ -448,16 +450,19 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-forest-900">
+                  <span
+                    id="admin-role-label"
+                    className="text-sm font-medium text-forest-900"
+                  >
                     Role
-                  </label>
+                  </span>
                   <Select
                     value={formRole}
                     onValueChange={(v) =>
                       setFormRole(v as "super_admin" | "scholar_admin")
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger aria-labelledby="admin-role-label">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -471,10 +476,14 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
 
                 {formRole === "scholar_admin" && (
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-forest-900">
+                    <label
+                      htmlFor="admin-scholar-id"
+                      className="text-sm font-medium text-forest-900"
+                    >
                       Scholar
                     </label>
                     <Input
+                      id="admin-scholar-id"
                       value={formScholarId}
                       onChange={(e) => setFormScholarId(e.target.value)}
                       placeholder="Scholar ID"

@@ -46,16 +46,16 @@ export function DownloadRow({
         }
       }}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-sand-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-sand-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:hover:bg-ink-800",
         className,
       )}
     >
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-forest-900 truncate">
+        <p className="text-sm font-medium text-forest-900 truncate dark:text-ink-100">
           {episode.title}
         </p>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="font-mono text-xs text-sand-300">
+          <span className="font-mono text-xs text-sand-300 dark:text-ink-500">
             {formatDuration(episode.duration_seconds ?? 0)}
           </span>
           {episode.tags.slice(0, 2).map((tag) => (
@@ -64,7 +64,7 @@ export function DownloadRow({
             </Badge>
           ))}
         </div>
-        <p className="mt-0.5 text-xs text-sand-300">
+        <p className="mt-0.5 text-xs text-sand-300 dark:text-ink-500">
           Downloaded {formatDistanceToNow(new Date(downloadedAt))}
         </p>
       </div>
@@ -76,7 +76,7 @@ export function DownloadRow({
             e.stopPropagation();
             onPlay?.(download);
           }}
-          className="flex h-11 w-11 items-center justify-center rounded-full text-forest-500 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-forest-500 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-100 dark:hover:bg-ink-800"
           aria-label={`Play: ${episode.title}`}
         >
           <Play className="h-5 w-5" />
@@ -88,7 +88,7 @@ export function DownloadRow({
               <button
                 type="button"
                 onClick={(e) => e.stopPropagation()}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-sand-300 hover:text-red-600 hover:bg-red-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-sand-300 hover:text-red-600 hover:bg-red-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                 aria-label={`Remove download: ${episode.title}`}
               >
                 <Trash2 className="h-5 w-5" />

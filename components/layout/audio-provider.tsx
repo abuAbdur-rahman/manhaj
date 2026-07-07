@@ -7,6 +7,7 @@ import { usePlayerStore } from "@/store/player";
 export function AudioProvider() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+  const playingRef = useRef(false);
   const {
     currentEpisode,
     isPlaying,
@@ -18,6 +19,8 @@ export function AudioProvider() {
     setLoading,
     setAudioRef,
   } = usePlayerStore();
+
+  playingRef.current = isPlaying;
 
   useEffect(() => {
     setAudioRef(audioRef.current);
@@ -38,19 +41,24 @@ export function AudioProvider() {
       return;
     }
 
-    const resolveSrc = async () => {
+    let cancelled = false;
+
+    const resolveAndPlay = async () => {
       let downloads: Awaited<ReturnType<typeof listDownloads>> = [];
       try {
         downloads = await listDownloads();
       } catch {
         // IDB unavailable — stream from network
       }
-      const local = downloads.find((d) => d.episode.id === currentEpisode.id);
+
+      if (cancelled) return;
 
       if (objectUrlRef.current) {
         URL.revokeObjectURL(objectUrlRef.current);
         objectUrlRef.current = null;
       }
+
+      const local = downloads.find((d) => d.episode.id === currentEpisode.id);
 
       if (local?.audioBlob) {
         const url = URL.createObjectURL(local.audioBlob);
@@ -60,6 +68,16 @@ export function AudioProvider() {
         audio.src = currentEpisode.audio_url;
       }
       audio.load();
+
+      if (cancelled) return;
+
+      if (playingRef.current) {
+        try {
+          await audio.play();
+        } catch {
+          setPlaying(false);
+        }
+      }
     };
 
     if (audio.src) {
@@ -68,14 +86,18 @@ export function AudioProvider() {
         !currentSrc.startsWith("blob:") &&
         currentSrc !== currentEpisode.audio_url
       ) {
-        resolveSrc();
+        resolveAndPlay();
       } else if (currentSrc.startsWith("blob:") && !objectUrlRef.current) {
-        resolveSrc();
+        resolveAndPlay();
       }
     } else {
-      resolveSrc();
+      resolveAndPlay();
     }
-  }, [currentEpisode]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentEpisode, setPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -98,7 +120,9 @@ export function AudioProvider() {
     if (!audio || !currentEpisode) return;
 
     if (isPlaying) {
-      audio.play().catch(() => setPlaying(false));
+      if (audio.readyState >= 2 || audio.src) {
+        audio.play().catch(() => setPlaying(false));
+      }
     } else {
       audio.pause();
     }

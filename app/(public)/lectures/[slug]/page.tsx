@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { getEpisodeBySlug, getSeriesEpisodes } from "@/lib/data";
 import { LectureContent } from "./lecture-content";
-import { OfflineLecture } from "./offline-lecture";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ mode?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -35,26 +33,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function LecturePage({ params, searchParams }: Props) {
+export default async function LecturePage({ params }: Props) {
   const { slug } = await params;
-  const { mode } = await searchParams;
 
   const episode = await getEpisodeBySlug(slug);
 
   if (!episode) {
-    if (mode === "offline") {
-      return (
-        <>
-          <Header>
-            <HeaderLeft type="back" label="Lecture" />
-            <HeaderCenter title="Lecture" />
-          </Header>
-          <main className="flex-1">
-            <OfflineLecture slug={slug} />
-          </main>
-        </>
-      );
-    }
     notFound();
   }
 
@@ -67,10 +51,7 @@ export default async function LecturePage({ params, searchParams }: Props) {
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="back" label="Lecture" />
-        <HeaderCenter title={episode.title} />
-      </Header>
+      <Header title={episode.title} backLabel="Lecture" />
 
       <main className="flex-1">
         <LectureContent episode={episode} moreEpisodes={moreEpisodes} />

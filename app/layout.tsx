@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Naskh_Arabic } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { SwRegister } from "@/components/layout/sw-register";
 import "./globals.css";
@@ -29,8 +30,15 @@ export const metadata: Metadata = {
     "A focused audio lecture platform for Nigerian Sunni/Salafi scholars. Stream, download, and organize lectures from trusted scholars.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: [
+      { url: "/favicon.png", sizes: "48x48", type: "image/png" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-180x180.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.png",
   },
   openGraph: {
     title: "Manhaj — Ilm, organized.",
@@ -56,13 +64,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${notoNaskhArabic.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <head>
-        <meta name="theme-color" content="#1a6b3c" />
-      </head>
-      <body className="flex min-h-full flex-col bg-sand-50 text-forest-900 font-sans">
-        {children}
-        <Toaster position="top-center" theme="light" />
+      <body className="flex min-h-full flex-col bg-sand-50 text-forest-900 font-sans dark:bg-ink-950 dark:text-ink-100">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
+        <Toaster position="top-center" theme="system" />
         <SwRegister />
       </body>
     </html>
