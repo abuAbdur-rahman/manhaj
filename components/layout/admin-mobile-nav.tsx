@@ -52,7 +52,7 @@ export function AdminMobileNav({
   return (
     <nav
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-sand-200 bg-sand-100 h-[calc(3.5rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)]",
+        "fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-sand-200 bg-sand-100 h-[calc(3.5rem+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] dark:border-ink-700 dark:bg-ink-900",
         className,
       )}
       aria-label="Admin navigation"
@@ -71,8 +71,8 @@ export function AdminMobileNav({
             className={cn(
               "flex flex-col items-center justify-center gap-0.5 px-3 py-1 min-h-11 min-w-11 rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
               isActive
-                ? "text-forest-600"
-                : "text-sand-300 hover:text-forest-700",
+                ? "text-forest-600 dark:text-ink-100"
+                : "text-sand-300 hover:text-forest-700 dark:text-ink-500 dark:hover:text-ink-100",
             )}
             aria-current={isActive ? "page" : undefined}
           >
@@ -88,7 +88,7 @@ export function AdminMobileNav({
         type="button"
         onClick={onMenuClick}
         className={cn(
-          "flex flex-col items-center justify-center gap-0.5 px-3 py-1 min-h-11 min-w-11 rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 text-sand-300 hover:text-forest-700",
+          "flex flex-col items-center justify-center gap-0.5 px-3 py-1 min-h-11 min-w-11 rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 text-sand-300 hover:text-forest-700 dark:text-ink-500 dark:hover:text-ink-100",
         )}
         aria-label="More menu"
       >

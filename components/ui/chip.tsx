@@ -17,12 +17,14 @@ export function Chip({
   ...props
 }: ChipProps) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-sand-100 text-forest-700 text-sm font-medium transition-colors">
+    <span className="inline-flex items-center gap-1 rounded-full bg-sand-100 text-forest-700 text-sm font-medium transition-colors dark:bg-ink-800 dark:text-ink-100">
       <button
         type="button"
         className={cn(
           "rounded-full px-3 py-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
-          selected ? "bg-forest-100 text-forest-700" : "hover:bg-sand-200",
+          selected
+            ? "bg-forest-100 text-forest-700 dark:bg-ink-700 dark:text-ink-100"
+            : "hover:bg-sand-200 dark:hover:bg-ink-700",
           onRemove ? "pr-1" : "pr-3",
           className,
         )}
@@ -37,7 +39,7 @@ export function Chip({
             e.stopPropagation();
             onRemove();
           }}
-          className="rounded-full p-0.5 mr-1 hover:bg-forest-500/10 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
+          className="rounded-full p-0.5 mr-1 hover:bg-forest-500/10 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:hover:bg-ink-700"
           aria-label="Remove"
         >
           <X className="h-3 w-3" />

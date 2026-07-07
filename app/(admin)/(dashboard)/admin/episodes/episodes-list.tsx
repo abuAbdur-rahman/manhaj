@@ -4,12 +4,7 @@ import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import {
-  Header,
-  HeaderCenter,
-  HeaderLeft,
-  HeaderRight,
-} from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
@@ -160,10 +155,9 @@ export function EpisodesList({
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="logo" />
-        <HeaderCenter title="Episodes" />
-        <HeaderRight>
+      <Header
+        title="Episodes"
+        actions={
           <Link
             href="/admin/episodes/new"
             className={cn(
@@ -174,8 +168,8 @@ export function EpisodesList({
             <Plus className="h-4 w-4" />
             New
           </Link>
-        </HeaderRight>
-      </Header>
+        }
+      />
 
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">

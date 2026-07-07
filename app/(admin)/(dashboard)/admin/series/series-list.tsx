@@ -1,16 +1,12 @@
 "use client";
 
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Header,
-  HeaderCenter,
-  HeaderLeft,
-  HeaderRight,
-} from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -55,7 +51,6 @@ interface SeriesListProps {
   adminScholarId: string | null;
 }
 
-type ConfirmAction = "delete" | null;
 type FormMode = "create" | "edit";
 
 export function SeriesList({
@@ -241,10 +236,9 @@ export function SeriesList({
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="logo" />
-        <HeaderCenter title="Series" />
-        <HeaderRight>
+      <Header
+        title="Series"
+        actions={
           <Button
             variant="primary"
             size="sm"
@@ -254,8 +248,8 @@ export function SeriesList({
             <Plus className="h-4 w-4" />
             New
           </Button>
-        </HeaderRight>
-      </Header>
+        }
+      />
 
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
@@ -316,9 +310,11 @@ export function SeriesList({
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-sand-200 text-xs font-medium text-sand-300">
                     {series.cover_url ? (
-                      <img
+                      <Image
                         src={series.cover_url}
                         alt=""
+                        width={40}
+                        height={40}
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -440,10 +436,14 @@ export function SeriesList({
             )}
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
+              <label
+                htmlFor="series-title"
+                className="text-sm font-medium text-forest-900"
+              >
                 Title
               </label>
               <Input
+                id="series-title"
                 value={formTitle}
                 onChange={(e) => setFormTitle(e.target.value)}
                 placeholder="Series title"
@@ -452,10 +452,14 @@ export function SeriesList({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
+              <label
+                htmlFor="series-description"
+                className="text-sm font-medium text-forest-900"
+              >
                 Description
               </label>
               <Input
+                id="series-description"
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder="Optional description"
@@ -464,11 +468,14 @@ export function SeriesList({
 
             {formMode === "create" && adminRole === "super_admin" && (
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-forest-900">
+                <span
+                  id="series-scholar-label"
+                  className="text-sm font-medium text-forest-900"
+                >
                   Scholar
-                </label>
+                </span>
                 <Select value={formScholarId} onValueChange={setFormScholarId}>
-                  <SelectTrigger>
+                  <SelectTrigger aria-labelledby="series-scholar-label">
                     <SelectValue placeholder="Select scholar" />
                   </SelectTrigger>
                   <SelectContent>

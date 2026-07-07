@@ -13,7 +13,7 @@ export default function AdminDashboardError({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 text-center md:px-6">
-      <p className="text-body text-forest-700">
+      <p className="text-body text-forest-700 dark:text-ink-500">
         Couldn&apos;t load dashboard. Tap to retry.
       </p>
       <Button variant="primary" className="mt-4" onClick={reset}>

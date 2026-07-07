@@ -1,4 +1,4 @@
-import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { OfflineLecture } from "../../lectures/[slug]/offline-lecture";
 
 interface Props {
@@ -10,10 +10,7 @@ export default async function OfflineLecturePage({ params }: Props) {
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="back" label="Downloads" href="/downloads" />
-        <HeaderCenter title="Lecture" />
-      </Header>
+      <Header title="Lecture" backHref="/downloads" backLabel="Downloads" />
       <main className="flex-1">
         <OfflineLecture slug={slug} />
       </main>

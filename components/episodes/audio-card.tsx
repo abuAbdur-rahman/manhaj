@@ -75,41 +75,45 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
     // ============================================
     if (variant === "download") {
       return (
+        // biome-ignore lint/a11y/useSemanticElements: wrapper contains nested action buttons, so a native button would be invalid HTML.
         <div
           ref={ref}
           className={cn(
-            "group flex items-center gap-3 rounded-lg px-4 py-3 transition-all hover:bg-sand-100 cursor-pointer",
+            "group flex cursor-pointer items-center gap-3 rounded-xl border border-sand-200 bg-sand-50 px-4 py-3 shadow-[0_2px_10px_rgba(15,65,38,0.05)] transition-all dark:border-ink-700 dark:bg-ink-900 dark:shadow-black/20",
             className,
           )}
-          onClick={() => router.push(getNavigationHref())}
+          role="button"
+          onClick={() => {
+            window.location.href = getNavigationHref();
+          }}
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              router.push(getNavigationHref());
+              window.location.href = getNavigationHref();
             }
           }}
         >
           <div className="flex flex-1 items-start gap-3 min-w-0">
             {number !== undefined && (
-              <span className="shrink-0 w-6 text-right font-mono text-xs font-semibold text-forest-400 pt-0.5">
+              <span className="shrink-0 w-6 text-right font-mono text-xs font-semibold text-forest-400 pt-0.5 dark:text-ink-500">
                 {number}
               </span>
             )}
 
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-forest-900 line-clamp-2 break-words">
+              <h3 className="text-sm font-semibold text-forest-900 line-clamp-2 break-words dark:text-ink-100">
                 {episode.title}
               </h3>
 
               {(scholar || episode.scholar) && (
-                <p className="text-xs font-medium text-forest-600 mt-0.5">
+                <p className="text-xs font-medium text-forest-600 mt-0.5 dark:text-ink-500">
                   {(scholar || episode.scholar)?.name}
                 </p>
               )}
 
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span className="inline-flex items-center gap-1 font-mono text-xs font-medium text-forest-500">
+                <span className="inline-flex items-center gap-1 font-mono text-xs font-medium text-forest-500 dark:text-ink-500">
                   <Clock size={12} className="flex-shrink-0" />
                   {durationText}
                 </span>
@@ -117,7 +121,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
                 {episode.tags.slice(0, 2).map((tag) => (
                   <span
                     key={tag}
-                    className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-forest-50 text-forest-600"
+                    className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-forest-50 text-forest-600 dark:bg-ink-800 dark:text-ink-100"
                   >
                     {tag}
                   </span>
@@ -136,7 +140,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
               disabled={isDownloading}
               className={cn(
                 "p-2.5 rounded-full transition-all duration-150",
-                "bg-forest-50 text-forest-600 hover:bg-forest-100",
+                "bg-forest-50 text-forest-600 hover:bg-forest-100 dark:bg-ink-800 dark:text-ink-100 dark:hover:bg-ink-700",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
               )}
@@ -155,7 +159,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
               disabled={isDownloading}
               className={cn(
                 "p-2.5 rounded-full transition-all duration-150",
-                "text-forest-400 hover:text-red-600 hover:bg-red-50",
+                "text-forest-400 hover:text-red-600 hover:bg-red-50 dark:text-ink-500 dark:hover:bg-red-950/40 dark:hover:text-red-400",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
               )}
@@ -173,7 +177,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
     // VARIANT: CARD
     // ============================================
     if (variant === "card") {
-      const cardContent = (
+      const infoContent = (
         <>
           <div className="flex items-center justify-between gap-2">
             {(scholar || episode.scholar) && (
@@ -181,17 +185,17 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-forest-400 to-forest-600 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
                   {(scholar || episode.scholar)?.name?.[0]?.toUpperCase()}
                 </div>
-                <span className="text-[10px] font-medium text-forest-600 truncate">
+                <span className="text-[10px] font-medium text-forest-600 truncate dark:text-ink-500">
                   {(scholar || episode.scholar)?.name}
                 </span>
               </div>
             )}
-            <span className="font-mono text-xs text-forest-500 flex-shrink-0">
+            <span className="font-mono text-xs text-forest-500 flex-shrink-0 dark:text-ink-500">
               {durationText}
             </span>
           </div>
 
-          <h3 className="text-sm font-semibold text-forest-900 line-clamp-2 mt-2">
+          <h3 className="text-sm font-semibold text-forest-900 line-clamp-2 mt-2 dark:text-ink-100">
             {episode.title}
           </h3>
 
@@ -200,12 +204,34 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
               {episode.tags.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-forest-50 text-forest-600"
+                  className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-forest-50 text-forest-600 dark:bg-ink-800 dark:text-ink-100"
                 >
                   {tag}
                 </span>
               ))}
             </div>
+          )}
+        </>
+      );
+
+      return (
+        <div
+          ref={ref}
+          className={cn(
+            "flex w-48 shrink-0 flex-col rounded-xl border border-sand-200 bg-white p-3 shadow-[0_2px_12px_rgba(15,65,38,0.06)] transition-all duration-150 dark:border-ink-700 dark:bg-ink-900 dark:shadow-black/25",
+            className,
+          )}
+        >
+          {href ? (
+            <Link
+              href={href}
+              className="flex flex-col gap-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 rounded-sm"
+              aria-label={`View: ${episode.title}`}
+            >
+              {infoContent}
+            </Link>
+          ) : (
+            infoContent
           )}
 
           <div className="mt-3 flex items-center gap-2">
@@ -234,8 +260,8 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
               className={cn(
                 "p-2 rounded-lg transition-all duration-150",
                 isDownloaded
-                  ? "text-green-600 bg-green-50"
-                  : "text-forest-400 hover:text-forest-600 hover:bg-forest-50",
+                  ? "text-green-600 bg-green-50 dark:bg-green-950/40 dark:text-green-400"
+                  : "text-forest-400 hover:text-forest-600 hover:bg-forest-50 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-100",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
               )}
@@ -251,28 +277,6 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
               )}
             </button>
           </div>
-        </>
-      );
-
-      return (
-        <div
-          ref={ref}
-          className={cn(
-            "flex flex-col w-48 shrink-0 rounded-lg border border-sand-200 bg-white p-3 transition-all duration-150 hover:shadow-sm hover:border-forest-200",
-            className,
-          )}
-        >
-          {href ? (
-            <Link
-              href={href}
-              className="flex flex-col gap-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 rounded-sm"
-              aria-label={`View: ${episode.title}`}
-            >
-              {cardContent}
-            </Link>
-          ) : (
-            cardContent
-          )}
         </div>
       );
     }
@@ -281,10 +285,11 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
     // VARIANT: ROW (Default)
     // ============================================
     return (
+      // biome-ignore lint/a11y/useSemanticElements: wrapper contains nested download button, so a native button would be invalid HTML.
       <div
         ref={ref}
         className={cn(
-          "group flex items-center gap-3 rounded-lg px-4 py-3 transition-all hover:bg-sand-100 cursor-pointer",
+          "group flex cursor-pointer items-center gap-3 rounded-xl border border-sand-200 bg-sand-50 px-4 py-3 shadow-[0_2px_10px_rgba(15,65,38,0.05)] transition-all dark:border-ink-700 dark:bg-ink-900 dark:shadow-black/20",
           className,
         )}
         onClick={() => {
@@ -294,6 +299,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
           }
           onPlay?.(episode);
         }}
+        role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -308,25 +314,25 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
       >
         <div className="flex flex-1 items-start gap-3 min-w-0">
           {number !== undefined && (
-            <span className="shrink-0 w-6 text-right font-mono text-xs font-semibold text-forest-400 pt-0.5">
+            <span className="shrink-0 w-6 text-right font-mono text-xs font-semibold text-forest-400 pt-0.5 dark:text-ink-500">
               {number}
             </span>
           )}
 
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-forest-900 line-clamp-1">
+            <p className="text-sm font-semibold text-forest-900 line-clamp-1 dark:text-ink-100">
               {episode.title}
             </p>
 
             {(scholar || episode.scholar) && (
-              <p className="text-xs font-medium text-forest-600 mt-0.5">
+              <p className="text-xs font-medium text-forest-600 mt-0.5 dark:text-ink-500">
                 {(scholar || episode.scholar)?.name}
               </p>
             )}
 
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               {episode.language && (
-                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-forest-50 text-forest-600">
+                <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-forest-50 text-forest-600 dark:bg-ink-800 dark:text-ink-100">
                   {episode.language.slice(0, 3)}
                 </span>
               )}
@@ -334,7 +340,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
               {episode.tags.slice(0, 1).map((tag) => (
                 <span
                   key={tag}
-                  className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-sand-100 text-forest-700"
+                  className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-sand-100 text-forest-700 dark:bg-ink-800 dark:text-ink-100"
                 >
                   {tag}
                 </span>
@@ -344,7 +350,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <span className="font-mono text-xs font-medium text-forest-500 whitespace-nowrap">
+          <span className="font-mono text-xs font-medium text-forest-500 whitespace-nowrap dark:text-ink-500">
             {durationText}
           </span>
 
@@ -355,8 +361,8 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
             className={cn(
               "p-2 rounded-full transition-all duration-150 flex-shrink-0",
               isDownloaded
-                ? "text-green-600 bg-green-50"
-                : "text-forest-400 hover:text-forest-600 hover:bg-forest-50",
+                ? "text-green-600 bg-green-50 dark:bg-green-950/40 dark:text-green-400"
+                : "text-forest-400 hover:text-forest-600 hover:bg-forest-50 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-100",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
               "disabled:opacity-50 disabled:cursor-not-allowed",
             )}
@@ -391,14 +397,14 @@ export function AudioCardSkeleton({
 }) {
   if (variant === "card") {
     return (
-      <div className="flex flex-col w-48 shrink-0 rounded-lg border border-sand-200 bg-white p-3 animate-pulse">
+      <div className="flex flex-col w-48 shrink-0 rounded-lg border border-sand-200 bg-white p-3 animate-pulse dark:border-ink-700 dark:bg-ink-900">
         <div className="flex items-center justify-between">
-          <div className="h-8 w-8 rounded-full bg-sand-200" />
-          <div className="h-3 w-12 rounded bg-sand-200" />
+          <div className="h-8 w-8 rounded-full bg-sand-200 dark:bg-ink-800" />
+          <div className="h-3 w-12 rounded bg-sand-200 dark:bg-ink-800" />
         </div>
-        <div className="h-4 w-full rounded bg-sand-200 mt-3" />
-        <div className="h-3 w-2/3 rounded bg-sand-200 mt-2" />
-        <div className="h-10 w-full rounded-lg bg-sand-200 mt-3" />
+        <div className="h-4 w-full rounded bg-sand-200 mt-3 dark:bg-ink-800" />
+        <div className="h-3 w-2/3 rounded bg-sand-200 mt-2 dark:bg-ink-800" />
+        <div className="h-10 w-full rounded-lg bg-sand-200 mt-3 dark:bg-ink-800" />
       </div>
     );
   }
@@ -406,15 +412,15 @@ export function AudioCardSkeleton({
   if (variant === "download") {
     return (
       <div className="flex items-center gap-3 rounded-lg px-4 py-3 animate-pulse">
-        <div className="h-4 w-6 bg-sand-200 rounded" />
+        <div className="h-4 w-6 bg-sand-200 rounded dark:bg-ink-800" />
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-full bg-sand-200 rounded" />
-          <div className="h-3 w-2/3 bg-sand-200 rounded" />
-          <div className="h-3 w-1/3 bg-sand-200 rounded mt-1" />
+          <div className="h-4 w-full bg-sand-200 rounded dark:bg-ink-800" />
+          <div className="h-3 w-2/3 bg-sand-200 rounded dark:bg-ink-800" />
+          <div className="h-3 w-1/3 bg-sand-200 rounded mt-1 dark:bg-ink-800" />
         </div>
         <div className="flex gap-2">
-          <div className="h-10 w-10 bg-sand-200 rounded-full" />
-          <div className="h-10 w-10 bg-sand-200 rounded-full" />
+          <div className="h-10 w-10 bg-sand-200 rounded-full dark:bg-ink-800" />
+          <div className="h-10 w-10 bg-sand-200 rounded-full dark:bg-ink-800" />
         </div>
       </div>
     );
@@ -423,15 +429,15 @@ export function AudioCardSkeleton({
   return (
     <div className="flex items-center gap-3 rounded-lg px-4 py-3 animate-pulse">
       <div className="flex-1 space-y-2">
-        <div className="h-4 w-full bg-sand-200 rounded" />
-        <div className="h-3 w-2/3 bg-sand-200 rounded" />
+        <div className="h-4 w-full bg-sand-200 rounded dark:bg-ink-800" />
+        <div className="h-3 w-2/3 bg-sand-200 rounded dark:bg-ink-800" />
         <div className="flex gap-2 mt-1">
-          <div className="h-5 w-10 bg-sand-200 rounded-full" />
-          <div className="h-5 w-12 bg-sand-200 rounded-full" />
+          <div className="h-5 w-10 bg-sand-200 rounded-full dark:bg-ink-800" />
+          <div className="h-5 w-12 bg-sand-200 rounded-full dark:bg-ink-800" />
         </div>
       </div>
-      <div className="h-3 w-12 bg-sand-200 rounded shrink-0" />
-      <div className="h-10 w-10 bg-sand-200 rounded-full shrink-0" />
+      <div className="h-3 w-12 bg-sand-200 rounded shrink-0 dark:bg-ink-800" />
+      <div className="h-10 w-10 bg-sand-200 rounded-full shrink-0 dark:bg-ink-800" />
     </div>
   );
 }

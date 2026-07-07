@@ -1,10 +1,9 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 export function OfflineDetector() {
-  const router = useRouter();
   const pathname = usePathname();
   const [offline, setOffline] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -25,11 +24,11 @@ export function OfflineDetector() {
       pathname.startsWith("/lectures/") &&
       !pathname.startsWith("/offline/")
     ) {
-      router.replace(pathname.replace("/lectures/", "/offline/"));
+      window.location.href = pathname.replace("/lectures/", "/offline/");
     } else {
-      router.replace("/downloads");
+      window.location.href = "/downloads";
     }
-  }, [mounted, offline, pathname, router]);
+  }, [mounted, offline, pathname]);
 
   const handleOffline = useCallback(() => {
     setOffline(true);
@@ -40,11 +39,11 @@ export function OfflineDetector() {
       pathname.startsWith("/lectures/") &&
       !pathname.startsWith("/offline/")
     ) {
-      router.replace(pathname.replace("/lectures/", "/offline/"));
+      window.location.href = pathname.replace("/lectures/", "/offline/");
     } else {
-      router.replace("/downloads");
+      window.location.href = "/downloads";
     }
-  }, [pathname, router]);
+  }, [pathname]);
 
   const handleOnline = useCallback(() => {
     setOffline(false);

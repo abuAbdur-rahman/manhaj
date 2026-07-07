@@ -13,7 +13,7 @@ export function Skeleton({ className, lines = 1 }: SkeletonProps) {
           <div
             key={i}
             className={cn(
-              "h-4 animate-pulse rounded-md bg-sand-200",
+              "h-4 animate-pulse rounded-md bg-sand-200 dark:bg-ink-800",
               i === lines - 1 ? "w-3/4" : "w-full",
               className,
             )}
@@ -24,7 +24,12 @@ export function Skeleton({ className, lines = 1 }: SkeletonProps) {
   }
 
   return (
-    <div className={cn("animate-pulse rounded-md bg-sand-200", className)} />
+    <div
+      className={cn(
+        "animate-pulse rounded-md bg-sand-200 dark:bg-ink-800",
+        className,
+      )}
+    />
   );
 }
 
@@ -40,7 +45,7 @@ export function WaveformSkeleton({ className }: { className?: string }) {
       {[4, 7, 3, 6, 5].map((h, i) => (
         <div
           key={i}
-          className="w-1 rounded-full bg-forest-500/30"
+          className="w-1 rounded-full bg-forest-500/30 dark:bg-ink-500"
           style={{ height: `${h * 3}px` }}
         />
       ))}

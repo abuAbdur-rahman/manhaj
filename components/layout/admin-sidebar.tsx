@@ -78,12 +78,12 @@ export function AdminSidebar({
   return (
     <aside
       className={cn(
-        "flex flex-col border-r border-sand-200 bg-sand-100 transition-all duration-200",
+        "flex flex-col border-r border-sand-200 bg-sand-100 transition-all duration-200 dark:border-ink-700 dark:bg-ink-900",
         isCollapsed ? "w-16" : "w-60",
         className,
       )}
     >
-      <div className="flex h-14 items-center justify-between border-b border-sand-200 px-3">
+      <div className="flex h-14 items-center justify-between border-b border-sand-200 px-3 dark:border-ink-700">
         {!isCollapsed && (
           <Link href="/admin" className="flex items-center gap-2 shrink-0">
             <div className="relative h-6 w-6 shrink-0">
@@ -94,7 +94,9 @@ export function AdminSidebar({
                 className="object-contain"
               />
             </div>
-            <span className="text-sm font-semibold text-forest-700">Admin</span>
+            <span className="text-sm font-semibold text-forest-700 dark:text-ink-100">
+              Admin
+            </span>
           </Link>
         )}
         <Button
@@ -127,8 +129,8 @@ export function AdminSidebar({
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
                 isActive
-                  ? "bg-forest-50 text-forest-700"
-                  : "text-forest-700 hover:bg-sand-50",
+                  ? "bg-forest-50 text-forest-700 dark:bg-ink-800 dark:text-ink-100"
+                  : "text-forest-700 hover:bg-sand-50 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-100",
                 isCollapsed && "justify-center px-2",
               )}
               aria-current={isActive ? "page" : undefined}
@@ -141,12 +143,12 @@ export function AdminSidebar({
         })}
       </nav>
 
-      <div className="border-t border-sand-200 p-2">
+      <div className="border-t border-sand-200 p-2 dark:border-ink-700">
         <button
           type="button"
           onClick={onSignOut}
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-forest-700 transition-colors hover:bg-sand-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-forest-700 transition-colors hover:bg-sand-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-100",
             isCollapsed && "justify-center px-2",
           )}
           title={isCollapsed ? "Sign out" : undefined}
