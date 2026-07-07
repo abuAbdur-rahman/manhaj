@@ -12,11 +12,12 @@ const buttonVariants = cva(
         primary:
           "bg-forest-500 text-white hover:bg-forest-600 active:bg-forest-700",
         secondary:
-          "bg-sand-100 text-forest-900 hover:bg-sand-200 active:bg-sand-300",
-        ghost: "text-forest-700 hover:bg-sand-100 active:bg-sand-200",
+          "bg-sand-100 text-forest-900 hover:bg-sand-200 active:bg-sand-300 dark:bg-ink-800 dark:text-ink-100 dark:hover:bg-ink-700 dark:active:bg-ink-700",
+        ghost:
+          "text-forest-700 hover:bg-sand-100 active:bg-sand-200 dark:text-ink-100 dark:hover:bg-ink-800 dark:active:bg-ink-700",
         clay: "bg-clay-500 text-white hover:bg-clay-600 active:bg-clay-500",
         outline:
-          "border border-sand-200 text-forest-700 hover:bg-sand-100 active:bg-sand-200",
+          "border border-sand-200 text-forest-700 hover:bg-sand-100 active:bg-sand-200 dark:border-ink-700 dark:text-ink-100 dark:hover:bg-ink-800 dark:active:bg-ink-700",
         destructive: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
       },
       size: {

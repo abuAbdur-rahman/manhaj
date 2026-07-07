@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { getSeriesWithEpisodes } from "@/lib/data";
 import { SeriesContent } from "./series-content";
 
@@ -21,13 +21,11 @@ export default async function SeriesPage({ params }: SeriesPageProps) {
 
   return (
     <div className="min-h-screen">
-      <Header>
-        <HeaderLeft type="back" label="Back to series" />
-        <HeaderCenter
-          title={series.title}
-          subtitle={`${series.scholar?.name ?? "Scholar"} \u00b7 ${episodeCount} episode${episodeCount !== 1 ? "s" : ""}`}
-        />
-      </Header>
+      <Header
+        title={series.title}
+        subtitle={`${series.scholar?.name ?? "Scholar"} \u00b7 ${episodeCount} episode${episodeCount !== 1 ? "s" : ""}`}
+        backLabel={series.scholar?.name ?? "Scholar"}
+      />
 
       <SeriesContent episodes={episodes} />
     </div>

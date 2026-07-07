@@ -3,7 +3,7 @@
 import { Loader2, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -86,7 +86,6 @@ export function NewEpisodeForm({
 }: NewEpisodeFormProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
   const [title, setTitle] = useState("");
@@ -300,16 +299,11 @@ export function NewEpisodeForm({
 
   return (
     <>
-      <Header>
-        <HeaderLeft
-          type="breadcrumb"
-          segments={[
-            { label: "Episodes", href: "/admin/episodes" },
-            { label: "New", href: "/admin/episodes/new" },
-          ]}
-        />
-        <HeaderCenter title="New Episode" />
-      </Header>
+      <Header
+        title="New Episode"
+        backHref="/admin/episodes"
+        backLabel="Episodes"
+      />
 
       <div className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <div className="mx-auto max-w-2xl px-4 py-6 md:px-6">

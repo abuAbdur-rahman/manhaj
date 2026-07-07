@@ -29,12 +29,12 @@ export function SheetContent({
       <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50" />
       <Drawer.Content
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-xl bg-white",
+          "fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-xl bg-white dark:bg-ink-900",
           className,
         )}
         {...props}
       >
-        <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-sand-200" />
+        <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-sand-200 dark:bg-ink-700" />
         {children}
       </Drawer.Content>
     </Drawer.Portal>
@@ -62,7 +62,10 @@ export function SheetTitle({
 }: ComponentProps<typeof Drawer.Title>) {
   return (
     <Drawer.Title
-      className={cn("text-lg font-semibold text-forest-900", className)}
+      className={cn(
+        "text-lg font-semibold text-forest-900 dark:text-ink-100",
+        className,
+      )}
       {...props}
     />
   );
@@ -75,7 +78,7 @@ export function SheetClose({
   return (
     <Drawer.Close
       className={cn(
-        "rounded-full p-1 text-sand-300 transition-colors hover:text-forest-700",
+        "rounded-full p-1 text-sand-300 transition-colors hover:text-forest-700 dark:text-ink-500 dark:hover:text-ink-100",
         className,
       )}
       {...props}

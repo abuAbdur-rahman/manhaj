@@ -15,7 +15,9 @@ export default function AdminLoginPage() {
               loading="eager"
             />
           </div>
-          <h1 className="text-display font-semibold text-forest-900">Admin</h1>
+          <h1 className="text-display font-semibold text-forest-900 dark:text-ink-100">
+            Admin
+          </h1>
         </div>
         <LoginForm />
       </div>

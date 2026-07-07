@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const password = crypto.randomUUID().slice(0, 16) + "A1!";
+  const password = `${crypto.randomUUID().slice(0, 16)}A1!`;
 
   const { data: authUser, error: createUserError } =
     await adminClient.auth.admin.createUser({

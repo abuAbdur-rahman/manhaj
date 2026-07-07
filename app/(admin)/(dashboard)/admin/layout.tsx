@@ -10,6 +10,11 @@ export default async function AdminDashboardLayout({
   const admin = await requireAdmin();
 
   return (
-    <AdminDashboardShell role={admin.role}>{children}</AdminDashboardShell>
+    <AdminDashboardShell
+      role={admin.role}
+      admin={{ name: admin.name, email: admin.email }}
+    >
+      {children}
+    </AdminDashboardShell>
   );
 }

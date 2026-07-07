@@ -45,10 +45,10 @@ export function PlayerControls({
       <Scrubber currentTime={currentTime} duration={duration} onSeek={onSeek} />
 
       <div className="flex items-center justify-between px-4">
-        <span className="font-mono text-xs text-sand-300 w-12 text-right">
+        <span className="font-mono text-xs text-sand-300 w-12 text-right dark:text-ink-500">
           {formatDuration(currentTime)}
         </span>
-        <span className="font-mono text-xs text-sand-300 w-12">
+        <span className="font-mono text-xs text-sand-300 w-12 dark:text-ink-500">
           {formatDuration(duration)}
         </span>
       </div>
@@ -57,7 +57,7 @@ export function PlayerControls({
         <button
           type="button"
           onClick={onSkipBack}
-          className="flex h-11 w-11 items-center justify-center rounded-full text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-100 dark:hover:bg-ink-800"
           aria-label="Skip back 10 seconds"
         >
           <SkipBack className="h-5 w-5" />
@@ -73,7 +73,7 @@ export function PlayerControls({
         <button
           type="button"
           onClick={onSkipForward}
-          className="flex h-11 w-11 items-center justify-center rounded-full text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-100 dark:hover:bg-ink-800"
           aria-label="Skip forward 10 seconds"
         >
           <SkipForward className="h-5 w-5" />
@@ -90,8 +90,8 @@ export function PlayerControls({
               className={cn(
                 "flex h-8 w-10 items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
                 s === speed
-                  ? "bg-forest-100 text-forest-700"
-                  : "text-sand-300 hover:text-forest-700",
+                  ? "bg-forest-100 text-forest-700 dark:bg-ink-800 dark:text-ink-100"
+                  : "text-sand-300 hover:text-forest-700 dark:text-ink-500 dark:hover:text-ink-100",
               )}
             >
               {s}x
@@ -105,8 +105,8 @@ export function PlayerControls({
           className={cn(
             "flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
             sleepTimerRemaining !== null
-              ? "text-clay-500 bg-clay-500/10"
-              : "text-sand-300 hover:text-forest-700 hover:bg-forest-50",
+              ? "text-clay-500 bg-clay-500/10 dark:text-clay-400"
+              : "text-sand-300 hover:text-forest-700 hover:bg-forest-50 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-100",
           )}
           aria-label={
             sleepTimerRemaining !== null

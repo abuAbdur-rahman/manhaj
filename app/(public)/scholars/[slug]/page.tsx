@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Header, HeaderCenter, HeaderLeft } from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -30,10 +30,7 @@ export default async function ScholarProfilePage({
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="back" label={scholar.name} />
-        <HeaderCenter title={scholar.name} />
-      </Header>
+      <Header title={scholar.name} backLabel="Scholars" />
 
       <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 pb-8">
@@ -51,7 +48,7 @@ export default async function ScholarProfilePage({
               />
             </div>
 
-            <h1 className="mt-4 text-2xl font-semibold text-forest-900 text-center">
+            <h1 className="mt-4 text-2xl font-semibold text-forest-900 text-center dark:text-ink-100">
               {scholar.name}
             </h1>
 
@@ -120,7 +117,7 @@ export default async function ScholarProfilePage({
 
 function ScholarBio({ bio }: { bio: string }) {
   return (
-    <p className="mt-3 max-w-md text-center text-sm leading-relaxed text-forest-700 line-clamp-2">
+    <p className="mt-3 max-w-md text-center text-sm leading-relaxed text-forest-700 line-clamp-2 dark:text-ink-500">
       {bio}
     </p>
   );

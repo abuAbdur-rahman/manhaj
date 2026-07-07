@@ -27,7 +27,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          "z-50 min-w-[8rem] overflow-hidden rounded-lg border border-sand-200 bg-white p-1 text-forest-900 shadow-lg",
+          "z-50 min-w-[8rem] overflow-hidden rounded-lg border border-sand-200 bg-white p-1 text-forest-900 shadow-lg dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100",
           className,
         )}
         {...props}
@@ -43,7 +43,7 @@ export function DropdownMenuItem({
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        "relative flex h-10 cursor-pointer select-none items-center rounded-md px-2 text-sm outline-none transition-colors focus:bg-forest-50 focus:text-forest-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex h-10 cursor-pointer select-none items-center rounded-md px-2 text-sm outline-none transition-colors focus:bg-forest-50 focus:text-forest-900 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:focus:bg-ink-800 dark:focus:text-ink-100",
         className,
       )}
       {...props}
@@ -57,7 +57,7 @@ export function DropdownMenuSeparator({
 }: ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
   return (
     <DropdownMenuPrimitive.Separator
-      className={cn("-mx-1 my-1 h-px bg-sand-200", className)}
+      className={cn("-mx-1 my-1 h-px bg-sand-200 dark:bg-ink-700", className)}
       {...props}
     />
   );
@@ -69,7 +69,10 @@ export function DropdownMenuLabel({
 }: ComponentProps<typeof DropdownMenuPrimitive.Label>) {
   return (
     <DropdownMenuPrimitive.Label
-      className={cn("px-2 py-1.5 text-xs font-medium text-sand-300", className)}
+      className={cn(
+        "px-2 py-1.5 text-xs font-medium text-sand-300 dark:text-ink-500",
+        className,
+      )}
       {...props}
     />
   );
@@ -89,7 +92,7 @@ export function DropdownMenuSubTrigger({
   return (
     <DropdownMenuPrimitive.SubTrigger
       className={cn(
-        "flex h-10 cursor-pointer select-none items-center rounded-md px-2 text-sm outline-none focus:bg-forest-50 focus:text-forest-900 data-[state=open]:bg-forest-50",
+        "flex h-10 cursor-pointer select-none items-center rounded-md px-2 text-sm outline-none focus:bg-forest-50 focus:text-forest-900 data-[state=open]:bg-forest-50 dark:focus:bg-ink-800 dark:focus:text-ink-100 dark:data-[state=open]:bg-ink-800",
         className,
       )}
       {...props}
@@ -107,7 +110,7 @@ export function DropdownMenuSubContent({
   return (
     <DropdownMenuPrimitive.SubContent
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-lg border border-sand-200 bg-white p-1 text-forest-900 shadow-lg",
+        "z-50 min-w-[8rem] overflow-hidden rounded-lg border border-sand-200 bg-white p-1 text-forest-900 shadow-lg dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100",
         className,
       )}
       {...props}
