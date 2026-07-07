@@ -53,12 +53,17 @@ export function MiniPlayer({ className }: { className?: string }) {
         }
       }}
     >
-      <Avatar
-        size="sm"
-        src={currentEpisode.scholar?.photo_url ?? undefined}
-        fallback={currentEpisode.scholar?.name ?? "?"}
-        alt={currentEpisode.scholar?.name ?? ""}
-      />
+      {currentEpisode.scholar?.photo_url ? (
+        <Avatar
+          size="sm"
+          src={currentEpisode.scholar.photo_url}
+          alt={currentEpisode.scholar?.name ?? ""}
+        />
+      ) : (
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-forest-400 to-forest-600 text-xs font-bold text-white">
+          {currentEpisode.scholar?.name?.[0]?.toUpperCase() ?? "?"}
+        </div>
+      )}
 
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-forest-900 truncate dark:text-ink-100">
