@@ -40,6 +40,11 @@ export const metadata: Metadata = {
     ],
     shortcut: "/favicon.png",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Manhaj",
+  },
   openGraph: {
     title: "Manhaj — Ilm, organized.",
     description:
@@ -53,6 +58,8 @@ export const viewport: Viewport = {
   themeColor: "#1a6b3c",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
