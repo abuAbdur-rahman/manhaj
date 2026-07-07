@@ -13,7 +13,7 @@ export function ScholarRow({ scholar, className }: ScholarRowProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-sand-100 dark:hover:bg-ink-800",
+        "flex items-center gap-3 rounded-xl border border-sand-200 bg-sand-50 px-3 py-3 shadow-[0_2px_10px_rgba(15,65,38,0.05)] transition-all hover:bg-sand-100 dark:border-ink-700 dark:bg-ink-900 dark:shadow-black/20 dark:hover:bg-ink-800",
         className,
       )}
     >
