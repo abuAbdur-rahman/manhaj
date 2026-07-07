@@ -36,6 +36,22 @@ async function requestPersistentStorage(): Promise<void> {
   }
 }
 
+async function primeOfflinePageCache(slug: string): Promise<void> {
+  if (!("caches" in window)) return;
+
+  try {
+    const cache = await caches.open("manhaj-pages");
+    const offlinePath = `/offline/${slug}`;
+    const response = await fetch(offlinePath, { credentials: "same-origin" });
+
+    if (response.ok) {
+      await cache.put(offlinePath, response.clone());
+    }
+  } catch (error) {
+    console.warn("Failed to prime offline page cache:", error);
+  }
+}
+
 export async function downloadEpisode(
   episode: Episode,
   onProgress?: (progress: DownloadProgress) => void,
@@ -106,6 +122,7 @@ export async function downloadEpisode(
     const blob = new Blob(chunks, { type: "audio/mpeg" });
     await saveDownload(episode, blob);
     await requestPersistentStorage();
+    await primeOfflinePageCache(episode.slug);
 
     store.updateProgress(episode.id, { status: "completed", percent: 100 });
     toast.success(`Downloaded "${episode.title}"`);

@@ -1,14 +1,10 @@
 "use client";
 
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  Header,
-  HeaderCenter,
-  HeaderLeft,
-  HeaderRight,
-} from "@/components/layout/header";
+import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -277,16 +273,16 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
       formSocialYoutube,
       formSocialTelegram,
       formSocialWebsite,
+      photoUploading,
       router,
     ],
   );
 
   return (
     <>
-      <Header>
-        <HeaderLeft type="logo" />
-        <HeaderCenter title="Scholars" />
-        <HeaderRight>
+      <Header
+        title="Scholars"
+        actions={
           <Button
             variant="primary"
             size="sm"
@@ -296,8 +292,8 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             <Plus className="h-4 w-4" />
             New
           </Button>
-        </HeaderRight>
-      </Header>
+        }
+      />
 
       <main className="flex-1 pb-20 lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
@@ -342,10 +338,12 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-sand-200 text-xs font-medium text-sand-300">
                     {scholar.photo_url ? (
-                      <img
+                      <Image
                         src={scholar.photo_url}
                         alt=""
+                        fill
                         className="h-full w-full object-cover"
+                        sizes="40px"
                       />
                     ) : (
                       scholar.name.charAt(0).toUpperCase()
@@ -459,10 +457,14 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
+              <label
+                htmlFor="formName"
+                className="text-sm font-medium text-forest-900"
+              >
                 Name
               </label>
               <Input
+                id="formName"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="Scholar name"
@@ -471,8 +473,14 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">Bio</label>
+              <label
+                htmlFor="formBio"
+                className="text-sm font-medium text-forest-900"
+              >
+                Bio
+              </label>
               <Input
+                id="formBio"
                 value={formBio}
                 onChange={(e) => setFormBio(e.target.value)}
                 placeholder="Short biography"
@@ -480,7 +488,10 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
+              <label
+                htmlFor="formLanguages"
+                className="text-sm font-medium text-forest-900"
+              >
                 Languages
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -502,16 +513,21 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
+              <label
+                htmlFor="formPhotoUrl"
+                className="text-sm font-medium text-forest-900"
+              >
                 Photo
               </label>
               <div className="flex items-center gap-3">
                 {formPhotoUrl && (
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-sand-200">
-                    <img
+                    <Image
                       src={formPhotoUrl}
                       alt=""
+                      fill
                       className="h-full w-full object-cover"
+                      sizes="48px"
                     />
                   </div>
                 )}
@@ -543,9 +559,9 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-forest-900">
+              <span className="text-sm font-medium text-forest-900">
                 Social links
-              </label>
+              </span>
               <div className="space-y-2">
                 <Input
                   value={formSocialWhatsapp}

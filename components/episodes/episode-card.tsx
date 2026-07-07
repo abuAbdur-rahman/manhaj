@@ -34,16 +34,16 @@ export function EpisodeCard({
           fallback={episode.scholar?.name ?? "?"}
           alt={episode.scholar?.name ?? ""}
         />
-        <span className="font-mono text-xs text-sand-300">
+        <span className="font-mono text-xs text-sand-300 dark:text-ink-500">
           {formatDuration(episode.duration_seconds ?? 0)}
         </span>
       </div>
 
       <div className="flex-1">
-        <h3 className="text-sm font-semibold text-forest-900 line-clamp-2">
+        <h3 className="text-sm font-semibold text-forest-900 line-clamp-2 dark:text-ink-100">
           {episode.title}
         </h3>
-        <p className="mt-0.5 text-xs text-forest-700">
+        <p className="mt-0.5 text-xs text-forest-700 dark:text-ink-500">
           {episode.scholar?.name}
         </p>
       </div>
@@ -79,7 +79,7 @@ export function EpisodeCard({
             e.stopPropagation();
             onDownload(episode);
           }}
-          className="flex h-10 w-10 items-center justify-center rounded-full text-sand-300 hover:text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-sand-300 hover:text-forest-700 hover:bg-forest-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-500 dark:hover:bg-ink-800 dark:hover:text-ink-100"
           aria-label={`Download: ${episode.title}`}
         >
           <Download className="h-4 w-4" />
@@ -92,7 +92,7 @@ export function EpisodeCard({
     return (
       <div
         className={cn(
-          "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3 transition-colors",
+          "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3 transition-colors dark:border-ink-700 dark:bg-ink-900",
           className,
         )}
       >
@@ -111,7 +111,7 @@ export function EpisodeCard({
   return (
     <div
       className={cn(
-        "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3",
+        "flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3 dark:border-ink-700 dark:bg-ink-900",
         className,
       )}
     >
@@ -123,21 +123,21 @@ export function EpisodeCard({
 
 export function EpisodeCardSkeleton() {
   return (
-    <div className="flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3">
+    <div className="flex w-[180px] shrink-0 flex-col gap-2 rounded-lg border border-sand-200 bg-sand-100 p-3 dark:border-ink-700 dark:bg-ink-900">
       <div className="flex items-start justify-between">
-        <div className="h-8 w-8 rounded-full bg-sand-200 animate-pulse" />
-        <div className="h-3 w-10 rounded bg-sand-200 animate-pulse" />
+        <div className="h-8 w-8 rounded-full bg-sand-200 animate-pulse dark:bg-ink-800" />
+        <div className="h-3 w-10 rounded bg-sand-200 animate-pulse dark:bg-ink-800" />
       </div>
       <div className="flex-1 space-y-1.5">
-        <div className="h-4 w-full rounded bg-sand-200 animate-pulse" />
-        <div className="h-3 w-2/3 rounded bg-sand-200 animate-pulse" />
+        <div className="h-4 w-full rounded bg-sand-200 animate-pulse dark:bg-ink-800" />
+        <div className="h-3 w-2/3 rounded bg-sand-200 animate-pulse dark:bg-ink-800" />
       </div>
       <div className="flex items-center gap-1">
-        <div className="h-5 w-12 rounded-full bg-sand-200 animate-pulse" />
-        <div className="h-5 w-12 rounded-full bg-sand-200 animate-pulse" />
+        <div className="h-5 w-12 rounded-full bg-sand-200 animate-pulse dark:bg-ink-800" />
+        <div className="h-5 w-12 rounded-full bg-sand-200 animate-pulse dark:bg-ink-800" />
       </div>
       <div className="flex items-center gap-2">
-        <div className="h-10 w-10 rounded-full bg-sand-200 animate-pulse" />
+        <div className="h-10 w-10 rounded-full bg-sand-200 animate-pulse dark:bg-ink-800" />
         <WaveformSeal variant="skeleton" />
       </div>
     </div>

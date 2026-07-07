@@ -26,7 +26,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         />
       </div>
       {currentEpisode && (
-        <MiniPlayer className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-30" />
+        <MiniPlayer className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom)+0.25rem)] left-2 right-2 z-30" />
       )}
       <BottomNav />
     </>
