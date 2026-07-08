@@ -24,6 +24,15 @@ interface SeriesWithCount {
 
 const PAGE_SIZE = 20;
 
+function mapSeriesWithCount(data: Record<string, unknown>[]): SeriesWithCount[] {
+  return data.map((s) => ({
+    ...s,
+    episode_count:
+      (s as unknown as { episode_count: { count: number }[] })
+        .episode_count?.[0]?.count ?? 0,
+  })) as SeriesWithCount[];
+}
+
 export default async function AdminSeriesPage({
   searchParams,
 }: {
@@ -66,12 +75,7 @@ export default async function AdminSeriesPage({
 
     if (seriesResult.error) throw seriesResult.error;
     if (countResult.error) throw countResult.error;
-    series = (seriesResult.data ?? []).map((s) => ({
-      ...s,
-      episode_count:
-        (s as unknown as { episode_count: { count: number }[] })
-          .episode_count?.[0]?.count ?? 0,
-    })) as SeriesWithCount[];
+    series = mapSeriesWithCount(seriesResult.data ?? []);
     totalCount = countResult.count ?? 0;
     scholars = [];
   } else {
@@ -97,12 +101,7 @@ export default async function AdminSeriesPage({
     if (countResult.error) throw countResult.error;
     if (scholarsResult.error) throw scholarsResult.error;
 
-    series = (seriesResult.data ?? []).map((s) => ({
-      ...s,
-      episode_count:
-        (s as unknown as { episode_count: { count: number }[] })
-          .episode_count?.[0]?.count ?? 0,
-    })) as SeriesWithCount[];
+    series = mapSeriesWithCount(seriesResult.data ?? []);
     totalCount = countResult.count ?? 0;
     scholars = scholarsResult.data ?? [];
   }

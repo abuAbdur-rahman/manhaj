@@ -43,13 +43,15 @@ async function primeOfflinePageCache(slug: string): Promise<boolean> {
     const cache = await caches.open("manhaj-pages");
     const paths = [`/offline/${slug}`, `/lectures/${slug}`];
 
+    let cached = false;
     for (const path of paths) {
       const response = await fetch(path, { credentials: "same-origin" });
       if (response.ok) {
         await cache.put(path, response.clone());
+        cached = true;
       }
     }
-    return true;
+    return cached;
   } catch (error) {
     console.warn("Failed to prime offline page cache:", error);
     return false;

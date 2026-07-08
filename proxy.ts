@@ -2,7 +2,11 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { requireEnv } from "@/lib/utils";
 
-const PUBLIC_ADMIN_PATHS = ["/admin/login", "/admin/accept-invite"];
+const PUBLIC_ADMIN_PATHS = [
+  "/admin/login",
+  "/admin/accept-invite",
+  "/api/admin/forgot-password",
+];
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -63,7 +67,7 @@ export async function proxy(request: NextRequest) {
     .eq("id", user.id)
     .single();
 
-  if (!adminRow?.is_active) {
+  if (!adminRow || !adminRow.is_active) {
     await supabase.auth.signOut();
     if (isApiPath) {
       return NextResponse.json(

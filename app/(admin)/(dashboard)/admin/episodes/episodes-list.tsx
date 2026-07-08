@@ -3,7 +3,7 @@
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatDuration } from "@/lib/audio";
-import type { Episode } from "@/types";
+import type { Episode, PaginationMeta } from "@/types";
 
 interface ScholarOption {
   id: string;
@@ -31,12 +31,6 @@ interface SeriesOption {
   title: string;
   scholar_id: string;
   scholar: { name: string } | null;
-}
-
-interface PaginationMeta {
-  page: number;
-  pageSize: number;
-  totalCount: number;
 }
 
 interface EpisodesListProps {
@@ -63,6 +57,10 @@ export function EpisodesList({
   const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState(initialEpisodes);
   const [pendingId, setPendingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setItems(initialEpisodes);
+  }, [initialEpisodes]);
   const [actionError, setActionError] = useState("");
   const [confirmAction, setConfirmAction] = useState<{
     id: string;

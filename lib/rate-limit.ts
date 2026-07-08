@@ -56,10 +56,13 @@ export async function checkRateLimit(
     };
   }
 
-  await supabase.from("auth_rate_limits").insert({
-    identifier: identifier.toLowerCase(),
-    action,
-  });
+  const { error: insertError } = await supabase
+    .from("auth_rate_limits")
+    .insert({ identifier: identifier.toLowerCase(), action });
+
+  if (insertError) {
+    console.error("rate-limit insert failed", insertError);
+  }
 
   return {
     allowed: true,

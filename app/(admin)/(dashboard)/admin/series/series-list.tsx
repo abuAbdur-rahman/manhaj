@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { PaginationMeta } from "@/types";
 
 interface ScholarOption {
   id: string;
@@ -43,12 +44,6 @@ interface SeriesRow {
   updated_at: string;
   scholar: ScholarOption | null;
   episode_count: number;
-}
-
-interface PaginationMeta {
-  page: number;
-  pageSize: number;
-  totalCount: number;
 }
 
 interface SeriesListProps {

@@ -3,7 +3,7 @@
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,19 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Language, Scholar } from "@/types";
+import type { Language, PaginationMeta, Scholar } from "@/types";
 
 const LANGUAGES: { value: Language; label: string }[] = [
   { value: "yoruba", label: "Yoruba" },
   { value: "english", label: "English" },
   { value: "arabic", label: "Arabic" },
 ];
-
-interface PaginationMeta {
-  page: number;
-  pageSize: number;
-  totalCount: number;
-}
 
 interface ScholarsListProps {
   scholars: Scholar[];
@@ -51,6 +45,10 @@ export function ScholarsList({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState(initialScholars);
+
+  useEffect(() => {
+    setItems(initialScholars);
+  }, [initialScholars]);
 
   const totalPages = Math.max(
     1,

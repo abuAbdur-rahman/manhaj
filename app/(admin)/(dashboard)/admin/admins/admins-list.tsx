@@ -23,20 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Admin, Scholar } from "@/types";
+import type { Admin, PaginationMeta, Scholar } from "@/types";
 
 interface AdminWithScholar extends Admin {
   scholar?: { id: string; name: string } | null;
 }
 
-interface PaginationMeta {
-  page: number;
-  pageSize: number;
-  totalCount: number;
-}
-
 interface AdminListProps {
   admins: AdminWithScholar[];
+  currentAdminId: string;
   scholars: Pick<Scholar, "id" | "name">[];
   pagination: PaginationMeta;
 }
@@ -51,6 +46,7 @@ function formatDate(iso: string): string {
 
 export function AdminsList({
   admins: initialAdmins,
+  currentAdminId,
   scholars,
   pagination,
 }: AdminListProps) {
@@ -284,7 +280,7 @@ export function AdminsList({
                       <p className="text-sm font-medium text-forest-900 truncate dark:text-ink-100">
                         {admin.name}
                       </p>
-                      {admin.id === initialAdmins[0]?.id && (
+                      {admin.id === currentAdminId && (
                         <span className="text-[10px] text-sand-300 dark:text-ink-500">
                           (you)
                         </span>

@@ -63,28 +63,31 @@ export function Pagination({
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
-  const pages = getPageNumbers(currentPage, totalPages);
-  const prevHref = buildHref(basePath, searchParams, currentPage - 1);
-  const nextHref = buildHref(basePath, searchParams, currentPage + 1);
+  const safePage = Math.max(1, Math.min(currentPage, totalPages));
+  const pages = getPageNumbers(safePage, totalPages);
+  const prevHref = buildHref(basePath, searchParams, safePage - 1);
+  const nextHref = buildHref(basePath, searchParams, safePage + 1);
 
   return (
     <nav
       aria-label="Pagination"
       className={cn("flex items-center justify-center gap-1", className)}
     >
-      <Link
-        href={prevHref}
-        aria-disabled={currentPage <= 1}
-        tabIndex={currentPage <= 1 ? -1 : 0}
-        className={cn(
-          "inline-flex h-9 items-center justify-center rounded-lg px-2 text-sm transition-colors",
-          currentPage <= 1
-            ? "pointer-events-none text-sand-300 dark:text-ink-500"
-            : "text-forest-700 hover:bg-sand-100 dark:text-ink-100 dark:hover:bg-ink-800",
-        )}
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Link>
+      {safePage <= 1 ? (
+        <span
+          aria-disabled="true"
+          className="inline-flex h-9 items-center justify-center rounded-lg px-2 text-sm text-sand-300 dark:text-ink-500"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </span>
+      ) : (
+        <Link
+          href={prevHref}
+          className="inline-flex h-9 items-center justify-center rounded-lg px-2 text-sm text-forest-700 transition-colors hover:bg-sand-100 dark:text-ink-100 dark:hover:bg-ink-800"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Link>
+      )}
 
       {pages.map((page, i) => {
         if (page === "...") {
@@ -115,19 +118,21 @@ export function Pagination({
         );
       })}
 
-      <Link
-        href={nextHref}
-        aria-disabled={currentPage >= totalPages}
-        tabIndex={currentPage >= totalPages ? -1 : 0}
-        className={cn(
-          "inline-flex h-9 items-center justify-center rounded-lg px-2 text-sm transition-colors",
-          currentPage >= totalPages
-            ? "pointer-events-none text-sand-300 dark:text-ink-500"
-            : "text-forest-700 hover:bg-sand-100 dark:text-ink-100 dark:hover:bg-ink-800",
-        )}
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Link>
+      {safePage >= totalPages ? (
+        <span
+          aria-disabled="true"
+          className="inline-flex h-9 items-center justify-center rounded-lg px-2 text-sm text-sand-300 dark:text-ink-500"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </span>
+      ) : (
+        <Link
+          href={nextHref}
+          className="inline-flex h-9 items-center justify-center rounded-lg px-2 text-sm text-forest-700 transition-colors hover:bg-sand-100 dark:text-ink-100 dark:hover:bg-ink-800"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Link>
+      )}
     </nav>
   );
 }
