@@ -310,7 +310,7 @@ export function NewEpisodeForm({
           {submitError && (
             <div
               role="alert"
-              className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400"
             >
               {submitError}
             </div>
@@ -320,7 +320,7 @@ export function NewEpisodeForm({
             <fieldset>
               <label
                 htmlFor="title"
-                className="mb-1.5 block text-sm font-medium text-forest-700"
+                className="mb-1.5 block text-sm font-medium text-forest-700 dark:text-ink-100"
               >
                 Title <span className="text-clay-500">*</span>
               </label>
@@ -340,7 +340,7 @@ export function NewEpisodeForm({
               <fieldset>
                 <label
                   htmlFor="scholar"
-                  className="mb-1.5 block text-sm font-medium text-forest-700"
+                  className="mb-1.5 block text-sm font-medium text-forest-700 dark:text-ink-100"
                 >
                   Scholar <span className="text-clay-500">*</span>
                 </label>
@@ -370,9 +370,12 @@ export function NewEpisodeForm({
             <fieldset>
               <label
                 htmlFor="series"
-                className="mb-1.5 block text-sm font-medium text-forest-700"
+                className="mb-1.5 block text-sm font-medium text-forest-700 dark:text-ink-100"
               >
-                Series <span className="text-xs text-sand-300">(optional)</span>
+                Series{" "}
+                <span className="text-xs text-sand-300 dark:text-ink-500">
+                  (optional)
+                </span>
               </label>
               <Select
                 value={seriesId}
@@ -406,7 +409,7 @@ export function NewEpisodeForm({
             <fieldset>
               <label
                 htmlFor="language"
-                className="mb-1.5 block text-sm font-medium text-forest-700"
+                className="mb-1.5 block text-sm font-medium text-forest-700 dark:text-ink-100"
               >
                 Language
               </label>
@@ -428,7 +431,7 @@ export function NewEpisodeForm({
             </fieldset>
 
             <fieldset>
-              <legend className="mb-1.5 block text-sm font-medium text-forest-700">
+              <legend className="mb-1.5 block text-sm font-medium text-forest-700 dark:text-ink-100">
                 Tags
               </legend>
               <div className="flex flex-wrap gap-1.5">
@@ -448,7 +451,7 @@ export function NewEpisodeForm({
             <fieldset>
               <label
                 htmlFor="audio"
-                className="mb-1.5 block text-sm font-medium text-forest-700"
+                className="mb-1.5 block text-sm font-medium text-forest-700 dark:text-ink-100"
               >
                 Audio file
               </label>
@@ -476,15 +479,15 @@ export function NewEpisodeForm({
 
               {(uploadState === "uploading" || uploadState === "error") && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm text-forest-700">
+                  <div className="flex items-center justify-between text-sm text-forest-700 dark:text-ink-100">
                     <span className="truncate max-w-[280px]">
                       {audioFile?.name}
                     </span>
-                    <span className="font-mono text-xs text-sand-300 shrink-0 ml-2">
+                    <span className="font-mono text-xs text-sand-300 shrink-0 ml-2 dark:text-ink-500">
                       {formatFileSize(audioFile?.size ?? 0)}
                     </span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-sand-200">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-sand-200 dark:bg-ink-700">
                     <div
                       className="h-full rounded-full bg-forest-500 transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
@@ -495,7 +498,7 @@ export function NewEpisodeForm({
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-sand-300">
+                    <span className="text-xs text-sand-300 dark:text-ink-500">
                       {uploadState === "uploading"
                         ? `Uploading ${uploadProgress}%`
                         : "Upload failed"}
@@ -503,7 +506,7 @@ export function NewEpisodeForm({
                     <button
                       type="button"
                       onClick={clearFile}
-                      className="text-xs text-sand-300 hover:text-forest-700 transition-colors"
+                      className="text-xs text-sand-300 hover:text-forest-700 transition-colors dark:text-ink-500 dark:hover:text-ink-100"
                     >
                       Cancel
                     </button>
@@ -512,20 +515,20 @@ export function NewEpisodeForm({
               )}
 
               {uploadState === "uploaded" && (
-                <div className="flex items-center gap-3 rounded-lg border border-sand-200 bg-sand-100 px-3 py-2.5">
+                <div className="flex items-center gap-3 rounded-lg border border-sand-200 bg-sand-100 px-3 py-2.5 dark:border-ink-700 dark:bg-ink-800">
                   <Badge variant="default" className="shrink-0">
                     Uploaded
                   </Badge>
-                  <span className="flex-1 min-w-0 truncate text-sm text-forest-700">
+                  <span className="flex-1 min-w-0 truncate text-sm text-forest-700 dark:text-ink-100">
                     {audioFile?.name}
                   </span>
-                  <span className="font-mono text-xs text-sand-300 shrink-0">
+                  <span className="font-mono text-xs text-sand-300 shrink-0 dark:text-ink-500">
                     {formatFileSize(audioFile?.size ?? 0)}
                   </span>
                   <button
                     type="button"
                     onClick={clearFile}
-                    className="shrink-0 rounded p-0.5 text-sand-300 hover:text-forest-700 transition-colors"
+                    className="shrink-0 rounded p-0.5 text-sand-300 hover:text-forest-700 transition-colors dark:text-ink-500 dark:hover:text-ink-100"
                     aria-label="Remove file"
                   >
                     <X className="h-4 w-4" />
@@ -541,7 +544,7 @@ export function NewEpisodeForm({
             <fieldset>
               <label
                 htmlFor="recordedDate"
-                className="mb-1.5 block text-sm font-medium text-forest-700"
+                className="mb-1.5 block text-sm font-medium text-forest-700 dark:text-ink-100"
               >
                 Recorded date
               </label>
@@ -556,7 +559,7 @@ export function NewEpisodeForm({
             <fieldset>
               <label
                 htmlFor="description"
-                className="mb-1.5 block text-sm font-medium text-forest-700"
+                className="mb-1.5 block text-sm font-medium text-forest-700 dark:text-ink-100"
               >
                 Description
               </label>
@@ -565,7 +568,7 @@ export function NewEpisodeForm({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                className="flex w-full rounded-lg border border-sand-200 bg-white px-3 py-2 text-sm text-forest-900 placeholder:text-sand-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                className="flex w-full rounded-lg border border-sand-200 bg-white px-3 py-2 text-sm text-forest-900 placeholder:text-sand-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 disabled:cursor-not-allowed disabled:opacity-50 resize-none dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100 dark:placeholder:text-ink-500"
                 placeholder="Optional description"
               />
             </fieldset>

@@ -6,6 +6,7 @@ import {
   NetworkFirst,
   RangeRequestsPlugin,
   Serwist,
+  StaleWhileRevalidate,
 } from "serwist";
 
 declare global {
@@ -21,18 +22,22 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  fallbacks: {
-    entries: [
-      {
-        url: "/downloads",
-        matcher({ request }) {
-          return request.destination === "document";
-        },
-      },
-    ],
-  },
   runtimeCaching: [
-    // 1. HTML pages — NetworkFirst (try online first, fall back to cache)
+    // 1a. Home page — StaleWhileRevalidate (instant load, background refresh)
+    {
+      matcher: ({ url }) => url.pathname === "/",
+      handler: new StaleWhileRevalidate({
+        cacheName: "manhaj-home",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 1,
+            maxAgeSeconds: 24 * 60 * 60,
+          }),
+        ],
+      }),
+    },
+
+    // 1b. Other HTML pages — NetworkFirst (try online first, fall back to cache)
     {
       matcher: ({ request }) => request.mode === "navigate",
       handler: new NetworkFirst({
@@ -95,3 +100,11 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+serwist.setCatchHandler(async ({ request }) => {
+  if (request.destination === "document") {
+    const match = await caches.match("/offline.html");
+    return match || Response.error();
+  }
+  return Response.error();
+});

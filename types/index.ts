@@ -100,3 +100,9 @@ export interface DownloadedEpisode {
   downloadedAt: string;
   fileSizeBytes: number;
 }
+
+export interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+}
