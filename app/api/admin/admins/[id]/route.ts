@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const UpdateAdminSchema = z.object({
@@ -166,6 +167,12 @@ export async function DELETE(
       { error: { code: "NOT_FOUND", message: "Admin not found" } },
       { status: 404 },
     );
+  }
+
+  try {
+    await createAdminClient().auth.admin.signOut(id, "global");
+  } catch (err) {
+    console.warn("Failed to sign out deactivated admin:", err);
   }
 
   return new NextResponse(null, { status: 204 });
