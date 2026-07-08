@@ -20,6 +20,7 @@ const withSerwist = withSerwistInit({
   cacheOnNavigation: true,
   reloadOnOnline: false,
   additionalPrecacheEntries: [
+    { url: "/", revision: "v1" },
     { url: "/downloads", revision: "v1" },
     { url: "/offline.html", revision: "v1" },
   ],

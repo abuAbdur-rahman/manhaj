@@ -169,7 +169,11 @@ export async function DELETE(
     );
   }
 
-  await createAdminClient().auth.admin.signOut(id, "global");
+  try {
+    await createAdminClient().auth.admin.signOut(id, "global");
+  } catch (err) {
+    console.warn("Failed to sign out deactivated admin:", err);
+  }
 
   return new NextResponse(null, { status: 204 });
 }

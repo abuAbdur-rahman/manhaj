@@ -15,7 +15,7 @@ export default async function AdminAdminsPage({
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  await requireAdmin("super_admin");
+  const currentAdmin = await requireAdmin("super_admin");
 
   const supabase = await createClient();
 
@@ -40,6 +40,7 @@ export default async function AdminAdminsPage({
   return (
     <AdminsList
       admins={(adminsResult.data as unknown as Admin[]) ?? []}
+      currentAdminId={currentAdmin.id}
       scholars={scholarsResult.data ?? []}
       pagination={{
         page,
