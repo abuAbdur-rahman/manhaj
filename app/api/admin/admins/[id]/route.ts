@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdminApi } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const UpdateAdminSchema = z.object({
@@ -167,6 +168,8 @@ export async function DELETE(
       { status: 404 },
     );
   }
+
+  await createAdminClient().auth.admin.signOut(id, "global");
 
   return new NextResponse(null, { status: 204 });
 }

@@ -22,7 +22,18 @@ interface SeriesWithCount {
   episode_count: number;
 }
 
-export default async function AdminSeriesPage() {
+const PAGE_SIZE = 20;
+
+export default async function AdminSeriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, Number(params.page) || 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
   const admin = await requireAdmin();
 
   if (admin.role === "scholar_admin" && !admin.scholarId) {
@@ -33,9 +44,10 @@ export default async function AdminSeriesPage() {
 
   let scholars: ScholarOption[];
   let series: SeriesWithCount[];
+  let totalCount = 0;
 
   if (admin.role === "scholar_admin") {
-    const [seriesResult] = await Promise.all([
+    const [seriesResult, countResult] = await Promise.all([
       supabase
         .from("series")
         .select(
@@ -44,19 +56,26 @@ export default async function AdminSeriesPage() {
           episode_count:episodes(count)`,
         )
         .eq("scholar_id", admin.scholarId)
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .range(from, to),
+      supabase
+        .from("series")
+        .select("id", { count: "exact", head: true })
+        .eq("scholar_id", admin.scholarId),
     ]);
 
     if (seriesResult.error) throw seriesResult.error;
+    if (countResult.error) throw countResult.error;
     series = (seriesResult.data ?? []).map((s) => ({
       ...s,
       episode_count:
         (s as unknown as { episode_count: { count: number }[] })
           .episode_count?.[0]?.count ?? 0,
     })) as SeriesWithCount[];
+    totalCount = countResult.count ?? 0;
     scholars = [];
   } else {
-    const [seriesResult, scholarsResult] = await Promise.all([
+    const [seriesResult, countResult, scholarsResult] = await Promise.all([
       supabase
         .from("series")
         .select(
@@ -64,7 +83,9 @@ export default async function AdminSeriesPage() {
           scholar:scholar_id(id, name),
           episode_count:episodes(count)`,
         )
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .range(from, to),
+      supabase.from("series").select("id", { count: "exact", head: true }),
       supabase
         .from("scholars")
         .select("id, name")
@@ -73,6 +94,7 @@ export default async function AdminSeriesPage() {
     ]);
 
     if (seriesResult.error) throw seriesResult.error;
+    if (countResult.error) throw countResult.error;
     if (scholarsResult.error) throw scholarsResult.error;
 
     series = (seriesResult.data ?? []).map((s) => ({
@@ -81,6 +103,7 @@ export default async function AdminSeriesPage() {
         (s as unknown as { episode_count: { count: number }[] })
           .episode_count?.[0]?.count ?? 0,
     })) as SeriesWithCount[];
+    totalCount = countResult.count ?? 0;
     scholars = scholarsResult.data ?? [];
   }
 
@@ -90,6 +113,11 @@ export default async function AdminSeriesPage() {
       scholars={scholars}
       adminRole={admin.role}
       adminScholarId={admin.scholarId}
+      pagination={{
+        page,
+        pageSize: PAGE_SIZE,
+        totalCount,
+      }}
     />
   );
 }

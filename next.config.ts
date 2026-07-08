@@ -19,7 +19,10 @@ const withSerwist = withSerwistInit({
   disable: false,
   cacheOnNavigation: true,
   reloadOnOnline: false,
-  additionalPrecacheEntries: [{ url: "/downloads", revision: "v1" }],
+  additionalPrecacheEntries: [
+    { url: "/downloads", revision: "v1" },
+    { url: "/offline.html", revision: "v1" },
+  ],
 });
 
 export default withSerwist(nextConfig);

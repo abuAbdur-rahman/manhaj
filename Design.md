@@ -1,6 +1,6 @@
 # Manhaj — Design Document
 **Version:** 1.0
-**Scope:** Mobile-first UI/UX design for MVP (v1), aligned to BRD v1.1 and Setup v1.2
+**Scope:** Mobile-first UI/UX design for MVP (v1), aligned to CODEBASE_STATE.md
 **Status:** Draft
 
 ---
@@ -391,4 +391,4 @@ Offline-specific state: if a user opens a lecture page with no connection and th
 
 ---
 
-*Companion to: `manhaj-brd-v1.1.md` (requirements) and `manhaj-setup-v1.2.md` (stack/schema).*
+*Companion to: `CODEBASE_STATE.md` (codebase inventory, stack, data model) and `manhaj_offline_structure.md` (PWA/offline architecture).*

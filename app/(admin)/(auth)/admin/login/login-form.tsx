@@ -1,18 +1,20 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { ForgotPasswordDialog } from "./forgot-password-dialog";
 
 export function LoginForm() {
   const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -69,16 +71,32 @@ export function LoginForm() {
         <label htmlFor="password" className="sr-only">
           Password
         </label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="current-password"
-          minLength={1}
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            minLength={1}
+            className="pr-11"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-0 top-0 flex h-full w-11 items-center justify-center text-sand-300 transition-colors hover:text-forest-700 dark:text-ink-500 dark:hover:text-ink-100"
+            tabIndex={-1}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -97,6 +115,10 @@ export function LoginForm() {
           "Log in"
         )}
       </Button>
+
+      <div className="flex justify-center pt-1">
+        <ForgotPasswordDialog />
+      </div>
     </form>
   );
 }
