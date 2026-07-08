@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -31,15 +32,36 @@ const LANGUAGES: { value: Language; label: string }[] = [
   { value: "arabic", label: "Arabic" },
 ];
 
-interface ScholarsListProps {
-  scholars: Scholar[];
+interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  totalCount: number;
 }
 
-export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
+interface ScholarsListProps {
+  scholars: Scholar[];
+  pagination: PaginationMeta;
+}
+
+export function ScholarsList({
+  scholars: initialScholars,
+  pagination,
+}: ScholarsListProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState(initialScholars);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(pagination.totalCount / pagination.pageSize),
+  );
+
+  const activeSearchParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (statusFilter !== "all") params.status = statusFilter;
+    return params;
+  }, [statusFilter]);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -300,7 +322,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
           {actionError && (
             <div
               role="alert"
-              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400"
             >
               {actionError}
             </div>
@@ -308,7 +330,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sand-300" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sand-300 dark:text-ink-500" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -330,13 +352,13 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
           </div>
 
           {filtered.length > 0 ? (
-            <div className="mt-4 divide-y divide-sand-200 rounded-lg border border-sand-200">
+            <div className="mt-4 divide-y divide-sand-200 rounded-lg border border-sand-200 dark:divide-ink-700 dark:border-ink-700">
               {filtered.map((scholar) => (
                 <div
                   key={scholar.id}
-                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100"
+                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100 dark:hover:bg-ink-800"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-sand-200 text-xs font-medium text-sand-300">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-sand-200 text-xs font-medium text-sand-300 dark:bg-ink-800 dark:text-ink-500">
                     {scholar.photo_url ? (
                       <Image
                         src={scholar.photo_url}
@@ -351,7 +373,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-forest-900 truncate">
+                    <p className="text-sm font-medium text-forest-900 truncate dark:text-ink-100">
                       {scholar.name}
                     </p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-1">
@@ -393,7 +415,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                           ? handleDelete(scholar.id)
                           : setConfirmDelete(scholar.id)
                       }
-                      className="shrink-0 text-sand-300 hover:text-red-500"
+                      className="shrink-0 text-sand-300 hover:text-red-500 dark:text-ink-500 dark:hover:text-red-400"
                       aria-label={`Delete ${scholar.name}`}
                     >
                       {pendingId === scholar.id ? (
@@ -433,6 +455,14 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
               />
             </div>
           )}
+
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={totalPages}
+            basePath="/admin/scholars"
+            searchParams={activeSearchParams}
+            className="mt-6"
+          />
         </div>
       </main>
 
@@ -451,7 +481,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
 
           <form onSubmit={handleFormSubmit} className="space-y-4">
             {formError && (
-              <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+              <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">
                 {formError}
               </div>
             )}
@@ -459,7 +489,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             <div className="space-y-1.5">
               <label
                 htmlFor="formName"
-                className="text-sm font-medium text-forest-900"
+                className="text-sm font-medium text-forest-900 dark:text-ink-100"
               >
                 Name
               </label>
@@ -475,7 +505,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             <div className="space-y-1.5">
               <label
                 htmlFor="formBio"
-                className="text-sm font-medium text-forest-900"
+                className="text-sm font-medium text-forest-900 dark:text-ink-100"
               >
                 Bio
               </label>
@@ -490,7 +520,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             <div className="space-y-1.5">
               <label
                 htmlFor="formLanguages"
-                className="text-sm font-medium text-forest-900"
+                className="text-sm font-medium text-forest-900 dark:text-ink-100"
               >
                 Languages
               </label>
@@ -502,8 +532,8 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
                     onClick={() => toggleLanguage(lang.value)}
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       formLanguages.includes(lang.value)
-                        ? "bg-forest-100 text-forest-700"
-                        : "bg-sand-100 text-sand-300 hover:bg-sand-200"
+                        ? "bg-forest-100 text-forest-700 dark:bg-ink-800 dark:text-ink-100"
+                        : "bg-sand-100 text-sand-300 hover:bg-sand-200 dark:bg-ink-800 dark:text-ink-500 dark:hover:bg-ink-700"
                     }`}
                   >
                     {lang.label}
@@ -515,13 +545,13 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             <div className="space-y-1.5">
               <label
                 htmlFor="formPhotoUrl"
-                className="text-sm font-medium text-forest-900"
+                className="text-sm font-medium text-forest-900 dark:text-ink-100"
               >
                 Photo
               </label>
               <div className="flex items-center gap-3">
                 {formPhotoUrl && (
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-sand-200">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-sand-200 dark:bg-ink-800">
                     <Image
                       src={formPhotoUrl}
                       alt=""
@@ -559,7 +589,7 @@ export function ScholarsList({ scholars: initialScholars }: ScholarsListProps) {
             </div>
 
             <div className="space-y-1.5">
-              <span className="text-sm font-medium text-forest-900">
+              <span className="text-sm font-medium text-forest-900 dark:text-ink-100">
                 Social links
               </span>
               <div className="space-y-2">
