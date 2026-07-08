@@ -10,6 +10,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/components/ui/cn";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -32,11 +33,18 @@ interface SeriesOption {
   scholar: { name: string } | null;
 }
 
+interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+}
+
 interface EpisodesListProps {
   episodes: Episode[];
   scholars: ScholarOption[];
   series: SeriesOption[];
   adminRole: "super_admin" | "scholar_admin";
+  pagination: PaginationMeta;
 }
 
 type ConfirmAction = "delete" | "toggle" | null;
@@ -46,6 +54,7 @@ export function EpisodesList({
   scholars,
   series,
   adminRole,
+  pagination,
 }: EpisodesListProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -59,6 +68,19 @@ export function EpisodesList({
     id: string;
     action: ConfirmAction;
   } | null>(null);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(pagination.totalCount / pagination.pageSize),
+  );
+
+  const activeSearchParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (scholarFilter !== "all") params.scholar = scholarFilter;
+    if (seriesFilter !== "all") params.series = seriesFilter;
+    if (statusFilter !== "all") params.status = statusFilter;
+    return params;
+  }, [scholarFilter, seriesFilter, statusFilter]);
 
   const filteredSeries = useMemo(() => {
     if (!scholarFilter || scholarFilter === "all") return series;
@@ -176,7 +198,7 @@ export function EpisodesList({
           {actionError && (
             <div
               role="alert"
-              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400"
             >
               {actionError}
             </div>
@@ -184,7 +206,7 @@ export function EpisodesList({
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sand-300" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sand-300 dark:text-ink-500" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -236,24 +258,26 @@ export function EpisodesList({
           </div>
 
           {filtered.length > 0 ? (
-            <div className="mt-4 divide-y divide-sand-200 rounded-lg border border-sand-200">
+            <div className="mt-4 divide-y divide-sand-200 rounded-lg border border-sand-200 dark:divide-ink-700 dark:border-ink-700">
               {filtered.map((episode) => (
                 <div
                   key={episode.id}
-                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100"
+                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100 dark:hover:bg-ink-800"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-forest-900 truncate">
+                    <p className="text-sm font-medium text-forest-900 truncate dark:text-ink-100">
                       {episode.title}
                     </p>
                     <div className="mt-0.5 flex items-center gap-2">
-                      <span className="text-xs text-forest-700">
+                      <span className="text-xs text-forest-700 dark:text-ink-100">
                         {episode.scholar?.name}
                       </span>
                       {episode.series && (
                         <>
-                          <span className="text-xs text-sand-300">·</span>
-                          <span className="text-xs text-forest-700 truncate max-w-[180px]">
+                          <span className="text-xs text-sand-300 dark:text-ink-500">
+                            ·
+                          </span>
+                          <span className="text-xs text-forest-700 truncate max-w-[180px] dark:text-ink-100">
                             {episode.series.title}
                           </span>
                         </>
@@ -261,7 +285,7 @@ export function EpisodesList({
                     </div>
                   </div>
 
-                  <span className="font-mono text-xs text-sand-300 shrink-0">
+                  <span className="font-mono text-xs text-sand-300 shrink-0 dark:text-ink-500">
                     {formatDuration(episode.duration_seconds ?? 0)}
                   </span>
 
@@ -310,7 +334,7 @@ export function EpisodesList({
                         ? handleDelete(episode.id)
                         : promptConfirm(episode.id, "delete")
                     }
-                    className="shrink-0 text-sand-300 hover:text-red-500"
+                    className="shrink-0 text-sand-300 hover:text-red-500 dark:text-ink-500 dark:hover:text-red-400"
                     aria-label={`Delete ${episode.title}`}
                   >
                     {pendingId === episode.id ? (
@@ -362,6 +386,14 @@ export function EpisodesList({
               />
             </div>
           )}
+
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={totalPages}
+            basePath="/admin/episodes"
+            searchParams={activeSearchParams}
+            className="mt-6"
+          />
         </div>
       </main>
     </>

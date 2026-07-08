@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Shield, Users } from "lucide-react";
+import { LogOut, Settings, Shield, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useCallback, useState } from "react";
@@ -92,6 +92,14 @@ export function AdminDashboardShell({
                 </Link>
               </>
             )}
+            <Link
+              href="/admin/settings"
+              onClick={() => setIsSheetOpen(false)}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-forest-700 transition-colors hover:bg-sand-100 dark:text-ink-100 dark:hover:bg-ink-800"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
             <button
               type="button"
               onClick={() => {
