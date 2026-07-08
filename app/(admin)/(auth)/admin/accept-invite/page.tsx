@@ -18,9 +18,29 @@ export default function AcceptInvitePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    async function init() {
+      const hash = window.location.hash;
+
+      if (hash.includes("access_token")) {
+        const params = new URLSearchParams(hash.substring(1));
+        const access_token = params.get("access_token");
+        const refresh_token = params.get("refresh_token");
+
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({
+            access_token,
+            refresh_token,
+          });
+          setSessionReady(!error);
+          window.history.replaceState(null, "", window.location.pathname);
+          return;
+        }
+      }
+
+      const { data } = await supabase.auth.getSession();
       setSessionReady(!!data.session);
-    });
+    }
+    init();
   }, [supabase]);
 
   async function onSubmit(e: React.FormEvent) {
@@ -50,6 +70,27 @@ export default function AcceptInvitePage() {
 
     toast.success("Password set.");
     router.push("/admin");
+  }
+
+  if (sessionReady === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="w-full max-w-sm text-center">
+          <div className="mx-auto mb-6 relative h-12 w-12">
+            <Image
+              src="/logo.png"
+              alt="Manhaj"
+              fill
+              className="object-contain"
+              loading="eager"
+            />
+          </div>
+          <p className="text-sm text-forest-700 dark:text-ink-100">
+            Verifying your link…
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (sessionReady === false) {
