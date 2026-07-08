@@ -47,7 +47,7 @@ scholars → series → episodes (hierarchy)
 admins  → references auth.users(id), scoped by role + scholar_id
 ```
 
-See `supabase/migrations/001_initial_schema.sql` for full schema (tables, indexes, RLS policies, helper functions).
+See `CODEBASE_STATE.md` §5 for full schema (tables, relationships, types).
 
 ## URL Structure
 

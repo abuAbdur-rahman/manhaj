@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Library,
   LogOut,
+  Settings,
   Shield,
   Users,
 } from "lucide-react";
@@ -60,6 +61,12 @@ const navItems: NavItem[] = [
     href: "/admin/episodes",
     label: "Episodes",
     icon: Headphones,
+    roles: ["super_admin", "scholar_admin"],
+  },
+  {
+    href: "/admin/settings",
+    label: "Settings",
+    icon: Settings,
     roles: ["super_admin", "scholar_admin"],
   },
 ];
