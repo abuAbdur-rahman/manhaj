@@ -78,7 +78,7 @@ export default async function AdminDashboardPage() {
             </h2>
 
             {episodes.length > 0 ? (
-              <div className="mt-4 divide-y divide-sand-200 dark:divide-ink-700">
+              <div className="mt-4 divide-y divide-sand-200 rounded-lg border border-sand-200 shadow-sm dark:divide-ink-700 dark:border-ink-700">
                 {episodes.map((episode) => (
                   <div
                     key={episode.id}

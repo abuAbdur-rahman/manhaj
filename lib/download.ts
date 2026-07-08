@@ -36,19 +36,25 @@ async function requestPersistentStorage(): Promise<void> {
   }
 }
 
-async function primeOfflinePageCache(slug: string): Promise<void> {
-  if (!("caches" in window)) return;
+async function primeOfflinePageCache(slug: string): Promise<boolean> {
+  if (!("caches" in window)) return false;
 
   try {
     const cache = await caches.open("manhaj-pages");
-    const offlinePath = `/offline/${slug}`;
-    const response = await fetch(offlinePath, { credentials: "same-origin" });
+    const paths = [`/offline/${slug}`, `/lectures/${slug}`];
 
-    if (response.ok) {
-      await cache.put(offlinePath, response.clone());
+    let cached = false;
+    for (const path of paths) {
+      const response = await fetch(path, { credentials: "same-origin" });
+      if (response.ok) {
+        await cache.put(path, response.clone());
+        cached = true;
+      }
     }
+    return cached;
   } catch (error) {
     console.warn("Failed to prime offline page cache:", error);
+    return false;
   }
 }
 
@@ -122,10 +128,16 @@ export async function downloadEpisode(
     const blob = new Blob(chunks, { type: "audio/mpeg" });
     await saveDownload(episode, blob);
     await requestPersistentStorage();
-    await primeOfflinePageCache(episode.slug);
+    const primed = await primeOfflinePageCache(episode.slug);
 
     store.updateProgress(episode.id, { status: "completed", percent: 100 });
-    toast.success(`Downloaded "${episode.title}"`);
+    if (primed) {
+      toast.success(`Downloaded "${episode.title}"`);
+    } else {
+      toast.warning(
+        `Downloaded "${episode.title}" — offline page may not load. Check your connection.`,
+      );
+    }
     store.removeDownload(episode.id);
     return true;
   } catch (error) {
