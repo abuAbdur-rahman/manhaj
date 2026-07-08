@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Select,
   SelectContent,
@@ -22,14 +23,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Admin } from "@/types";
+import type { Admin, Scholar } from "@/types";
 
 interface AdminWithScholar extends Admin {
   scholar?: { id: string; name: string } | null;
 }
 
+interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+}
+
 interface AdminListProps {
   admins: AdminWithScholar[];
+  scholars: Pick<Scholar, "id" | "name">[];
+  pagination: PaginationMeta;
 }
 
 function formatDate(iso: string): string {
@@ -40,7 +49,11 @@ function formatDate(iso: string): string {
   });
 }
 
-export function AdminsList({ admins: initialAdmins }: AdminListProps) {
+export function AdminsList({
+  admins: initialAdmins,
+  scholars,
+  pagination,
+}: AdminListProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -52,10 +65,19 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formError, setFormError] = useState("");
   const [formPending, setFormPending] = useState(false);
-  const [inviteResult, setInviteResult] = useState<{
-    email: string;
-    password: string;
-  } | null>(null);
+  const [inviteResult, setInviteResult] = useState<string | null>(null);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(pagination.totalCount / pagination.pageSize),
+  );
+
+  const activeSearchParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (roleFilter !== "all") params.role = roleFilter;
+    if (statusFilter !== "all") params.status = statusFilter;
+    return params;
+  }, [roleFilter, statusFilter]);
 
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -175,10 +197,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
 
         const data = await res.json();
         setItems((prev) => [data, ...prev]);
-        setInviteResult({
-          email: formEmail.trim(),
-          password: data.tempPassword,
-        });
+        setInviteResult(formEmail.trim());
         router.refresh();
       } catch (err) {
         setFormError(
@@ -213,7 +232,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
           {actionError && (
             <div
               role="alert"
-              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400"
             >
               {actionError}
             </div>
@@ -221,7 +240,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sand-300" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-sand-300 dark:text-ink-500" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -254,29 +273,33 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
           </div>
 
           {filtered.length > 0 ? (
-            <div className="mt-4 divide-y divide-sand-200 rounded-lg border border-sand-200">
+            <div className="mt-4 divide-y divide-sand-200 rounded-lg border border-sand-200 dark:divide-ink-700 dark:border-ink-700">
               {filtered.map((admin) => (
                 <div
                   key={admin.id}
-                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100"
+                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-sand-100 dark:hover:bg-ink-800"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-forest-900 truncate">
+                      <p className="text-sm font-medium text-forest-900 truncate dark:text-ink-100">
                         {admin.name}
                       </p>
                       {admin.id === initialAdmins[0]?.id && (
-                        <span className="text-[10px] text-sand-300">(you)</span>
+                        <span className="text-[10px] text-sand-300 dark:text-ink-500">
+                          (you)
+                        </span>
                       )}
                     </div>
                     <div className="mt-0.5 flex items-center gap-2">
-                      <span className="text-xs text-forest-700">
+                      <span className="text-xs text-forest-700 dark:text-ink-100">
                         {admin.email}
                       </span>
                       {admin.scholar && (
                         <>
-                          <span className="text-xs text-sand-300">·</span>
-                          <span className="text-xs text-forest-700">
+                          <span className="text-xs text-sand-300 dark:text-ink-500">
+                            ·
+                          </span>
+                          <span className="text-xs text-forest-700 dark:text-ink-100">
                             {admin.scholar.name}
                           </span>
                         </>
@@ -298,7 +321,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                     {admin.is_active ? "Active" : "Inactive"}
                   </Badge>
 
-                  <span className="font-mono text-[10px] text-sand-300 shrink-0">
+                  <span className="font-mono text-[10px] text-sand-300 shrink-0 dark:text-ink-500">
                     {formatDate(admin.created_at)}
                   </span>
 
@@ -312,7 +335,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                           ? handleDeactivate(admin.id)
                           : setConfirmDelete(admin.id)
                       }
-                      className="shrink-0 text-sand-300 hover:text-red-500"
+                      className="shrink-0 text-sand-300 hover:text-red-500 dark:text-ink-500 dark:hover:text-red-400"
                       aria-label={`Deactivate ${admin.name}`}
                     >
                       {pendingId === admin.id ? (
@@ -352,6 +375,14 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
               />
             </div>
           )}
+
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={totalPages}
+            basePath="/admin/admins"
+            searchParams={activeSearchParams}
+            className="mt-6"
+          />
         </div>
       </main>
 
@@ -366,26 +397,19 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
           {inviteResult ? (
             <>
               <DialogHeader>
-                <DialogTitle>Admin invited</DialogTitle>
+                <DialogTitle>Invitation sent</DialogTitle>
                 <DialogDescription>
-                  Share these credentials securely with the new admin.
+                  An invite email has been sent. The new admin sets their own
+                  password from the link in the email.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-3 rounded-lg border border-sand-200 bg-sand-100 p-4">
-                <div className="space-y-0.5">
-                  <p className="text-xs font-medium text-sand-300">Email</p>
-                  <p className="text-sm text-forest-900">
-                    {inviteResult.email}
-                  </p>
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-xs font-medium text-sand-300">
-                    Temporary password
-                  </p>
-                  <p className="font-mono text-sm text-forest-900 break-all">
-                    {inviteResult.password}
-                  </p>
-                </div>
+              <div className="space-y-2 rounded-lg border border-sand-200 bg-sand-100 p-4 dark:border-ink-700 dark:bg-ink-800">
+                <p className="text-xs font-medium text-sand-300 dark:text-ink-500">
+                  Sent to
+                </p>
+                <p className="text-sm text-forest-900 break-all dark:text-ink-100">
+                  {inviteResult}
+                </p>
               </div>
               <div className="flex justify-end">
                 <Button
@@ -404,14 +428,14 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
               <DialogHeader>
                 <DialogTitle>Invite admin</DialogTitle>
                 <DialogDescription>
-                  Create a new admin account. A temporary password will be
-                  generated.
+                  Send an invite by email. The new admin sets their own password
+                  from the invite link.
                 </DialogDescription>
               </DialogHeader>
 
               <form onSubmit={handleFormSubmit} className="space-y-4">
                 {formError && (
-                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">
                     {formError}
                   </div>
                 )}
@@ -419,7 +443,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="admin-name"
-                    className="text-sm font-medium text-forest-900"
+                    className="text-sm font-medium text-forest-900 dark:text-ink-100"
                   >
                     Name
                   </label>
@@ -435,7 +459,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="admin-email"
-                    className="text-sm font-medium text-forest-900"
+                    className="text-sm font-medium text-forest-900 dark:text-ink-100"
                   >
                     Email
                   </label>
@@ -452,7 +476,7 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
                 <div className="space-y-1.5">
                   <span
                     id="admin-role-label"
-                    className="text-sm font-medium text-forest-900"
+                    className="text-sm font-medium text-forest-900 dark:text-ink-100"
                   >
                     Role
                   </span>
@@ -476,21 +500,41 @@ export function AdminsList({ admins: initialAdmins }: AdminListProps) {
 
                 {formRole === "scholar_admin" && (
                   <div className="space-y-1.5">
-                    <label
-                      htmlFor="admin-scholar-id"
-                      className="text-sm font-medium text-forest-900"
+                    <span
+                      id="admin-scholar-label"
+                      className="text-sm font-medium text-forest-900 dark:text-ink-100"
                     >
                       Scholar
-                    </label>
-                    <Input
-                      id="admin-scholar-id"
+                    </span>
+                    <Select
                       value={formScholarId}
-                      onChange={(e) => setFormScholarId(e.target.value)}
-                      placeholder="Scholar ID"
-                    />
-                    <p className="text-xs text-sand-300">
-                      Enter the scholar's UUID this admin will manage.
-                    </p>
+                      onValueChange={setFormScholarId}
+                    >
+                      <SelectTrigger
+                        aria-labelledby="admin-scholar-label"
+                        disabled={scholars.length === 0}
+                      >
+                        <SelectValue
+                          placeholder={
+                            scholars.length === 0
+                              ? "No active scholars"
+                              : "Select scholar"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {scholars.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {scholars.length === 0 && (
+                      <p className="text-xs text-sand-300 dark:text-ink-500">
+                        Create a scholar first before assigning a scholar admin.
+                      </p>
+                    )}
                   </div>
                 )}
 

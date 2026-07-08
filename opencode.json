@@ -3,8 +3,7 @@
   "instructions": [
     "AGENTS.md",
     "DESIGN.md",
-    ".opencode/docs/manhaj-brd-v1.1.md",
-    ".opencode/docs/manhaj-setup-v1.5.md",
+    "CODEBASE_STATE.md",
     ".opencode/tasks/*.md"
   ]
 }
