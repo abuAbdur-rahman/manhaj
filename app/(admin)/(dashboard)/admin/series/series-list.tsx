@@ -267,7 +267,7 @@ export function SeriesList({
         }
       />
 
-      <main className="flex-1 pb-20 lg:pb-0">
+      <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <div className="mx-auto max-w-4xl px-4 py-6 md:px-6">
           {actionError && (
             <div

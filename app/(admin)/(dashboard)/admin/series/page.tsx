@@ -24,7 +24,9 @@ interface SeriesWithCount {
 
 const PAGE_SIZE = 20;
 
-function mapSeriesWithCount(data: Record<string, unknown>[]): SeriesWithCount[] {
+function mapSeriesWithCount(
+  data: Record<string, unknown>[],
+): SeriesWithCount[] {
   return data.map((s) => ({
     ...s,
     episode_count:
