@@ -48,7 +48,7 @@ export function AdminDashboardShell({
   return (
     <AdminIdentityProvider value={admin}>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <div className="flex min-h-screen">
+        <div className="flex h-screen overflow-hidden">
           <AdminSidebar
             role={role}
             isCollapsed={isCollapsed}
@@ -56,7 +56,7 @@ export function AdminDashboardShell({
             onSignOut={handleSignOut}
             className="hidden lg:flex"
           />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 overflow-y-auto">{children}</main>
           <AdminMobileNav
             role={role}
             onMenuClick={handleMenuClick}
