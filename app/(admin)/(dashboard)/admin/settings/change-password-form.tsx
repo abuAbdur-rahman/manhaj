@@ -66,7 +66,7 @@ export function ChangePasswordForm() {
   return (
     <>
       <Header title="Settings" />
-      <main className="flex-1 pb-20 lg:pb-0">
+      <main className="flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <div className="mx-auto max-w-md px-4 py-6 md:px-6">
           <form onSubmit={onSubmit} className="space-y-4">
             <h2 className="text-lg font-semibold text-forest-900 dark:text-ink-100">
