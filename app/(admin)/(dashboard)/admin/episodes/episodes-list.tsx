@@ -3,7 +3,7 @@
 import { Loader2, Plus, Search, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Header } from "@/components/layout/header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -57,6 +57,7 @@ export function EpisodesList({
   const [statusFilter, setStatusFilter] = useState("all");
   const [items, setItems] = useState(initialEpisodes);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const operationIdsRef = useRef(new Map<string, string>());
 
   useEffect(() => {
     setItems(initialEpisodes);
@@ -115,33 +116,47 @@ export function EpisodesList({
     return result;
   }, [items, search, scholarFilter, seriesFilter, statusFilter]);
 
-  const handleTogglePublish = useCallback(async (episode: Episode) => {
-    setActionError("");
-    setPendingId(episode.id);
-    try {
-      const res = await fetch(`/api/admin/episodes/${episode.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_published: !episode.is_published }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message ?? "Failed to update");
+  const handleTogglePublish = useCallback(
+    async (episode: Episode) => {
+      setActionError("");
+      setPendingId(episode.id);
+      try {
+        const res = await fetch(`/api/admin/episodes/${episode.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Operation-ID":
+              operationIdsRef.current.get(episode.id) ??
+              (() => {
+                const id = crypto.randomUUID();
+                operationIdsRef.current.set(episode.id, id);
+                return id;
+              })(),
+          },
+          body: JSON.stringify({ is_published: !episode.is_published }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error?.message ?? "Failed to update");
+        }
+        operationIdsRef.current.delete(episode.id);
+        setItems((prev) =>
+          prev.map((e) =>
+            e.id === episode.id ? { ...e, is_published: !e.is_published } : e,
+          ),
+        );
+        router.refresh();
+      } catch (err) {
+        setActionError(
+          err instanceof Error ? err.message : "Something went wrong",
+        );
+      } finally {
+        setPendingId(null);
+        setConfirmAction(null);
       }
-      setItems((prev) =>
-        prev.map((e) =>
-          e.id === episode.id ? { ...e, is_published: !e.is_published } : e,
-        ),
-      );
-    } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Something went wrong",
-      );
-    } finally {
-      setPendingId(null);
-      setConfirmAction(null);
-    }
-  }, []);
+    },
+    [router],
+  );
 
   const handleDelete = useCallback(
     async (id: string) => {

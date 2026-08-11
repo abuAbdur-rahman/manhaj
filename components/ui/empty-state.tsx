@@ -20,18 +20,20 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center px-4 py-12 text-center",
+        "flex flex-col items-center justify-center px-6 py-16 text-center page-enter",
         className,
       )}
     >
-      {icon ?? <WaveformSeal variant="skeleton" className="mb-4 scale-150" />}
-      <h3 className="mt-4 text-sm font-semibold text-forest-900 dark:text-ink-100">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-forest-50/80 dark:bg-ink-800/80">
+        {icon ?? <WaveformSeal variant="skeleton" className="scale-125" />}
+      </div>
+      <h3 className="mt-5 text-base font-semibold text-forest-900 dark:text-ink-100">
         {title}
       </h3>
-      <p className="mt-1 max-w-[280px] text-sm text-forest-700 leading-relaxed dark:text-ink-500">
+      <p className="mt-2 max-w-[280px] text-sm text-sand-300 leading-relaxed dark:text-ink-500">
         {description}
       </p>
-      {action && <div className="mt-4">{action}</div>}
+      {action && <div className="mt-5">{action}</div>}
     </div>
   );
 }

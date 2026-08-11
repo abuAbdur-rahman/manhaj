@@ -13,7 +13,10 @@ export function ScholarRow({ scholar, className }: ScholarRowProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-xl border border-sand-200 bg-sand-50 px-3 py-3 shadow-[0_2px_10px_rgba(15,65,38,0.05)] transition-all hover:bg-sand-100 dark:border-ink-700 dark:bg-ink-900 dark:shadow-black/20 dark:hover:bg-ink-800",
+        "flex items-center gap-3 rounded-2xl border border-sand-200/60 bg-sand-50 px-4 py-3.5",
+        "shadow-[0_1px_3px_rgba(15,65,38,0.04),0_4px_12px_rgba(15,65,38,0.03)]",
+        "motion-safe:transition-all motion-safe:duration-150 hover:bg-sand-100 active:scale-[0.98] motion-reduce:active:scale-100",
+        "dark:border-ink-700/50 dark:bg-ink-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)] dark:hover:bg-ink-800",
         className,
       )}
     >
@@ -28,7 +31,7 @@ export function ScholarRow({ scholar, className }: ScholarRowProps) {
         <p className="text-sm font-semibold text-forest-900 truncate dark:text-ink-100">
           {scholar.name}
         </p>
-        <div className="flex items-center gap-1.5 mt-0.5">
+        <div className="flex items-center gap-1.5 mt-1">
           {scholar.languages.map((lang) => (
             <Badge key={lang} variant="default" className="text-[11px]">
               {lang}
@@ -49,16 +52,16 @@ export function ScholarRow({ scholar, className }: ScholarRowProps) {
 
 export function ScholarRowSkeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-lg px-2 py-2.5">
-      <div className="h-10 w-10 rounded-full bg-sand-200 animate-pulse shrink-0 dark:bg-ink-800" />
-      <div className="flex-1 space-y-1.5">
-        <div className="h-4 w-40 rounded bg-sand-200 animate-pulse dark:bg-ink-800" />
+    <div className="flex items-center gap-3 rounded-2xl px-4 py-3.5">
+      <div className="h-10 w-10 rounded-full bg-sand-200/80 motion-safe:animate-pulse shrink-0 dark:bg-ink-800" />
+      <div className="flex-1 space-y-2">
+        <div className="h-4 w-40 rounded-lg bg-sand-200/80 motion-safe:animate-pulse dark:bg-ink-800" />
         <div className="flex items-center gap-1.5">
-          <div className="h-5 w-12 rounded-full bg-sand-200 animate-pulse dark:bg-ink-800" />
-          <div className="h-5 w-12 rounded-full bg-sand-200 animate-pulse dark:bg-ink-800" />
+          <div className="h-5 w-12 rounded-full bg-sand-200/80 motion-safe:animate-pulse dark:bg-ink-800" />
+          <div className="h-5 w-12 rounded-full bg-sand-200/80 motion-safe:animate-pulse dark:bg-ink-800" />
         </div>
       </div>
-      <div className="h-4 w-4 bg-sand-200 rounded animate-pulse shrink-0 dark:bg-ink-800" />
+      <div className="h-4 w-4 bg-sand-200/80 rounded motion-safe:animate-pulse shrink-0 dark:bg-ink-800" />
     </div>
   );
 }

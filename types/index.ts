@@ -71,7 +71,7 @@ export interface Episode {
   title: string;
   slug: string;
   description: string | null;
-  audio_url: string;
+  audio_url: string | null;
   duration_seconds: number | null;
   language: Language;
   tags: Tag[];

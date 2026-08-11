@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { AudioProvider } from "@/components/layout/audio-provider";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { DownloadToaster } from "@/components/layout/download-toaster";
 import { InstallBanner } from "@/components/layout/install-banner";
 import { MiniPlayer } from "@/components/layout/mini-player";
 import { OfflineDetector } from "@/components/layout/offline-detector";
@@ -15,6 +16,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     <>
       <AudioProvider />
       <OfflineDetector />
+      <DownloadToaster />
       <div className="flex min-h-screen flex-col">
         {children}
         <div

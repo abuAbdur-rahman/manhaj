@@ -75,8 +75,11 @@ export async function POST(request: NextRequest) {
 
   if (updateError) {
     if (updateError.status === 429) return rateLimitResponse(60);
+    console.error("Failed to update password:", updateError);
     return NextResponse.json(
-      { error: { code: "INTERNAL_ERROR", message: updateError.message } },
+      {
+        error: { code: "INTERNAL_ERROR", message: "Failed to update password" },
+      },
       { status: 400 },
     );
   }

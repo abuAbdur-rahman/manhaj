@@ -49,7 +49,7 @@ export function SearchInput({
         value={value}
         onChange={handleChange}
         placeholder={placeholder}
-        className="flex h-11 w-full rounded-lg border border-sand-200 bg-white pl-9 pr-9 text-sm text-forest-900 placeholder:text-sand-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100 dark:placeholder:text-ink-500"
+        className="flex h-12 w-full rounded-xl border border-sand-200/60 bg-white pl-10 pr-10 text-sm text-forest-900 placeholder:text-sand-300 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 motion-safe:transition-shadow motion-safe:duration-150 focus:shadow-[0_2px_12px_rgba(26,107,60,0.08)] dark:border-ink-700/50 dark:bg-ink-900 dark:text-ink-100 dark:placeholder:text-ink-500"
         // biome-ignore lint/a11y/noAutofocus: per design spec, search input auto-focuses on tab tap
         autoFocus
       />

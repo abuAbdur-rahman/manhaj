@@ -11,42 +11,60 @@ export interface DownloadProgress {
   percent: number;
   status: "downloading" | "saving" | "completed" | "error";
   error?: string;
+  /** Hidden from the floating toaster but still downloading. */
+  dismissed?: boolean;
 }
 
 interface DownloadsStore {
   inProgress: DownloadProgress[];
-  downloadRevision: number;
   addDownload: (episode: Episode) => void;
+  resetDownload: (episode: Episode) => void;
   updateProgress: (
     episodeId: string,
     partial: Partial<DownloadProgress>,
   ) => void;
   removeDownload: (episodeId: string) => void;
-  clearCompleted: () => void;
+  /**
+   * Hide a download from the floating toaster.
+   * For active downloads this only hides the chip (download keeps running);
+   * for terminal states (completed/error) it removes the entry.
+   */
+  dismissDownload: (episodeId: string) => void;
+}
+
+const ACTIVE: DownloadProgress["status"][] = ["downloading", "saving"];
+
+function initialDownload(episode: Episode): DownloadProgress {
+  return {
+    episodeId: episode.id,
+    episode,
+    loaded: 0,
+    total: 0,
+    percent: 0,
+    status: "downloading",
+    dismissed: false,
+  };
 }
 
 export const useDownloadsStore = create<DownloadsStore>((set) => ({
   inProgress: [],
-  downloadRevision: 0,
 
   addDownload: (episode) =>
     set((state) => {
       if (state.inProgress.some((d) => d.episodeId === episode.id))
         return state;
       return {
-        inProgress: [
-          ...state.inProgress,
-          {
-            episodeId: episode.id,
-            episode,
-            loaded: 0,
-            total: 0,
-            percent: 0,
-            status: "downloading",
-          },
-        ],
+        inProgress: [...state.inProgress, initialDownload(episode)],
       };
     }),
+
+  resetDownload: (episode) =>
+    set((state) => ({
+      inProgress: [
+        ...state.inProgress.filter((d) => d.episodeId !== episode.id),
+        initialDownload(episode),
+      ],
+    })),
 
   updateProgress: (episodeId, partial) =>
     set((state) => ({
@@ -58,11 +76,21 @@ export const useDownloadsStore = create<DownloadsStore>((set) => ({
   removeDownload: (episodeId) =>
     set((state) => ({
       inProgress: state.inProgress.filter((d) => d.episodeId !== episodeId),
-      downloadRevision: state.downloadRevision + 1,
     })),
 
-  clearCompleted: () =>
-    set((state) => ({
-      inProgress: state.inProgress.filter((d) => d.status === "downloading"),
-    })),
+  dismissDownload: (episodeId) =>
+    set((state) => {
+      const entry = state.inProgress.find((d) => d.episodeId === episodeId);
+      if (!entry) return state;
+      if (ACTIVE.includes(entry.status)) {
+        return {
+          inProgress: state.inProgress.map((d) =>
+            d.episodeId === episodeId ? { ...d, dismissed: true } : d,
+          ),
+        };
+      }
+      return {
+        inProgress: state.inProgress.filter((d) => d.episodeId !== episodeId),
+      };
+    }),
 }));

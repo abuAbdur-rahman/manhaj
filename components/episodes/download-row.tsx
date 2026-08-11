@@ -46,7 +46,7 @@ export function DownloadRow({
         }
       }}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-sand-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:hover:bg-ink-800",
+        "flex items-center gap-3 rounded-xl px-3 py-3 motion-safe:transition-all motion-safe:duration-150 hover:bg-sand-100/80 cursor-pointer active:scale-[0.99] motion-reduce:active:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:hover:bg-ink-800/60",
         className,
       )}
     >
