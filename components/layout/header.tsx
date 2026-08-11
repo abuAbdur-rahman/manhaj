@@ -51,7 +51,8 @@ function ThemeToggle() {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className={cn(
-        "flex h-11 w-11 items-center justify-center rounded-full transition-colors",
+        "flex h-11 w-11 items-center justify-center rounded-full",
+        "motion-safe:transition-all motion-safe:duration-150 active:scale-95 motion-reduce:active:scale-100",
         "text-forest-700 hover:bg-sand-100 dark:text-ink-100 dark:hover:bg-ink-800",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
       )}
@@ -94,15 +95,15 @@ export function Header({
     <header
       className={cn(
         "sticky top-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3",
-        "h-[calc(3.5rem+env(safe-area-inset-top))] border-b border-sand-200 bg-sand-50/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur",
-        "dark:border-ink-700 dark:bg-ink-900/95",
+        "h-[calc(3.5rem+env(safe-area-inset-top))] border-b border-sand-200/60 bg-sand-50/80 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150",
+        "dark:border-ink-700/40 dark:bg-ink-900/80",
         className,
       )}
     >
       <div className="flex min-w-0 items-center gap-2">
         {home ? (
-          <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2">
-            <div className="relative h-7 w-7 shrink-0">
+          <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2.5">
+            <div className="relative h-8 w-8 shrink-0">
               <Image
                 src="/logo.png"
                 alt="Manhaj"
@@ -112,11 +113,11 @@ export function Header({
               />
             </div>
             <div className="min-w-0">
-              <span className="block truncate text-lg font-semibold text-forest-700 dark:text-ink-100">
+              <span className="block truncate text-lg font-bold text-forest-700 dark:text-ink-100">
                 Manhaj
               </span>
               {title && (
-                <span className="block truncate text-xs font-medium text-forest-500 dark:text-ink-500">
+                <span className="block truncate text-[11px] font-medium text-sand-300 dark:text-ink-500">
                   {title}
                 </span>
               )}
@@ -132,7 +133,8 @@ export function Header({
                 }
                 aria-label={`Back${backLabel ? ` to ${backLabel}` : ""}`}
                 className={cn(
-                  "-ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors",
+                  "-ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
+                  "motion-safe:transition-all motion-safe:duration-150 active:scale-90 motion-reduce:active:scale-100",
                   "text-forest-700 hover:bg-sand-100 dark:text-ink-100 dark:hover:bg-ink-800",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
                 )}
@@ -147,7 +149,7 @@ export function Header({
                 </span>
               )}
               {subtitle && (
-                <span className="block truncate text-xs font-medium text-forest-500 dark:text-ink-500">
+                <span className="block truncate text-[11px] font-medium text-sand-300 dark:text-ink-500">
                   {subtitle}
                 </span>
               )}

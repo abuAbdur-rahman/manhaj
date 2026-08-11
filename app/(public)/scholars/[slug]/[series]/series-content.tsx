@@ -13,7 +13,7 @@ interface SeriesContentProps {
 }
 
 export function SeriesContent({ episodes }: SeriesContentProps) {
-  const setEpisode = usePlayerStore((s) => s.setEpisode);
+  const setQueue = usePlayerStore((s) => s.setQueue);
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   const handleDownloadAll = useCallback(async () => {
@@ -27,21 +27,23 @@ export function SeriesContent({ episodes }: SeriesContentProps) {
 
   const handlePlayAll = useCallback(() => {
     if (episodes.length > 0) {
-      setEpisode(episodes[0]);
+      setQueue(episodes);
     }
-  }, [episodes, setEpisode]);
+  }, [episodes, setQueue]);
 
   if (episodes.length === 0) {
     return (
-      <div className="py-16 text-center">
-        <p className="text-sm text-sand-300">No episodes in this series yet.</p>
+      <div className="py-16 text-center page-enter">
+        <p className="text-sm text-sand-300 dark:text-ink-500">
+          No episodes in this series yet.
+        </p>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-2 px-4 py-4">
+    <div className="page-enter">
+      <div className="flex items-center gap-2.5 px-4 py-5">
         <Button onClick={handlePlayAll} className="flex-1 gap-2">
           <Play className="h-4 w-4" />
           Play all
@@ -57,7 +59,7 @@ export function SeriesContent({ episodes }: SeriesContentProps) {
         </Button>
       </div>
 
-      <div className="divide-y divide-sand-200">
+      <div className="space-y-0.5 px-1">
         {episodes.map((episode, i) => (
           <AudioCard key={episode.id} episode={episode} number={i + 1} />
         ))}

@@ -19,13 +19,14 @@ export function WaveformSeal({
 }: WaveformSealProps) {
   const heights = barHeights[0].slice(0, barCount);
 
-  const baseClasses = "flex items-end gap-0.5";
+  const baseClasses = "flex items-end gap-[3px]";
 
   const variantClasses = {
-    inline: "text-forest-500",
-    watermark: "opacity-[0.06] text-forest-50",
-    skeleton: "text-forest-500/30 motion-safe:animate-pulse",
-    muted: "text-sand-300",
+    inline: "text-forest-500 dark:text-forest-500/70",
+    watermark: "opacity-[0.04] text-forest-500",
+    skeleton:
+      "text-forest-500/25 motion-safe:animate-pulse dark:text-ink-500/40",
+    muted: "text-sand-300 dark:text-ink-500",
   };
 
   return (
@@ -36,7 +37,7 @@ export function WaveformSeal({
       {heights.map((h, i) => (
         <div
           key={i}
-          className="w-1 rounded-full bg-current"
+          className="w-[3px] rounded-full bg-current"
           style={{ height: `${h * 2}px` }}
         />
       ))}

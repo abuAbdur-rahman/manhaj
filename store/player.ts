@@ -3,6 +3,8 @@ import type { Episode, Speed } from "@/types";
 
 interface PlayerStore {
   currentEpisode: Episode | null;
+  queue: Episode[];
+  queueIndex: number;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
@@ -11,6 +13,9 @@ interface PlayerStore {
   sleepTimerRemaining: number | null;
   audioRef: HTMLAudioElement | null;
   setEpisode: (episode: Episode) => void;
+  setQueue: (episodes: Episode[], startIndex?: number) => void;
+  playNext: () => boolean;
+  playPrevious: () => boolean;
   setPlaying: (playing: boolean) => void;
   setCurrentTime: (time: number) => void;
   setDuration: (duration: number) => void;
@@ -22,8 +27,18 @@ interface PlayerStore {
   clear: () => void;
 }
 
+const episodeState = (episode: Episode) => ({
+  currentEpisode: episode,
+  currentTime: 0,
+  duration: episode.duration_seconds ?? 0,
+  isPlaying: true,
+  isLoading: true,
+});
+
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
   currentEpisode: null,
+  queue: [],
+  queueIndex: -1,
   isPlaying: false,
   currentTime: 0,
   duration: 0,
@@ -33,12 +48,36 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   audioRef: null,
   setEpisode: (episode) =>
     set({
-      currentEpisode: episode,
-      currentTime: 0,
-      duration: episode.duration_seconds ?? 0,
-      isPlaying: true,
-      isLoading: true,
+      ...episodeState(episode),
+      queue: [episode],
+      queueIndex: 0,
     }),
+  setQueue: (episodes, startIndex = 0) => {
+    if (episodes.length === 0) return;
+    const safeIndex = Math.min(Math.max(startIndex, 0), episodes.length - 1);
+    set({
+      ...episodeState(episodes[safeIndex]),
+      queue: episodes,
+      queueIndex: safeIndex,
+    });
+  },
+  playNext: () => {
+    const { queue, queueIndex } = get();
+    if (queueIndex < 0 || queueIndex >= queue.length - 1) {
+      set({ isPlaying: false });
+      return false;
+    }
+    const nextIndex = queueIndex + 1;
+    set({ ...episodeState(queue[nextIndex]), queueIndex: nextIndex });
+    return true;
+  },
+  playPrevious: () => {
+    const { queue, queueIndex } = get();
+    if (queueIndex <= 0) return false;
+    const previousIndex = queueIndex - 1;
+    set({ ...episodeState(queue[previousIndex]), queueIndex: previousIndex });
+    return true;
+  },
   setPlaying: (playing) => set({ isPlaying: playing }),
   setCurrentTime: (time) => set({ currentTime: time }),
   setDuration: (duration) => set({ duration }),
@@ -58,6 +97,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   clear: () =>
     set({
       currentEpisode: null,
+      queue: [],
+      queueIndex: -1,
       isPlaying: false,
       currentTime: 0,
       duration: 0,

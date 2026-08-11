@@ -185,7 +185,7 @@ export function ScholarsList({
         const formData = new FormData();
         formData.append("image", file);
 
-        const res = await fetch("/api/admin/upload", {
+        const res = await fetch("/api/admin/upload-image", {
           method: "POST",
           body: formData,
         });

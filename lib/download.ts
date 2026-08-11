@@ -1,5 +1,9 @@
 import { toast } from "sonner";
-import { saveDownload } from "@/lib/downloads-db";
+import {
+  removeDownload as removeStoredDownload,
+  saveDownload,
+} from "@/lib/downloads-db";
+import { invalidateDownloads } from "@/lib/query-client";
 import { useDownloadsStore } from "@/store/downloads";
 import type { Episode } from "@/types";
 
@@ -58,6 +62,60 @@ async function primeOfflinePageCache(slug: string): Promise<boolean> {
   }
 }
 
+const activeTransfers = new Map<string, AbortController>();
+const MAX_ATTEMPTS = 3;
+
+function wait(ms: number, signal: AbortSignal) {
+  if (signal.aborted) {
+    return Promise.reject(new DOMException("Download cancelled", "AbortError"));
+  }
+  return new Promise<void>((resolve, reject) => {
+    const timeout = window.setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        window.clearTimeout(timeout);
+        reject(new DOMException("Download cancelled", "AbortError"));
+      },
+      { once: true },
+    );
+  });
+}
+
+export function isTransientDownloadError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  return /network|fetch|http 429|http 5\d\d/i.test(error.message);
+}
+
+export function cancelDownload(episodeId: string): void {
+  activeTransfers.get(episodeId)?.abort();
+}
+
+export async function evictDownload(
+  episodeId: string,
+  slug: string,
+  audioUrl?: string | null,
+): Promise<void> {
+  const { removeDownload, removePlaybackHistory } = await import(
+    "@/lib/downloads-db"
+  );
+  await removeDownload(episodeId);
+  await removePlaybackHistory(episodeId);
+  if (!("caches" in window)) return;
+  const paths = [`/offline/${slug}`, `/lectures/${slug}`];
+  if (audioUrl) {
+    paths.push(`/api/download?url=${encodeURIComponent(audioUrl)}`, audioUrl);
+  }
+  await Promise.all(
+    paths.map(async (path) => {
+      for (const cacheName of ["manhaj-pages", "manhaj-api", "manhaj-audio"]) {
+        const cache = await caches.open(cacheName);
+        await cache.delete(path);
+      }
+    }),
+  );
+}
+
 export async function downloadEpisode(
   episode: Episode,
   onProgress?: (progress: DownloadProgress) => void,
@@ -67,8 +125,13 @@ export async function downloadEpisode(
     return false;
   }
 
+  const existing = activeTransfers.get(episode.id);
+  if (existing) return false;
+
+  const controller = new AbortController();
+  activeTransfers.set(episode.id, controller);
   const store = useDownloadsStore.getState();
-  store.addDownload(episode);
+  store.resetDownload(episode);
 
   try {
     const storage = await checkStorageQuota();
@@ -82,51 +145,69 @@ export async function downloadEpisode(
       return false;
     }
 
-    const response = await fetch(
-      `/api/download?url=${encodeURIComponent(episode.audio_url)}`,
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    if (!response.body) {
-      throw new Error("Stream unavailable");
-    }
-
-    const contentLength = response.headers.get("content-length");
-    const total = contentLength ? Number.parseInt(contentLength, 10) : 0;
-
-    if (total > 0 && total > storage.available) {
-      const msg = `File too large (${(total / 1024 / 1024).toFixed(1)}MB). Free up space.`;
-      store.updateProgress(episode.id, { status: "error", error: msg });
-      toast.error(msg);
-      return false;
-    }
-
-    const reader = response.body.getReader();
-    const chunks: BlobPart[] = [];
+    let chunks: BlobPart[] = [];
     let loaded = 0;
+    let total = 0;
+    let lastError: unknown;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      loaded += value.length;
-      const percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
-      store.updateProgress(episode.id, {
-        loaded,
-        total,
-        percent,
-        status: "downloading",
-      });
-      if (total > 0 && onProgress) {
-        onProgress({ episodeId: episode.id, loaded, total, percent });
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        const response = await fetch(
+          `/api/download?url=${encodeURIComponent(episode.audio_url)}`,
+          { signal: controller.signal },
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        if (!response.body) throw new Error("Stream unavailable");
+
+        const contentLength = response.headers.get("content-length");
+        total = contentLength ? Number.parseInt(contentLength, 10) : 0;
+        if (total > 0 && total > storage.available) {
+          throw new Error(
+            `File too large (${(total / 1024 / 1024).toFixed(1)}MB). Free up space.`,
+          );
+        }
+
+        const reader = response.body.getReader();
+        chunks = [];
+        loaded = 0;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          loaded += value.length;
+          const percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
+          store.updateProgress(episode.id, {
+            loaded,
+            total,
+            percent,
+            status: "downloading",
+          });
+          onProgress?.({ episodeId: episode.id, loaded, total, percent });
+        }
+        lastError = undefined;
+        break;
+      } catch (error) {
+        lastError = error;
+        if (
+          controller.signal.aborted ||
+          attempt === MAX_ATTEMPTS ||
+          !isTransientDownloadError(error)
+        ) {
+          throw error;
+        }
+        await wait(500 * 2 ** (attempt - 1), controller.signal);
       }
     }
 
+    if (lastError) throw lastError;
+
     store.updateProgress(episode.id, { status: "saving" });
+    controller.signal.throwIfAborted();
     const blob = new Blob(chunks, { type: "audio/mpeg" });
     await saveDownload(episode, blob);
+    controller.signal.throwIfAborted();
     await requestPersistentStorage();
     const primed = await primeOfflinePageCache(episode.slug);
 
@@ -138,11 +219,18 @@ export async function downloadEpisode(
         `Downloaded "${episode.title}" — offline page may not load. Check your connection.`,
       );
     }
+    invalidateDownloads();
     store.removeDownload(episode.id);
     return true;
   } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      await removeStoredDownload(episode.id).catch(() => undefined);
+      invalidateDownloads();
+      store.removeDownload(episode.id);
+      toast.info(`Cancelled "${episode.title}"`);
+      return false;
+    }
     const msg = error instanceof Error ? error.message : String(error);
-    console.error(`Download failed for "${episode.title}":`, msg);
     store.updateProgress(episode.id, { status: "error", error: msg });
 
     const lower = msg.toLowerCase();
@@ -160,6 +248,10 @@ export async function downloadEpisode(
       toast.error(`Couldn't download "${episode.title}". ${msg.slice(0, 60)}`);
     }
     return false;
+  } finally {
+    if (activeTransfers.get(episode.id) === controller) {
+      activeTransfers.delete(episode.id);
+    }
   }
 }
 

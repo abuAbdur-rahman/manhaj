@@ -35,11 +35,13 @@ export function PlayButton({
       onClick={onClick}
       disabled={isLoading}
       className={cn(
-        "flex items-center justify-center rounded-full transition-all duration-150",
-        "bg-forest-600 text-white hover:bg-forest-700 active:scale-95",
+        "relative flex items-center justify-center rounded-full",
+        "motion-safe:transition-all motion-safe:duration-200",
+        "bg-forest-600 text-white hover:bg-forest-700 active:scale-90 motion-reduce:active:scale-100",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
         "disabled:opacity-70 disabled:cursor-not-allowed",
-        "shadow-lg hover:shadow-xl",
+        "shadow-[0_4px_16px_rgba(26,107,60,0.3)] hover:shadow-[0_6px_24px_rgba(26,107,60,0.4)]",
+        isPlaying && "pulse-ring",
         config.button,
         className,
       )}
@@ -51,7 +53,7 @@ export function PlayButton({
       ) : isPlaying ? (
         <Pause size={config.icon} fill="currentColor" />
       ) : (
-        <Play size={config.icon} fill="currentColor" />
+        <Play size={config.icon} fill="currentColor" className="ml-[3px]" />
       )}
     </button>
   );

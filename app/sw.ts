@@ -82,7 +82,9 @@ const serwist = new Serwist({
 
     // 4. API calls — NetworkFirst
     {
-      matcher: ({ url }) => url.pathname.startsWith("/api/"),
+      matcher: ({ url }) =>
+        url.pathname.startsWith("/api/") &&
+        !url.pathname.startsWith("/api/download"),
       handler: new NetworkFirst({
         cacheName: "manhaj-api",
         plugins: [

@@ -26,15 +26,15 @@ export function SheetContent({
 }: ComponentProps<typeof Drawer.Content>) {
   return (
     <Drawer.Portal>
-      <Drawer.Overlay className="fixed inset-0 z-50 bg-black/50" />
+      <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" />
       <Drawer.Content
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-xl bg-white dark:bg-ink-900",
+          "fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-2xl bg-white shadow-[0_-8px_32px_rgba(0,0,0,0.12)] dark:bg-ink-900 dark:shadow-[0_-8px_32px_rgba(0,0,0,0.4)]",
           className,
         )}
         {...props}
       >
-        <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-sand-200 dark:bg-ink-700" />
+        <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-sand-200/80 dark:bg-ink-700" />
         {children}
       </Drawer.Content>
     </Drawer.Portal>

@@ -15,7 +15,7 @@ export function TabsList({
   return (
     <TabsPrimitive.List
       className={cn(
-        "inline-flex h-10 items-center justify-center gap-1 rounded-lg bg-sand-100 p-1 text-sand-300 dark:bg-ink-800 dark:text-ink-500",
+        "inline-flex h-11 items-center justify-center gap-1 rounded-xl bg-sand-100 p-1 text-sand-300 dark:bg-ink-800 dark:text-ink-500",
         className,
       )}
       {...props}
@@ -30,7 +30,12 @@ export function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "inline-flex h-8 items-center justify-center rounded-md px-3 text-sm font-medium whitespace-nowrap transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-forest-700 data-[state=active]:shadow-sm dark:data-[state=active]:bg-ink-700 dark:data-[state=active]:text-ink-100",
+        "inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-semibold whitespace-nowrap",
+        "motion-safe:transition-all motion-safe:duration-150",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+        "disabled:pointer-events-none disabled:opacity-50",
+        "data-[state=active]:bg-white data-[state=active]:text-forest-700 data-[state=active]:shadow-sm",
+        "dark:data-[state=active]:bg-ink-700 dark:data-[state=active]:text-ink-100",
         className,
       )}
       {...props}
@@ -45,7 +50,7 @@ export function TabsContent({
   return (
     <TabsPrimitive.Content
       className={cn(
-        "mt-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+        "mt-4 page-enter focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
         className,
       )}
       {...props}

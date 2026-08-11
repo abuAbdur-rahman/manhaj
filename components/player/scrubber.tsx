@@ -75,7 +75,7 @@ export function Scrubber({
     <div
       ref={trackRef}
       className={cn(
-        "relative h-2 w-full cursor-pointer rounded-full bg-sand-200 dark:bg-ink-800",
+        "group relative h-6 w-full cursor-pointer flex items-center",
         className,
       )}
       onMouseDown={handleMouseDown}
@@ -87,12 +87,18 @@ export function Scrubber({
       aria-valuenow={currentTime}
       tabIndex={0}
     >
+      {/* Track background */}
+      <div className="absolute inset-x-0 h-[5px] rounded-full bg-sand-200 dark:bg-ink-700" />
+
+      {/* Track fill */}
       <div
-        className="absolute inset-y-0 left-0 rounded-full bg-forest-500 transition-[width] duration-100"
+        className="absolute left-0 h-[5px] rounded-full bg-forest-500 motion-safe:transition-[width] motion-safe:duration-75 dark:bg-forest-500/80"
         style={{ width: `${progress}%` }}
       />
+
+      {/* Thumb */}
       <div
-        className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-forest-500 shadow-sm"
+        className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 h-[18px] w-[18px] rounded-full bg-forest-600 shadow-[0_2px_8px_rgba(26,107,60,0.3)] motion-safe:transition-[left,transform] motion-safe:duration-75 group-active:scale-125 motion-reduce:group-active:scale-100 dark:bg-forest-500"
         style={{ left: `${progress}%` }}
       />
     </div>

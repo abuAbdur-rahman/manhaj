@@ -11,7 +11,7 @@ export default async function OfflineLecturePage({ params }: Props) {
   return (
     <>
       <Header title="Lecture" backHref="/downloads" backLabel="Downloads" />
-      <main className="flex-1">
+      <main className="flex-1 page-enter">
         <OfflineLecture slug={slug} />
       </main>
     </>

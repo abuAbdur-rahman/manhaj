@@ -76,6 +76,10 @@ export async function PATCH(
 
   const updates = { ...result.data };
 
+  if (admin.role !== "super_admin") {
+    delete updates.is_featured;
+  }
+
   if (updates.scholar_id && admin.role === "super_admin") {
     const { data: scholarExists } = await supabase
       .from("scholars")

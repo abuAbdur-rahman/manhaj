@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Noto_Naskh_Arabic } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import { SwRegister } from "@/components/layout/sw-register";
+import { QueryProvider } from "@/components/providers/query-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -75,7 +76,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col bg-sand-50 text-forest-900 font-sans dark:bg-ink-950 dark:text-ink-100">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
         <Toaster position="top-center" theme="system" />
         <SwRegister />

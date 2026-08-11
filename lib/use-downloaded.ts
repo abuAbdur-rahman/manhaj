@@ -1,25 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { listDownloads } from "@/lib/downloads-db";
-import { useDownloadsStore } from "@/store/downloads";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { listDownloadMetadata } from "@/lib/downloads-db";
+
+/**
+ * IDs of episodes downloaded to this device. Backed by TanStack Query, so
+ * it stays in sync across the search/downloads/lecture pages and refreshes
+ * automatically when `invalidateDownloads()` runs after a save or delete.
+ * Offline-safe: if IndexedDB can't be read the query resolves to an empty
+ * set instead of erroring the UI.
+ */
+export function useDownloads() {
+  return useQuery({
+    queryKey: ["downloads"],
+    queryFn: async () => {
+      try {
+        return await listDownloadMetadata();
+      } catch {
+        return [];
+      }
+    },
+    staleTime: 30_000,
+    networkMode: "offlineFirst",
+  });
+}
 
 export function useDownloadedIds() {
-  const [ids, setIds] = useState<Set<string>>(new Set());
-  const downloadRevision = useDownloadsStore((s) => s.downloadRevision);
+  const query = useDownloads();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: downloadRevision intentionally triggers IndexedDB re-fetch after writes.
-  useEffect(() => {
-    let cancelled = false;
-    listDownloads()
-      .then((items) => {
-        if (!cancelled) setIds(new Set(items.map((d) => d.episode.id)));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [downloadRevision]);
-
+  const ids = useMemo(
+    () => new Set<string>((query.data ?? []).map((d) => d.episode.id)),
+    [query.data],
+  );
   return ids;
 }

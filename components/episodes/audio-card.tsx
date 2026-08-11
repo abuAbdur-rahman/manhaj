@@ -1,10 +1,11 @@
 "use client";
 
-import { Clock, Download, Loader2, Play, Trash2 } from "lucide-react";
+import { Clock, Download, Play, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { forwardRef, useCallback, useMemo } from "react";
 import { cn } from "@/components/ui/cn";
+import { ProgressRing } from "@/components/ui/progress-ring";
 import { formatDuration } from "@/lib/audio";
 import { downloadEpisode } from "@/lib/download";
 import { useDownloadedIds } from "@/lib/use-downloaded";
@@ -40,9 +41,13 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
   ) => {
     const router = useRouter();
     const downloadedIds = useDownloadedIds();
-    const isDownloading = useDownloadsStore((s) =>
-      s.inProgress.some((d) => d.episodeId === episode.id),
+    const download = useDownloadsStore((s) =>
+      s.inProgress.find((d) => d.episodeId === episode.id),
     );
+    const isDownloading =
+      download?.status === "downloading" || download?.status === "saving";
+    const downloadPercent = download?.percent ?? 0;
+    const downloadIndeterminate = isDownloading && (download?.total ?? 0) === 0;
     const isDownloaded = downloadedIds.has(episode.id);
 
     const getNavigationHref = useCallback(() => {
@@ -79,7 +84,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
         <div
           ref={ref}
           className={cn(
-            "group flex cursor-pointer items-center gap-3 rounded-xl border border-sand-200 bg-sand-50 px-4 py-3 shadow-[0_2px_10px_rgba(15,65,38,0.05)] transition-all dark:border-ink-700 dark:bg-ink-900 dark:shadow-black/20",
+            "group flex cursor-pointer items-center gap-3 rounded-2xl border border-sand-200/60 bg-sand-50 px-4 py-3 shadow-[0_1px_3px_rgba(15,65,38,0.04),0_4px_12px_rgba(15,65,38,0.03)] motion-safe:transition-all motion-safe:duration-150 hover:shadow-[0_4px_16px_rgba(15,65,38,0.08)] active:scale-[0.98] motion-reduce:active:scale-100 dark:border-ink-700/50 dark:bg-ink-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)]",
             className,
           )}
           role="button"
@@ -218,7 +223,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
         <div
           ref={ref}
           className={cn(
-            "flex w-48 shrink-0 flex-col rounded-xl border border-sand-200 bg-white p-3 shadow-[0_2px_12px_rgba(15,65,38,0.06)] transition-all duration-150 dark:border-ink-700 dark:bg-ink-900 dark:shadow-black/25",
+            "flex w-48 shrink-0 flex-col rounded-2xl border border-sand-200/60 bg-sand-50 p-3 shadow-[0_1px_3px_rgba(15,65,38,0.04),0_4px_12px_rgba(15,65,38,0.03)] motion-safe:transition-all motion-safe:duration-150 hover:shadow-[0_4px_16px_rgba(15,65,38,0.08)] active:scale-[0.97] motion-reduce:active:scale-100 dark:border-ink-700/50 dark:bg-ink-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)]",
             className,
           )}
         >
@@ -269,7 +274,18 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
               title={isDownloaded ? "Downloaded" : "Download"}
             >
               {isDownloading ? (
-                <Loader2 size={16} className="animate-spin" />
+                <ProgressRing
+                  value={downloadPercent}
+                  indeterminate={downloadIndeterminate}
+                  size={22}
+                  strokeWidth={2.5}
+                >
+                  {downloadIndeterminate || downloadPercent <= 0 ? null : (
+                    <span className="font-mono text-[8px] font-semibold tabular-nums leading-none text-forest-600 dark:text-ink-100">
+                      {Math.round(downloadPercent)}
+                    </span>
+                  )}
+                </ProgressRing>
               ) : isDownloaded ? (
                 <Download size={16} fill="currentColor" />
               ) : (
@@ -289,7 +305,7 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
       <div
         ref={ref}
         className={cn(
-          "group flex cursor-pointer items-center gap-3 rounded-xl border border-sand-200 bg-sand-50 px-4 py-3 shadow-[0_2px_10px_rgba(15,65,38,0.05)] transition-all dark:border-ink-700 dark:bg-ink-900 dark:shadow-black/20",
+          "group flex cursor-pointer items-center gap-3 rounded-2xl border border-sand-200/60 bg-sand-50 px-4 py-3 shadow-[0_1px_3px_rgba(15,65,38,0.04),0_4px_12px_rgba(15,65,38,0.03)] motion-safe:transition-all motion-safe:duration-150 hover:shadow-[0_4px_16px_rgba(15,65,38,0.08)] active:scale-[0.98] motion-reduce:active:scale-100 dark:border-ink-700/50 dark:bg-ink-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)]",
           className,
         )}
         onClick={() => {
@@ -370,7 +386,18 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
             title={isDownloaded ? "Downloaded" : "Download"}
           >
             {isDownloading ? (
-              <Loader2 size={18} className="animate-spin" />
+              <ProgressRing
+                value={downloadPercent}
+                indeterminate={downloadIndeterminate}
+                size={22}
+                strokeWidth={2.5}
+              >
+                {downloadIndeterminate || downloadPercent <= 0 ? null : (
+                  <span className="font-mono text-[8px] font-semibold tabular-nums leading-none text-forest-600 dark:text-ink-100">
+                    {Math.round(downloadPercent)}
+                  </span>
+                )}
+              </ProgressRing>
             ) : isDownloaded ? (
               <Download size={18} fill="currentColor" />
             ) : (
@@ -397,47 +424,47 @@ export function AudioCardSkeleton({
 }) {
   if (variant === "card") {
     return (
-      <div className="flex flex-col w-48 shrink-0 rounded-lg border border-sand-200 bg-white p-3 animate-pulse dark:border-ink-700 dark:bg-ink-900">
+      <div className="flex flex-col w-48 shrink-0 rounded-2xl border border-sand-200/60 bg-sand-50 p-3 motion-safe:animate-pulse dark:border-ink-700/50 dark:bg-ink-900">
         <div className="flex items-center justify-between">
-          <div className="h-8 w-8 rounded-full bg-sand-200 dark:bg-ink-800" />
-          <div className="h-3 w-12 rounded bg-sand-200 dark:bg-ink-800" />
+          <div className="h-8 w-8 rounded-full bg-sand-200/80 dark:bg-ink-800" />
+          <div className="h-3 w-12 rounded-lg bg-sand-200/80 dark:bg-ink-800" />
         </div>
-        <div className="h-4 w-full rounded bg-sand-200 mt-3 dark:bg-ink-800" />
-        <div className="h-3 w-2/3 rounded bg-sand-200 mt-2 dark:bg-ink-800" />
-        <div className="h-10 w-full rounded-lg bg-sand-200 mt-3 dark:bg-ink-800" />
+        <div className="h-4 w-full rounded-lg bg-sand-200/80 mt-3 dark:bg-ink-800" />
+        <div className="h-3 w-2/3 rounded-lg bg-sand-200/80 mt-2 dark:bg-ink-800" />
+        <div className="h-10 w-full rounded-xl bg-sand-200/80 mt-3 dark:bg-ink-800" />
       </div>
     );
   }
 
   if (variant === "download") {
     return (
-      <div className="flex items-center gap-3 rounded-lg px-4 py-3 animate-pulse">
-        <div className="h-4 w-6 bg-sand-200 rounded dark:bg-ink-800" />
+      <div className="flex items-center gap-3 rounded-2xl px-4 py-3 motion-safe:animate-pulse">
+        <div className="h-4 w-6 bg-sand-200/80 rounded-lg dark:bg-ink-800" />
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-full bg-sand-200 rounded dark:bg-ink-800" />
-          <div className="h-3 w-2/3 bg-sand-200 rounded dark:bg-ink-800" />
-          <div className="h-3 w-1/3 bg-sand-200 rounded mt-1 dark:bg-ink-800" />
+          <div className="h-4 w-full bg-sand-200/80 rounded-lg dark:bg-ink-800" />
+          <div className="h-3 w-2/3 bg-sand-200/80 rounded-lg dark:bg-ink-800" />
+          <div className="h-3 w-1/3 bg-sand-200/80 rounded-lg mt-1 dark:bg-ink-800" />
         </div>
         <div className="flex gap-2">
-          <div className="h-10 w-10 bg-sand-200 rounded-full dark:bg-ink-800" />
-          <div className="h-10 w-10 bg-sand-200 rounded-full dark:bg-ink-800" />
+          <div className="h-10 w-10 bg-sand-200/80 rounded-full dark:bg-ink-800" />
+          <div className="h-10 w-10 bg-sand-200/80 rounded-full dark:bg-ink-800" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-lg px-4 py-3 animate-pulse">
+    <div className="flex items-center gap-3 rounded-2xl px-4 py-3 motion-safe:animate-pulse">
       <div className="flex-1 space-y-2">
-        <div className="h-4 w-full bg-sand-200 rounded dark:bg-ink-800" />
-        <div className="h-3 w-2/3 bg-sand-200 rounded dark:bg-ink-800" />
+        <div className="h-4 w-full bg-sand-200/80 rounded-lg dark:bg-ink-800" />
+        <div className="h-3 w-2/3 bg-sand-200/80 rounded-lg dark:bg-ink-800" />
         <div className="flex gap-2 mt-1">
-          <div className="h-5 w-10 bg-sand-200 rounded-full dark:bg-ink-800" />
-          <div className="h-5 w-12 bg-sand-200 rounded-full dark:bg-ink-800" />
+          <div className="h-5 w-10 bg-sand-200/80 rounded-full dark:bg-ink-800" />
+          <div className="h-5 w-12 bg-sand-200/80 rounded-full dark:bg-ink-800" />
         </div>
       </div>
-      <div className="h-3 w-12 bg-sand-200 rounded shrink-0 dark:bg-ink-800" />
-      <div className="h-10 w-10 bg-sand-200 rounded-full shrink-0 dark:bg-ink-800" />
+      <div className="h-3 w-12 bg-sand-200/80 rounded-lg shrink-0 dark:bg-ink-800" />
+      <div className="h-10 w-10 bg-sand-200/80 rounded-full shrink-0 dark:bg-ink-800" />
     </div>
   );
 }

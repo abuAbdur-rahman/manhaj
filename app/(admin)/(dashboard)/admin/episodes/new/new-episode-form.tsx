@@ -28,6 +28,7 @@ const ALLOWED_AUDIO_EXTENSIONS = [
   "opus",
   "oga",
 ];
+const MAX_AUDIO_FILE_SIZE = 200 * 1024 * 1024;
 const ACCEPT_STRING = ALLOWED_AUDIO_EXTENSIONS.map((e) => `.${e}`).join(",");
 
 const ALL_TAGS: Tag[] = [
@@ -96,7 +97,11 @@ export function NewEpisodeForm({
   const [language, setLanguage] = useState<Language>("yoruba");
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [audioUrl, setAudioUrl] = useState("");
+  const [uploadOperationId, setUploadOperationId] = useState<string | null>(
+    null,
+  );
+  const createOperationIdRef = useRef(crypto.randomUUID());
+  const publishIntentRef = useRef<boolean | null>(null);
   const [durationSeconds, setDurationSeconds] = useState<number | null>(null);
   const [recordedDate, setRecordedDate] = useState("");
   const [description, setDescription] = useState("");
@@ -122,6 +127,14 @@ export function NewEpisodeForm({
       const file = e.target.files?.[0];
       if (!file) return;
 
+      if (file.size > MAX_AUDIO_FILE_SIZE) {
+        setErrors((prev) => ({
+          ...prev,
+          audio: "Audio file cannot exceed 200 MB",
+        }));
+        return;
+      }
+
       if (xhrRef.current) {
         xhrRef.current.abort();
         xhrRef.current = null;
@@ -146,8 +159,11 @@ export function NewEpisodeForm({
       setUploadState("uploading");
       setUploadProgress(0);
 
+      const operationId = crypto.randomUUID();
+      setUploadOperationId(operationId);
       const formData = new FormData();
       formData.append("audio", file);
+      formData.append("scholar_id", scholarId);
 
       const xhr = new XMLHttpRequest();
       xhrRef.current = xhr;
@@ -159,7 +175,7 @@ export function NewEpisodeForm({
       });
 
       try {
-        const result = await new Promise<{ url: string }>((resolve, reject) => {
+        await new Promise<{ url: string }>((resolve, reject) => {
           xhr.addEventListener("load", () => {
             if (xhr.status >= 200 && xhr.status < 300) {
               resolve(JSON.parse(xhr.responseText));
@@ -179,10 +195,9 @@ export function NewEpisodeForm({
             reject(new DOMException("Upload cancelled", "AbortError")),
           );
           xhr.open("POST", "/api/admin/upload");
+          xhr.setRequestHeader("X-Operation-ID", operationId);
           xhr.send(formData);
         });
-
-        setAudioUrl(result.url);
 
         const arrayBuffer = await file.arrayBuffer();
         const tempCtx = new AudioContext();
@@ -205,7 +220,7 @@ export function NewEpisodeForm({
         xhrRef.current = null;
       }
     },
-    [],
+    [scholarId],
   );
 
   const clearFile = useCallback(() => {
@@ -214,7 +229,7 @@ export function NewEpisodeForm({
       xhrRef.current = null;
     }
     setAudioFile(null);
-    setAudioUrl("");
+    setUploadOperationId(null);
     setDurationSeconds(null);
     setUploadState("idle");
     setUploadProgress(0);
@@ -244,13 +259,20 @@ export function NewEpisodeForm({
       if (Object.keys(errs).length > 0) return;
 
       setIsSubmitting(true);
+      if (
+        publishIntentRef.current !== null &&
+        publishIntentRef.current !== publish
+      ) {
+        createOperationIdRef.current = crypto.randomUUID();
+      }
+      publishIntentRef.current = publish;
 
       try {
         const payload: Record<string, unknown> = {
           title: title.trim(),
           language,
           tags: selectedTags,
-          audio_url: audioUrl,
+          upload_operation_id: uploadOperationId,
           duration_seconds: durationSeconds,
           recorded_date: recordedDate || undefined,
           description: description.trim() || undefined,
@@ -261,7 +283,10 @@ export function NewEpisodeForm({
 
         const res = await fetch("/api/admin/episodes", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "X-Operation-ID": createOperationIdRef.current,
+          },
           body: JSON.stringify(payload),
         });
 
@@ -285,7 +310,7 @@ export function NewEpisodeForm({
       seriesId,
       language,
       selectedTags,
-      audioUrl,
+      uploadOperationId,
       durationSeconds,
       recordedDate,
       description,
