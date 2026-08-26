@@ -22,19 +22,19 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         <div
           className={
             currentEpisode
-              ? "h-[calc(7rem+env(safe-area-inset-bottom))]"
-              : "h-[calc(3.5rem+env(safe-area-inset-bottom))]"
+              ? "h-[calc(8rem+env(safe-area-inset-bottom))]"
+              : "h-[calc(4rem+env(safe-area-inset-bottom))]"
           }
           aria-hidden="true"
         />
       </div>
       {currentEpisode && (
-        <MiniPlayer className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom)+0.25rem)] left-2 right-2 z-30" />
+        <MiniPlayer className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+0.25rem)] left-2 right-2 z-30" />
       )}
       <InstallBanner
         className={
           currentEpisode
-            ? "fixed bottom-[calc(7rem+env(safe-area-inset-bottom)+0.75rem)] left-2 right-2 z-50 flex items-center justify-between gap-3 rounded-2xl bg-forest-900 px-4 py-3 text-white shadow-lg dark:bg-ink-800"
+            ? "fixed bottom-[calc(8rem+env(safe-area-inset-bottom)+0.75rem)] left-2 right-2 z-50 flex items-center justify-between gap-3 rounded-2xl bg-forest-900 px-4 py-3 text-white shadow-lg dark:bg-ink-800"
             : undefined
         }
       />

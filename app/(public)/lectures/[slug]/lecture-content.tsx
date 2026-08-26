@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { AudioCard } from "@/components/episodes/audio-card";
-import { PlayButton } from "@/components/player/play-button";
 import { PlayerControls } from "@/components/player/player-controls";
 import { cn } from "@/components/ui/cn";
 import { formatDuration } from "@/lib/audio";
@@ -168,16 +167,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
             </div>
           )}
 
-          <div className="mb-8">
-            <PlayButton
-              isPlaying={isThisEpisodePlaying ?? false}
-              isLoading={isThisEpisodeLoading}
-              size="xl"
-              onClick={handlePlay}
-            />
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-bold text-forest-900 leading-tight mb-3 dark:text-ink-100">
+          <h1 className="mb-3 text-2xl font-bold leading-tight text-forest-900 sm:text-3xl dark:text-ink-100">
             {episode.title}
           </h1>
 

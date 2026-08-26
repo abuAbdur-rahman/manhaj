@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/components/ui/cn";
+import { formatCount } from "@/lib/utils";
 import type { Series } from "@/types";
 
 interface FeaturedSeriesCardProps {
@@ -52,7 +53,7 @@ export function FeaturedSeriesCard({
                 size="sm"
                 src={series.scholar.photo_url}
                 fallback={series.scholar.name}
-                alt={series.scholar.name}
+                alt=""
               />
               <span className="text-sm font-medium text-forest-700 dark:text-ink-100">
                 {series.scholar.name}
@@ -61,7 +62,7 @@ export function FeaturedSeriesCard({
           )}
           {series.episode_count !== undefined && (
             <span className="text-xs text-sand-300 dark:text-ink-500">
-              · {series.episode_count} episodes
+              · {formatCount(series.episode_count, "episode")}
             </span>
           )}
         </div>

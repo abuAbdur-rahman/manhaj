@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { cn } from "@/components/ui/cn";
+import { formatCount } from "@/lib/utils";
 import type { Series } from "@/types";
 
 interface SeriesCardProps {
@@ -42,7 +43,7 @@ export function SeriesCard({ series, className }: SeriesCardProps) {
         </h3>
         {series.episode_count !== undefined && (
           <p className="mt-1 text-[11px] text-sand-300 dark:text-ink-500">
-            {series.episode_count} episodes
+            {formatCount(series.episode_count, "episode")}
           </p>
         )}
       </div>

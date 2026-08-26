@@ -89,8 +89,13 @@ function wait(ms: number, signal: AbortSignal) {
 }
 
 export function isTransientDownloadError(error: unknown) {
+  if (error instanceof DOMException && error.name === "AbortError")
+    return false;
+  if (error instanceof TypeError) return true;
   if (!(error instanceof Error)) return false;
-  return /network|fetch|http 429|http 5\d\d/i.test(error.message);
+  return /network|fetch|terminated|socket|timeout|http 429|http 5\d\d/i.test(
+    error.message,
+  );
 }
 
 export function pauseDownload(episodeId: string): void {
@@ -182,17 +187,33 @@ export async function downloadEpisode(
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
+        const range = loaded > 0 ? `bytes=${loaded}-` : undefined;
         const response = await fetch(
           `/api/download?url=${encodeURIComponent(episode.audio_url)}`,
-          { signal: controller.signal },
+          {
+            headers: range ? { Range: range } : undefined,
+            signal: controller.signal,
+          },
         );
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         if (!response.body) throw new Error("Stream unavailable");
 
-        const contentLength = response.headers.get("content-length");
-        total = contentLength ? Number.parseInt(contentLength, 10) : 0;
+        const contentRange = response.headers.get("content-range");
+        const rangeTotal = contentRange?.match(/\/([0-9]+)$/)?.[1];
+        if (rangeTotal) {
+          total = Number.parseInt(rangeTotal, 10);
+        } else if (loaded === 0) {
+          const contentLength = response.headers.get("content-length");
+          total = contentLength ? Number.parseInt(contentLength, 10) : 0;
+        }
+        if (loaded > 0 && response.status !== 206) {
+          chunks = [];
+          loaded = 0;
+          const contentLength = response.headers.get("content-length");
+          total = contentLength ? Number.parseInt(contentLength, 10) : 0;
+        }
         if (total > 0 && total > storage.available) {
           throw new Error(
             `File too large (${(total / 1024 / 1024).toFixed(1)}MB). Free up space.`,
@@ -200,8 +221,6 @@ export async function downloadEpisode(
         }
 
         const reader = response.body.getReader();
-        chunks = [];
-        loaded = 0;
         while (true) {
           if (transfer.paused) {
             store.updateProgress(episode.id, { status: "paused" });

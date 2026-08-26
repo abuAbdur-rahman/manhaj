@@ -98,6 +98,40 @@ describe("download runtime recovery", () => {
     expect((await getDownloadById(episode.id))?.audioBlob.size).toBe(3);
   });
 
+  it("resumes from the received byte after a transient stream failure", async () => {
+    const resumeEpisode = { ...episode, id: "resume-runtime" };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        streamResponse([new Uint8Array([1]), new Error("network interrupted")]),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.enqueue(new Uint8Array([2, 3]));
+              controller.close();
+            },
+          }),
+          {
+            status: 206,
+            headers: {
+              "content-length": "2",
+              "content-range": "bytes 1-2/3",
+            },
+          },
+        ),
+      )
+      .mockResolvedValue(new Response("page", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(downloadEpisode(resumeEpisode)).resolves.toBe(true);
+    expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({
+      headers: { Range: "bytes=1-" },
+    });
+    expect((await getDownloadById(resumeEpisode.id))?.audioBlob.size).toBe(3);
+  });
+
   it("pauses and resumes an active streamed transfer", async () => {
     const pausedEpisode = { ...episode, id: "pause-runtime" };
     const fetchMock = vi
