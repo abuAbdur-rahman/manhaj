@@ -31,7 +31,10 @@ export function DownloadsContent() {
 
   const inProgress = useDownloadsStore((s) => s.inProgress);
   const active = inProgress.filter(
-    (d) => d.status === "downloading" || d.status === "saving",
+    (d) =>
+      d.status === "downloading" ||
+      d.status === "saving" ||
+      d.status === "paused",
   );
   const failed = inProgress.filter((d) => d.status === "error");
 
@@ -247,9 +250,11 @@ function InProgressCard({ download }: { download: DownloadProgress }) {
           <span className="shrink-0 font-mono text-xs tabular-nums text-forest-500 dark:text-ink-500">
             {download.status === "saving"
               ? "Saving…"
-              : indeterminate
-                ? "…"
-                : `${download.percent}%`}
+              : download.status === "paused"
+                ? "Paused"
+                : indeterminate
+                  ? "…"
+                  : `${download.percent}%`}
           </span>
         </div>
         <p className="mt-0.5 font-mono text-[10px] tabular-nums text-sand-300 dark:text-ink-500">

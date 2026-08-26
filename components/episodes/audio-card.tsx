@@ -45,7 +45,9 @@ const AudioCard = forwardRef<HTMLDivElement, AudioCardProps>(
       s.inProgress.find((d) => d.episodeId === episode.id),
     );
     const isDownloading =
-      download?.status === "downloading" || download?.status === "saving";
+      download?.status === "downloading" ||
+      download?.status === "saving" ||
+      download?.status === "paused";
     const downloadPercent = download?.percent ?? 0;
     const downloadIndeterminate = isDownloading && (download?.total ?? 0) === 0;
     const isDownloaded = downloadedIds.has(episode.id);

@@ -9,7 +9,7 @@ export interface DownloadProgress {
   loaded: number;
   total: number;
   percent: number;
-  status: "downloading" | "saving" | "completed" | "error";
+  status: "downloading" | "saving" | "paused" | "completed" | "error";
   error?: string;
   /** Hidden from the floating toaster but still downloading. */
   dismissed?: boolean;
@@ -32,7 +32,11 @@ interface DownloadsStore {
   dismissDownload: (episodeId: string) => void;
 }
 
-const ACTIVE: DownloadProgress["status"][] = ["downloading", "saving"];
+const ACTIVE: DownloadProgress["status"][] = [
+  "downloading",
+  "saving",
+  "paused",
+];
 
 function initialDownload(episode: Episode): DownloadProgress {
   return {

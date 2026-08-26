@@ -1,12 +1,19 @@
 import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cancelDownload, downloadEpisode, evictDownload } from "@/lib/download";
+import {
+  cancelDownload,
+  downloadEpisode,
+  evictDownload,
+  pauseDownload,
+  resumeDownload,
+} from "@/lib/download";
 import {
   getDownloadById,
   getPlaybackHistory,
   saveDownload,
   savePlaybackHistory,
 } from "@/lib/downloads-db";
+import { useDownloadsStore } from "@/store/downloads";
 import type { Episode } from "@/types";
 
 vi.mock("sonner", () => ({
@@ -89,6 +96,42 @@ describe("download runtime recovery", () => {
     await expect(downloadEpisode(episode)).resolves.toBe(true);
     expect(fetchMock).toHaveBeenCalledTimes(4);
     expect((await getDownloadById(episode.id))?.audioBlob.size).toBe(3);
+  });
+
+  it("pauses and resumes an active streamed transfer", async () => {
+    const pausedEpisode = { ...episode, id: "pause-runtime" };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        streamResponse([
+          new Uint8Array([1]),
+          new Uint8Array([2]),
+          new Uint8Array([3]),
+        ]),
+      )
+      .mockResolvedValue(new Response("page", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    let paused = false;
+    const pending = downloadEpisode(pausedEpisode, () => {
+      if (!paused) {
+        paused = true;
+        pauseDownload(pausedEpisode.id);
+      }
+    });
+
+    await vi.waitFor(() => {
+      expect(
+        useDownloadsStore
+          .getState()
+          .inProgress.find((item) => item.episodeId === pausedEpisode.id)
+          ?.status,
+      ).toBe("paused");
+    });
+    resumeDownload(pausedEpisode.id);
+
+    await expect(pending).resolves.toBe(true);
+    expect((await getDownloadById(pausedEpisode.id))?.audioBlob.size).toBe(3);
   });
 
   it("cancels an active transfer without retaining a partial record", async () => {

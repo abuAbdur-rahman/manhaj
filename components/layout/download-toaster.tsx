@@ -1,10 +1,16 @@
 "use client";
 
-import { Check, RefreshCw, X } from "lucide-react";
+import { Check, Pause, Play, RefreshCw, Trash2, X } from "lucide-react";
 import { useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/components/ui/cn";
-import { cancelDownload, downloadEpisode } from "@/lib/download";
+import {
+  cancelDownload,
+  downloadEpisode,
+  evictDownload,
+  pauseDownload,
+  resumeDownload,
+} from "@/lib/download";
 import { formatBytes } from "@/lib/utils";
 import { type DownloadProgress, useDownloadsStore } from "@/store/downloads";
 
@@ -44,6 +50,8 @@ function DownloadChip({ download }: { download: DownloadProgress }) {
 
   const isError = download.status === "error";
   const isCompleted = download.status === "completed";
+  const isPaused = download.status === "paused";
+  const isActive = download.status === "downloading" || isPaused;
   const indeterminate = !isError && !isCompleted && download.total === 0;
   const scholar = download.episode.scholar;
 
@@ -60,12 +68,33 @@ function DownloadChip({ download }: { download: DownloadProgress }) {
     void downloadEpisode(download.episode);
   };
 
+  const handleClose = () => {
+    if (isActive || download.status === "saving") {
+      cancelDownload(download.episodeId);
+      return;
+    }
+    dismissDownload(download.episodeId);
+  };
+
+  const handleDelete = async () => {
+    if (isActive || download.status === "saving") {
+      cancelDownload(download.episodeId);
+      return;
+    }
+    await evictDownload(
+      download.episodeId,
+      download.episode.slug,
+      download.episode.audio_url,
+    );
+    removeDownload(download.episodeId);
+  };
+
   return (
     // biome-ignore lint/a11y/useSemanticElements: card holds nested buttons; a native button would be invalid.
     <div
       role="status"
       className={cn(
-        "pointer-events-auto flex items-center gap-3 rounded-2xl border bg-sand-50/95 px-3 py-2.5 shadow-[0_4px_20px_rgba(15,65,38,0.12)] backdrop-blur-lg dark:bg-ink-900/95 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]",
+        "pointer-events-auto relative flex items-center gap-3 rounded-2xl border bg-sand-50/95 px-3 py-2.5 pr-11 shadow-[0_4px_20px_rgba(15,65,38,0.12)] backdrop-blur-lg dark:bg-ink-900/95 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]",
         isError
           ? "border-clay-500/40 dark:border-clay-500/50"
           : isCompleted
@@ -91,14 +120,20 @@ function DownloadChip({ download }: { download: DownloadProgress }) {
 
         {/* Progress row */}
         <div className="mt-1.5 flex items-center gap-2">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-sand-200 dark:bg-ink-700">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-sand-200 dark:bg-ink-700">
             {indeterminate ? (
               <div className="h-full w-1/3 rounded-full bg-forest-500 motion-safe:animate-pulse dark:bg-forest-500" />
             ) : (
               <div
                 className={cn(
                   "h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300 ease-out",
-                  isError ? "bg-clay-500" : "bg-forest-500",
+                  isError
+                    ? "bg-clay-500"
+                    : download.percent < 33
+                      ? "bg-red-500"
+                      : download.percent < 66
+                        ? "bg-amber-400"
+                        : "bg-forest-500",
                 )}
                 style={{ width: `${download.percent}%` }}
               />
@@ -109,11 +144,13 @@ function DownloadChip({ download }: { download: DownloadProgress }) {
               ? "Failed"
               : isCompleted
                 ? "Saved"
-                : download.status === "saving"
-                  ? "Saving…"
-                  : indeterminate
-                    ? formatBytes(download.loaded) || "…"
-                    : `${download.percent}%`}
+                : isPaused
+                  ? "Paused"
+                  : download.status === "saving"
+                    ? "Saving…"
+                    : indeterminate
+                      ? formatBytes(download.loaded) || "…"
+                      : `${download.percent}%`}
           </span>
         </div>
 
@@ -149,27 +186,45 @@ function DownloadChip({ download }: { download: DownloadProgress }) {
             <RefreshCw className="h-4 w-4" />
           </button>
         )}
-        {!isError && !isCompleted && (
+        {isActive && (
           <button
             type="button"
-            onClick={() => cancelDownload(download.episodeId)}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-clay-600 hover:bg-clay-500/10 focus-visible:outline-2 focus-visible:outline-forest-500 dark:text-clay-400"
-            aria-label={`Cancel download: ${download.episode.title}`}
-            title="Cancel"
+            onClick={() =>
+              isPaused
+                ? resumeDownload(download.episodeId)
+                : pauseDownload(download.episodeId)
+            }
+            className="flex h-9 w-9 items-center justify-center rounded-full text-forest-600 hover:bg-forest-500/10 motion-safe:transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-300"
+            aria-label={`${isPaused ? "Resume" : "Pause"} download: ${download.episode.title}`}
+            title={isPaused ? "Resume" : "Pause"}
           >
-            <X className="h-4 w-4" />
+            {isPaused ? (
+              <Play className="h-4 w-4" />
+            ) : (
+              <Pause className="h-4 w-4" />
+            )}
           </button>
         )}
         <button
           type="button"
-          onClick={() => dismissDownload(download.episodeId)}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-sand-300 hover:bg-sand-200/60 hover:text-forest-700 motion-safe:transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-500 dark:hover:bg-ink-700 dark:hover:text-ink-100"
-          aria-label={`Dismiss: ${download.episode.title}`}
-          title="Dismiss"
+          onClick={() => void handleDelete()}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-clay-600 hover:bg-clay-500/10 motion-safe:transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-clay-400"
+          aria-label={`Delete download: ${download.episode.title}`}
+          title="Delete"
         >
-          <X className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
+
+      <button
+        type="button"
+        onClick={handleClose}
+        className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full text-sand-300 hover:bg-sand-200/60 hover:text-forest-700 motion-safe:transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500 dark:text-ink-500 dark:hover:bg-ink-700 dark:hover:text-ink-100"
+        aria-label={`${isActive || download.status === "saving" ? "Cancel download" : "Dismiss"}: ${download.episode.title}`}
+        title={isActive || download.status === "saving" ? "Cancel" : "Dismiss"}
+      >
+        <X className="h-4 w-4" />
+      </button>
     </div>
   );
 }

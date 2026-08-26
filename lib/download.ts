@@ -62,7 +62,13 @@ async function primeOfflinePageCache(slug: string): Promise<boolean> {
   }
 }
 
-const activeTransfers = new Map<string, AbortController>();
+interface TransferControl {
+  controller: AbortController;
+  paused: boolean;
+  waiters: Array<() => void>;
+}
+
+const activeTransfers = new Map<string, TransferControl>();
 const MAX_ATTEMPTS = 3;
 
 function wait(ms: number, signal: AbortSignal) {
@@ -87,8 +93,27 @@ export function isTransientDownloadError(error: unknown) {
   return /network|fetch|http 429|http 5\d\d/i.test(error.message);
 }
 
+export function pauseDownload(episodeId: string): void {
+  const transfer = activeTransfers.get(episodeId);
+  if (transfer && !transfer.controller.signal.aborted) {
+    transfer.paused = true;
+  }
+}
+
+export function resumeDownload(episodeId: string): void {
+  const transfer = activeTransfers.get(episodeId);
+  if (!transfer) return;
+  transfer.paused = false;
+  const waiters = transfer.waiters.splice(0);
+  for (const resolve of waiters) resolve();
+}
+
 export function cancelDownload(episodeId: string): void {
-  activeTransfers.get(episodeId)?.abort();
+  const transfer = activeTransfers.get(episodeId);
+  if (!transfer) return;
+  transfer.controller.abort();
+  const waiters = transfer.waiters.splice(0);
+  for (const resolve of waiters) resolve();
 }
 
 export async function evictDownload(
@@ -129,7 +154,12 @@ export async function downloadEpisode(
   if (existing) return false;
 
   const controller = new AbortController();
-  activeTransfers.set(episode.id, controller);
+  const transfer: TransferControl = {
+    controller,
+    paused: false,
+    waiters: [],
+  };
+  activeTransfers.set(episode.id, transfer);
   const store = useDownloadsStore.getState();
   store.resetDownload(episode);
 
@@ -173,6 +203,15 @@ export async function downloadEpisode(
         chunks = [];
         loaded = 0;
         while (true) {
+          if (transfer.paused) {
+            store.updateProgress(episode.id, { status: "paused" });
+            await new Promise<void>((resolve) =>
+              transfer.waiters.push(resolve),
+            );
+            controller.signal.throwIfAborted();
+            store.updateProgress(episode.id, { status: "downloading" });
+          }
+
           const { done, value } = await reader.read();
           if (done) break;
           chunks.push(value);
@@ -249,7 +288,7 @@ export async function downloadEpisode(
     }
     return false;
   } finally {
-    if (activeTransfers.get(episode.id) === controller) {
+    if (activeTransfers.get(episode.id) === transfer) {
       activeTransfers.delete(episode.id);
     }
   }
