@@ -6,6 +6,7 @@ import {
   getOperationId,
   requestHash,
 } from "@/lib/admin-operations";
+import { getAudioDuration } from "@/lib/audio";
 import { requireAdminApi } from "@/lib/auth";
 import { getAudioPublicUrl, getUploadedAudio, uploadAudio } from "@/lib/r2";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -155,6 +156,10 @@ export async function POST(request: NextRequest) {
       { status: 404 },
     );
   }
+
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const durationSeconds = await getAudioDuration(bytes);
+
   const fingerprint = requestHash({
     scholarId,
     name: file.name,
@@ -171,7 +176,11 @@ export async function POST(request: NextRequest) {
   });
   if (claim instanceof Response) return claim;
   if (claim.status === "completed") {
-    return NextResponse.json({ url: claim.object_url, key: claim.object_key });
+    return NextResponse.json({
+      url: claim.object_url,
+      key: claim.object_key,
+      duration_seconds: durationSeconds,
+    });
   }
   const key = `lectures/${scholarId}/${admin.id}/${operationId}.${rawExt}`;
   const url = getAudioPublicUrl(key);
@@ -215,6 +224,7 @@ export async function POST(request: NextRequest) {
       fileSizeBytes: file.size,
       contentType: file.type,
       fileExtension: rawExt,
+      responseBody: { url, key, duration_seconds: durationSeconds },
     });
   } catch (error) {
     console.error("Failed to record completed upload:", error);
@@ -237,5 +247,5 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({ url, key });
+  return NextResponse.json({ url, key, duration_seconds: durationSeconds });
 }
