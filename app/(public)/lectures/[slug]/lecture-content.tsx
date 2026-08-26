@@ -8,7 +8,7 @@ import { AudioCard } from "@/components/episodes/audio-card";
 import { PlayerControls } from "@/components/player/player-controls";
 import { cn } from "@/components/ui/cn";
 import { formatDuration } from "@/lib/audio";
-import { downloadEpisode } from "@/lib/download";
+import { downloadEpisode, resumeDownload } from "@/lib/download";
 import { updateDownloadedEpisodeMetadata } from "@/lib/downloads-db";
 import { invalidateDownloads } from "@/lib/query-client";
 import { useDownloadedIds } from "@/lib/use-downloaded";
@@ -29,9 +29,8 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
     s.inProgress.find((d) => d.episodeId === episode.id),
   );
   const isDownloading =
-    download?.status === "downloading" ||
-    download?.status === "saving" ||
-    download?.status === "paused";
+    download?.status === "downloading" || download?.status === "saving";
+  const isPaused = download?.status === "paused";
   const downloadPercent = download?.percent ?? 0;
   const downloadIndeterminate = isDownloading && (download?.total ?? 0) === 0;
   const [sleepTimerIndex, setSleepTimerIndex] = useState(-1);
@@ -102,9 +101,13 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   }, [sleepTimerIndex, setSleepTimer]);
 
   const handleDownload = useCallback(async () => {
+    if (isPaused) {
+      resumeDownload(episode.id);
+      return;
+    }
     if (isDownloading || downloadedIds.has(episode.id)) return;
     await downloadEpisode(episode);
-  }, [episode, isDownloading, downloadedIds]);
+  }, [episode, isDownloading, isPaused, downloadedIds]);
 
   const handleWhatsAppShare = useCallback(() => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -294,13 +297,15 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
               size={18}
               fill={downloadedIds.has(episode.id) ? "currentColor" : "none"}
             />
-            {isDownloading
-              ? downloadIndeterminate
-                ? "Downloading…"
-                : `Downloading ${downloadPercent}%`
-              : downloadedIds.has(episode.id)
-                ? "Downloaded"
-                : "Download"}
+            {isPaused
+              ? "Resume download"
+              : isDownloading
+                ? downloadIndeterminate
+                  ? "Downloading…"
+                  : `Downloading ${downloadPercent}%`
+                : downloadedIds.has(episode.id)
+                  ? "Downloaded"
+                  : "Download"}
           </button>
 
           <button

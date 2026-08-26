@@ -168,6 +168,44 @@ describe("download runtime recovery", () => {
     expect((await getDownloadById(pausedEpisode.id))?.audioBlob.size).toBe(3);
   });
 
+  it("publishes paused status while a stream read remains pending", async () => {
+    const pausedEpisode = { ...episode, id: "pending-pause-runtime" };
+    let resolveRead: (() => void) | undefined;
+    const readPending = new Promise<void>((resolve) => {
+      resolveRead = resolve;
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          new ReadableStream({
+            async pull(controller) {
+              await readPending;
+              controller.enqueue(new Uint8Array([1, 2, 3]));
+              controller.close();
+            },
+          }),
+          { status: 200, headers: { "content-length": "3" } },
+        ),
+      )
+      .mockResolvedValue(new Response("page", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const pending = downloadEpisode(pausedEpisode);
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    pauseDownload(pausedEpisode.id);
+
+    expect(
+      useDownloadsStore
+        .getState()
+        .inProgress.find((item) => item.episodeId === pausedEpisode.id)?.status,
+    ).toBe("paused");
+
+    resolveRead?.();
+    resumeDownload(pausedEpisode.id);
+    await expect(pending).resolves.toBe(true);
+  });
+
   it("cancels an active transfer without retaining a partial record", async () => {
     let markStarted: (() => void) | undefined;
     const started = new Promise<void>((resolve) => {

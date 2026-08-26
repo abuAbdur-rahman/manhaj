@@ -102,6 +102,9 @@ export function pauseDownload(episodeId: string): void {
   const transfer = activeTransfers.get(episodeId);
   if (transfer && !transfer.controller.signal.aborted) {
     transfer.paused = true;
+    useDownloadsStore
+      .getState()
+      .updateProgress(episodeId, { status: "paused" });
   }
 }
 

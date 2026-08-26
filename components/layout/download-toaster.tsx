@@ -11,6 +11,7 @@ import {
   pauseDownload,
   resumeDownload,
 } from "@/lib/download";
+import { invalidateDownloads } from "@/lib/query-client";
 import { formatBytes } from "@/lib/utils";
 import { type DownloadProgress, useDownloadsStore } from "@/store/downloads";
 
@@ -86,6 +87,7 @@ function DownloadChip({ download }: { download: DownloadProgress }) {
       download.episode.slug,
       download.episode.audio_url,
     );
+    invalidateDownloads();
     removeDownload(download.episodeId);
   };
 
