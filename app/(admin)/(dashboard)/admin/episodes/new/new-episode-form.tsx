@@ -175,7 +175,10 @@ export function NewEpisodeForm({
       });
 
       try {
-        await new Promise<{ url: string }>((resolve, reject) => {
+        const result = await new Promise<{
+          url: string;
+          duration_seconds?: number | null;
+        }>((resolve, reject) => {
           xhr.addEventListener("load", () => {
             if (xhr.status >= 200 && xhr.status < 300) {
               resolve(JSON.parse(xhr.responseText));
@@ -199,13 +202,20 @@ export function NewEpisodeForm({
           xhr.send(formData);
         });
 
-        const arrayBuffer = await file.arrayBuffer();
-        const tempCtx = new AudioContext();
-        try {
-          const audioBuffer = await tempCtx.decodeAudioData(arrayBuffer);
-          setDurationSeconds(Math.round(audioBuffer.duration));
-        } finally {
-          tempCtx.close();
+        if (
+          typeof result.duration_seconds === "number" &&
+          result.duration_seconds > 0
+        ) {
+          setDurationSeconds(Math.round(result.duration_seconds));
+        } else {
+          const arrayBuffer = await file.arrayBuffer();
+          const tempCtx = new AudioContext();
+          try {
+            const audioBuffer = await tempCtx.decodeAudioData(arrayBuffer);
+            setDurationSeconds(Math.round(audioBuffer.duration));
+          } finally {
+            tempCtx.close();
+          }
         }
 
         setUploadState("uploaded");

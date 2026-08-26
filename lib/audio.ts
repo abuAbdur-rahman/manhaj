@@ -22,9 +22,21 @@ export function parseDurationString(input: string): number | null {
   return null;
 }
 
-export async function getAudioDuration(
-  _buffer: Buffer,
-): Promise<number | null> {
-  // TODO: Implement with music-metadata or ffprobe once upload flow is built
-  return null;
+export async function getAudioDuration(buffer: Buffer) {
+  try {
+    const { parseBuffer } = await import("music-metadata");
+    const metadata = await parseBuffer(buffer);
+    const duration = metadata.format.duration;
+    if (
+      typeof duration === "number" &&
+      Number.isFinite(duration) &&
+      duration > 0
+    ) {
+      return duration;
+    }
+    return null;
+  } catch {
+    // Unparseable or unsupported audio — callers fall back to manual entry.
+    return null;
+  }
 }
