@@ -112,6 +112,18 @@ export function resumeDownload(episodeId: string): void {
   const transfer = activeTransfers.get(episodeId);
   if (!transfer) return;
   transfer.paused = false;
+  if (
+    useDownloadsStore
+      .getState()
+      .inProgress.some(
+        (download) =>
+          download.episodeId === episodeId && download.status === "paused",
+      )
+  ) {
+    useDownloadsStore
+      .getState()
+      .updateProgress(episodeId, { status: "downloading" });
+  }
   const waiters = transfer.waiters.splice(0);
   for (const resolve of waiters) resolve();
 }
