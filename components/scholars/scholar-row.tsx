@@ -2,6 +2,7 @@ import { ChevronRight } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/components/ui/cn";
+import { formatCount } from "@/lib/utils";
 import type { Scholar } from "@/types";
 
 interface ScholarRowProps {
@@ -24,7 +25,7 @@ export function ScholarRow({ scholar, className }: ScholarRowProps) {
         size="md"
         src={scholar.photo_url ?? undefined}
         fallback={scholar.name}
-        alt={scholar.name}
+        alt=""
       />
 
       <div className="flex-1 min-w-0">
@@ -39,7 +40,7 @@ export function ScholarRow({ scholar, className }: ScholarRowProps) {
           ))}
           {scholar.episode_count !== undefined && (
             <span className="text-xs text-sand-300 dark:text-ink-500">
-              · {scholar.episode_count} lectures
+              · {formatCount(scholar.episode_count, "lecture")}
             </span>
           )}
         </div>

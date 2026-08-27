@@ -7,7 +7,16 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!node_modules", "!.next", "!dist", "!build"]
+    "includes": [
+      "**",
+      "!node_modules",
+      "!.next",
+      "!dist",
+      "!build",
+      "!public/sw.js",
+      "!public/sw.js.map",
+      "!public/swe-worker-*.js"
+    ]
   },
   "formatter": {
     "enabled": true,

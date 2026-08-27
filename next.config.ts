@@ -17,6 +17,7 @@ const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
   disable: false,
+  register: false,
   cacheOnNavigation: true,
   reloadOnOnline: false,
   additionalPrecacheEntries: [

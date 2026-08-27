@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     const rangeHeader = request.headers.get("range");
     const upstream = await fetch(rawUrl, {
       headers: rangeHeader ? { Range: rangeHeader } : undefined,
-      signal: AbortSignal.timeout(30000),
+      signal: request.signal,
     });
 
     if (!upstream.ok) {
