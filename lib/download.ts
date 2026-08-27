@@ -62,7 +62,13 @@ async function primeOfflinePageCache(slug: string): Promise<boolean> {
   }
 }
 
-const activeTransfers = new Map<string, AbortController>();
+interface TransferControl {
+  controller: AbortController;
+  paused: boolean;
+  waiters: Array<() => void>;
+}
+
+const activeTransfers = new Map<string, TransferControl>();
 const MAX_ATTEMPTS = 3;
 
 function wait(ms: number, signal: AbortSignal) {
@@ -83,12 +89,51 @@ function wait(ms: number, signal: AbortSignal) {
 }
 
 export function isTransientDownloadError(error: unknown) {
+  if (error instanceof DOMException && error.name === "AbortError")
+    return false;
+  if (error instanceof TypeError) return true;
   if (!(error instanceof Error)) return false;
-  return /network|fetch|http 429|http 5\d\d/i.test(error.message);
+  return /network|fetch|terminated|socket|timeout|http 429|http 5\d\d/i.test(
+    error.message,
+  );
+}
+
+export function pauseDownload(episodeId: string): void {
+  const transfer = activeTransfers.get(episodeId);
+  if (transfer && !transfer.controller.signal.aborted) {
+    transfer.paused = true;
+    useDownloadsStore
+      .getState()
+      .updateProgress(episodeId, { status: "paused" });
+  }
+}
+
+export function resumeDownload(episodeId: string): void {
+  const transfer = activeTransfers.get(episodeId);
+  if (!transfer) return;
+  transfer.paused = false;
+  if (
+    useDownloadsStore
+      .getState()
+      .inProgress.some(
+        (download) =>
+          download.episodeId === episodeId && download.status === "paused",
+      )
+  ) {
+    useDownloadsStore
+      .getState()
+      .updateProgress(episodeId, { status: "downloading" });
+  }
+  const waiters = transfer.waiters.splice(0);
+  for (const resolve of waiters) resolve();
 }
 
 export function cancelDownload(episodeId: string): void {
-  activeTransfers.get(episodeId)?.abort();
+  const transfer = activeTransfers.get(episodeId);
+  if (!transfer) return;
+  transfer.controller.abort();
+  const waiters = transfer.waiters.splice(0);
+  for (const resolve of waiters) resolve();
 }
 
 export async function evictDownload(
@@ -129,7 +174,12 @@ export async function downloadEpisode(
   if (existing) return false;
 
   const controller = new AbortController();
-  activeTransfers.set(episode.id, controller);
+  const transfer: TransferControl = {
+    controller,
+    paused: false,
+    waiters: [],
+  };
+  activeTransfers.set(episode.id, transfer);
   const store = useDownloadsStore.getState();
   store.resetDownload(episode);
 
@@ -152,17 +202,33 @@ export async function downloadEpisode(
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
+        const range = loaded > 0 ? `bytes=${loaded}-` : undefined;
         const response = await fetch(
           `/api/download?url=${encodeURIComponent(episode.audio_url)}`,
-          { signal: controller.signal },
+          {
+            headers: range ? { Range: range } : undefined,
+            signal: controller.signal,
+          },
         );
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         if (!response.body) throw new Error("Stream unavailable");
 
-        const contentLength = response.headers.get("content-length");
-        total = contentLength ? Number.parseInt(contentLength, 10) : 0;
+        const contentRange = response.headers.get("content-range");
+        const rangeTotal = contentRange?.match(/\/([0-9]+)$/)?.[1];
+        if (rangeTotal) {
+          total = Number.parseInt(rangeTotal, 10);
+        } else if (loaded === 0) {
+          const contentLength = response.headers.get("content-length");
+          total = contentLength ? Number.parseInt(contentLength, 10) : 0;
+        }
+        if (loaded > 0 && response.status !== 206) {
+          chunks = [];
+          loaded = 0;
+          const contentLength = response.headers.get("content-length");
+          total = contentLength ? Number.parseInt(contentLength, 10) : 0;
+        }
         if (total > 0 && total > storage.available) {
           throw new Error(
             `File too large (${(total / 1024 / 1024).toFixed(1)}MB). Free up space.`,
@@ -170,9 +236,16 @@ export async function downloadEpisode(
         }
 
         const reader = response.body.getReader();
-        chunks = [];
-        loaded = 0;
         while (true) {
+          if (transfer.paused) {
+            store.updateProgress(episode.id, { status: "paused" });
+            await new Promise<void>((resolve) =>
+              transfer.waiters.push(resolve),
+            );
+            controller.signal.throwIfAborted();
+            store.updateProgress(episode.id, { status: "downloading" });
+          }
+
           const { done, value } = await reader.read();
           if (done) break;
           chunks.push(value);
@@ -249,7 +322,7 @@ export async function downloadEpisode(
     }
     return false;
   } finally {
-    if (activeTransfers.get(episode.id) === controller) {
+    if (activeTransfers.get(episode.id) === transfer) {
       activeTransfers.delete(episode.id);
     }
   }

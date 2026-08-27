@@ -5,11 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { AudioCard } from "@/components/episodes/audio-card";
-import { PlayButton } from "@/components/player/play-button";
 import { PlayerControls } from "@/components/player/player-controls";
 import { cn } from "@/components/ui/cn";
 import { formatDuration } from "@/lib/audio";
-import { downloadEpisode } from "@/lib/download";
+import { downloadEpisode, resumeDownload } from "@/lib/download";
 import { updateDownloadedEpisodeMetadata } from "@/lib/downloads-db";
 import { invalidateDownloads } from "@/lib/query-client";
 import { useDownloadedIds } from "@/lib/use-downloaded";
@@ -31,6 +30,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   );
   const isDownloading =
     download?.status === "downloading" || download?.status === "saving";
+  const isPaused = download?.status === "paused";
   const downloadPercent = download?.percent ?? 0;
   const downloadIndeterminate = isDownloading && (download?.total ?? 0) === 0;
   const [sleepTimerIndex, setSleepTimerIndex] = useState(-1);
@@ -101,9 +101,13 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
   }, [sleepTimerIndex, setSleepTimer]);
 
   const handleDownload = useCallback(async () => {
+    if (isPaused) {
+      resumeDownload(episode.id);
+      return;
+    }
     if (isDownloading || downloadedIds.has(episode.id)) return;
     await downloadEpisode(episode);
-  }, [episode, isDownloading, downloadedIds]);
+  }, [episode, isDownloading, isPaused, downloadedIds]);
 
   const handleWhatsAppShare = useCallback(() => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -166,16 +170,7 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
             </div>
           )}
 
-          <div className="mb-8">
-            <PlayButton
-              isPlaying={isThisEpisodePlaying ?? false}
-              isLoading={isThisEpisodeLoading}
-              size="xl"
-              onClick={handlePlay}
-            />
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-bold text-forest-900 leading-tight mb-3 dark:text-ink-100">
+          <h1 className="mb-3 text-2xl font-bold leading-tight text-forest-900 sm:text-3xl dark:text-ink-100">
             {episode.title}
           </h1>
 
@@ -302,13 +297,15 @@ export function LectureContent({ episode, moreEpisodes }: LectureContentProps) {
               size={18}
               fill={downloadedIds.has(episode.id) ? "currentColor" : "none"}
             />
-            {isDownloading
-              ? downloadIndeterminate
-                ? "Downloading…"
-                : `Downloading ${downloadPercent}%`
-              : downloadedIds.has(episode.id)
-                ? "Downloaded"
-                : "Download"}
+            {isPaused
+              ? "Resume download"
+              : isDownloading
+                ? downloadIndeterminate
+                  ? "Downloading…"
+                  : `Downloading ${downloadPercent}%`
+                : downloadedIds.has(episode.id)
+                  ? "Downloaded"
+                  : "Download"}
           </button>
 
           <button
