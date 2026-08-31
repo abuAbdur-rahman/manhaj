@@ -37,8 +37,8 @@ export default function PrivacyPage() {
               <li>
                 <strong>Anonymous play counts:</strong> <code>episode_id</code>{" "}
                 + timestamp + source (<code>stream</code>/<code>offline</code>).
-                No name, email, or device ID. Stored in{" "}
-                <code>episode_plays</code> via anon insert (RLS).
+                No name, email, or device ID. Stored locally on your device. It
+                is not sent to our servers.
               </li>
               <li>
                 <strong>Anonymous crash logs:</strong> error message + stack +
