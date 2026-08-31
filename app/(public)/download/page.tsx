@@ -143,7 +143,7 @@ export default function DownloadPage() {
           </Link>
           <span className="text-sand-200 dark:text-ink-700">•</span>
           <a
-            href="https://github.com"
+            href="https://github.com/abuAbdur-rahman/manhaj"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sand-400 hover:text-forest-700 dark:text-ink-400"
