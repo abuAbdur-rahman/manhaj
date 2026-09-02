@@ -19,6 +19,13 @@ export function PwaInstallCard() {
   const [showIosSteps, setShowIosSteps] = useState(false);
 
   useEffect(() => {
+    const ua = navigator.userAgent;
+    const isAppleMobile =
+      /iphone|ipad|ipod/i.test(ua) ||
+      // iPadOS 13+ reports as MacIntel in desktop-class mode
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setIsIos(isAppleMobile);
+
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as NavigatorWithStandalone).standalone === true;
@@ -26,13 +33,6 @@ export function PwaInstallCard() {
       setIsStandalone(true);
       return;
     }
-
-    const ua = navigator.userAgent;
-    const isAppleMobile =
-      /iphone|ipad|ipod/i.test(ua) ||
-      // iPadOS 13+ reports as MacIntel in desktop-class mode
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    setIsIos(isAppleMobile);
 
     const onBeforeInstall = (e: Event) => {
       e.preventDefault();
@@ -59,6 +59,8 @@ export function PwaInstallCard() {
     setDeferredPrompt(null);
   }, [deferredPrompt, isIos]);
 
+  if (isIos) return null;
+
   if (isStandalone) {
     return (
       <section className="rounded-2xl border border-forest-200 bg-forest-50 p-6 dark:border-ink-700 dark:bg-ink-800">
@@ -79,8 +81,6 @@ export function PwaInstallCard() {
       </section>
     );
   }
-
-  if (isIos) return null;
 
   return (
     <section className="rounded-2xl border border-sand-200/70 bg-white p-6 shadow-sm dark:border-ink-700/40 dark:bg-ink-800">
