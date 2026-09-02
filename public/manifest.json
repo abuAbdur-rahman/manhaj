@@ -44,18 +44,18 @@
   ],
   "screenshots": [
     {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
+      "src": "/screenshots/home-desktop.png",
+      "sizes": "1440x900",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Manhaj desktop view"
+      "label": "Manhaj desktop"
     },
     {
-      "src": "/icons/icon-512x512-maskable.png",
-      "sizes": "512x512",
+      "src": "/screenshots/home-mobile.png",
+      "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Manhaj mobile view"
+      "label": "Manhaj mobile"
     }
   ]
 }

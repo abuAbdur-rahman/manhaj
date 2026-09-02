@@ -11,6 +11,15 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ["@aws-sdk/client-s3"],
+  async redirects() {
+    return [
+      {
+        source: "/download",
+        destination: "/install",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const withSerwist = withSerwistInit({

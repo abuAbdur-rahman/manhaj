@@ -116,10 +116,10 @@ export default function PrivacyPage() {
               We&apos;ll update this page when the policy changes and bump the
               date above. Linked from{" "}
               <Link
-                href="/download"
+                href="/install"
                 className="font-semibold text-forest-700 underline-offset-4 hover:underline"
               >
-                /download
+                /install
               </Link>
               .
             </p>

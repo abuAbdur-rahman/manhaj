@@ -90,6 +90,14 @@ export function Header({
   const router = useRouter();
   const showBack = !home && !isRootPath(pathname);
   const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+  const [isIos, setIsIos] = useState(false);
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    setIsIos(
+      /iphone|ipad|ipod/i.test(ua) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
+    );
+  }, []);
 
   return (
     <header
@@ -108,7 +116,14 @@ export function Header({
                 src="/logo.png"
                 alt="Manhaj"
                 fill
-                className="object-contain"
+                className="object-contain dark:hidden"
+                loading="eager"
+              />
+              <Image
+                src="/logo-light.png"
+                alt="Manhaj"
+                fill
+                className="hidden object-contain dark:block"
                 loading="eager"
               />
             </div>
@@ -161,6 +176,18 @@ export function Header({
       <div className="flex min-w-0 items-center justify-end gap-1">
         {actions}
         {adminActions}
+        {!isAdmin && !isIos && (
+          <Link
+            href="/install"
+            className={cn(
+              "inline-flex h-9 items-center rounded-full px-3.5 text-sm font-semibold",
+              "bg-forest-700 text-white hover:bg-forest-600 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+            )}
+          >
+            Install
+          </Link>
+        )}
         {isAdmin && <AdminIdentityAction />}
         <ThemeToggle />
       </div>
