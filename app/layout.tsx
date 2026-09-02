@@ -23,6 +23,9 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://manhaj-sunnah.vercel.app",
+  ),
   title: {
     default: "Manhaj — Ilm, organized.",
     template: "%s — Manhaj",

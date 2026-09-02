@@ -168,6 +168,18 @@ export function Header({
       <div className="flex min-w-0 items-center justify-end gap-1">
         {actions}
         {adminActions}
+        {!isAdmin && (
+          <Link
+            href="/install"
+            className={cn(
+              "inline-flex h-9 items-center rounded-full px-3.5 text-sm font-semibold",
+              "bg-forest-700 text-white hover:bg-forest-600 dark:bg-ink-100 dark:text-ink-900 dark:hover:bg-white",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-500",
+            )}
+          >
+            Install
+          </Link>
+        )}
         {isAdmin && <AdminIdentityAction />}
         <ThemeToggle />
       </div>
