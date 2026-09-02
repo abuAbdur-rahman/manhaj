@@ -27,7 +27,12 @@ export function PwaInstallCard() {
       return;
     }
 
-    setIsIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
+    const ua = navigator.userAgent;
+    const isAppleMobile =
+      /iphone|ipad|ipod/i.test(ua) ||
+      // iPadOS 13+ reports as MacIntel in desktop-class mode
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setIsIos(isAppleMobile);
 
     const onBeforeInstall = (e: Event) => {
       e.preventDefault();
@@ -74,6 +79,8 @@ export function PwaInstallCard() {
       </section>
     );
   }
+
+  if (isIos) return null;
 
   return (
     <section className="rounded-2xl border border-sand-200/70 bg-white p-6 shadow-sm dark:border-ink-700/40 dark:bg-ink-800">

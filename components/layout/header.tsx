@@ -90,6 +90,14 @@ export function Header({
   const router = useRouter();
   const showBack = !home && !isRootPath(pathname);
   const isAdmin = pathname === "/admin" || pathname.startsWith("/admin/");
+  const [isIos, setIsIos] = useState(false);
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    setIsIos(
+      /iphone|ipad|ipod/i.test(ua) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
+    );
+  }, []);
 
   return (
     <header
@@ -168,7 +176,7 @@ export function Header({
       <div className="flex min-w-0 items-center justify-end gap-1">
         {actions}
         {adminActions}
-        {!isAdmin && (
+        {!isAdmin && !isIos && (
           <Link
             href="/install"
             className={cn(
