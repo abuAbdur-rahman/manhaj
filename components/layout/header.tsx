@@ -108,7 +108,14 @@ export function Header({
                 src="/logo.png"
                 alt="Manhaj"
                 fill
-                className="object-contain"
+                className="object-contain dark:hidden"
+                loading="eager"
+              />
+              <Image
+                src="/logo-light.png"
+                alt="Manhaj"
+                fill
+                className="hidden object-contain dark:block"
                 loading="eager"
               />
             </div>

@@ -52,6 +52,18 @@ export const metadata: Metadata = {
       "Stream and download audio lectures from trusted Nigerian Sunni/Salafi scholars.",
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Manhaj — Ilm, organized.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og.png"],
   },
 };
 
