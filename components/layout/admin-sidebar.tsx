@@ -98,7 +98,13 @@ export function AdminSidebar({
                 src="/logo.png"
                 alt="Manhaj"
                 fill
-                className="object-contain"
+                className="object-contain dark:hidden"
+              />
+              <Image
+                src="/logo-light.png"
+                alt="Manhaj"
+                fill
+                className="hidden object-contain dark:block"
               />
             </div>
             <span className="text-sm font-semibold text-forest-700 dark:text-ink-100">
