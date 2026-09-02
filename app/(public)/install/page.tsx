@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Install — Manhaj Sunnah",
   description:
     "Install Manhaj for offline listening — add to your home screen or download the Android APK.",
-  alternates: { canonical: "https://manhaj-sunnah.vercel.app/install" },
+  alternates: { canonical: "/install" },
 };
 
 const APK_URL = process.env.NEXT_PUBLIC_APP_APK_URL ?? "";
