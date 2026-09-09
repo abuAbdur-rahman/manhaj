@@ -1,0 +1,44 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-forest-50: #f0f7f4;
+  --color-forest-100: #dcede6;
+  --color-forest-500: #1a6b3c;
+  --color-forest-600: #155732;
+  --color-forest-700: #0f4126;
+  --color-forest-900: #07200f;
+
+  --color-sand-50: #fafaf7;
+  --color-sand-100: #f5f3ec;
+  --color-sand-200: #eae6d9;
+  --color-sand-300: #d9d3c0;
+
+  --color-clay-400: #c2754a;
+  --color-clay-500: #a85c35;
+  --color-clay-600: #8c4a29;
+
+  --color-ink-100: #eef1ee;
+  --color-ink-500: #5c6b60;
+  --color-ink-700: #2a332c;
+  --color-ink-800: #1c231e;
+  --color-ink-900: #141a16;
+  --color-ink-950: #0e1210;
+
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-arabic: "Noto Naskh Arabic", serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --text-display: 24px;
+  --text-title: 18px;
+  --text-label: 13px;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@utility scrollbar-none {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+}
