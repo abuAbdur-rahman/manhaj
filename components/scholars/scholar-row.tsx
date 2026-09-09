@@ -1,0 +1,68 @@
+import { ChevronRight } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/components/ui/cn";
+import { formatCount } from "@/lib/utils";
+import type { Scholar } from "@/types";
+
+interface ScholarRowProps {
+  scholar: Scholar;
+  className?: string;
+}
+
+export function ScholarRow({ scholar, className }: ScholarRowProps) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-3 rounded-2xl border border-sand-200/60 bg-sand-50 px-4 py-3.5",
+        "shadow-[0_1px_3px_rgba(15,65,38,0.04),0_4px_12px_rgba(15,65,38,0.03)]",
+        "motion-safe:transition-all motion-safe:duration-150 hover:bg-sand-100 active:scale-[0.98] motion-reduce:active:scale-100",
+        "dark:border-ink-700/50 dark:bg-ink-900 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)] dark:hover:bg-ink-800",
+        className,
+      )}
+    >
+      <Avatar
+        size="md"
+        src={scholar.photo_url ?? undefined}
+        fallback={scholar.name}
+        alt=""
+      />
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-forest-900 truncate dark:text-ink-100">
+          {scholar.name}
+        </p>
+        <div className="flex items-center gap-1.5 mt-1">
+          {scholar.languages.map((lang) => (
+            <Badge key={lang} variant="default" className="text-[11px]">
+              {lang}
+            </Badge>
+          ))}
+          {scholar.episode_count !== undefined && (
+            <span className="text-xs text-sand-300 dark:text-ink-500">
+              · {formatCount(scholar.episode_count, "lecture")}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <ChevronRight className="h-4 w-4 text-sand-300 shrink-0 dark:text-ink-500" />
+    </div>
+  );
+}
+
+export function ScholarRowSkeleton() {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl px-4 py-3.5">
+      <div className="h-10 w-10 rounded-full bg-sand-200/80 motion-safe:animate-pulse shrink-0 dark:bg-ink-800" />
+      <div className="flex-1 space-y-2">
+        <div className="h-4 w-40 rounded-lg bg-sand-200/80 motion-safe:animate-pulse dark:bg-ink-800" />
+        <div className="flex items-center gap-1.5">
+          <div className="h-5 w-12 rounded-full bg-sand-200/80 motion-safe:animate-pulse dark:bg-ink-800" />
+          <div className="h-5 w-12 rounded-full bg-sand-200/80 motion-safe:animate-pulse dark:bg-ink-800" />
+        </div>
+      </div>
+      <div className="h-4 w-4 bg-sand-200/80 rounded motion-safe:animate-pulse shrink-0 dark:bg-ink-800" />
+    </div>
+  );
+}
